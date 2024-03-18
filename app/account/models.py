@@ -1,14 +1,22 @@
-from random import randint
+import string
+import random
+import httpx
 
+from django.conf import settings
 from django.utils import timezone
 from django.db import models
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
 
 
 class CustomUserManager(BaseUserManager):
-    def create_user(self, whatsapp, full_name, password=None):
+    def create_user(self, whatsapp, full_name, password=None, **extra_fields):
         if not whatsapp:
             raise ValueError("Users must have an whatsapp number")
+        
+        if password is None:
+            # Random ASCII password
+            password = self.generate_random_password()
+        
 
         user = self.model(
             whatsapp=whatsapp,
@@ -20,15 +28,20 @@ class CustomUserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, whatsapp, full_name, password=None):
+    def create_superuser(self, whatsapp, full_name, password=None, **extra_fields):
         user = self.create_user(
             whatsapp=whatsapp,
-            password=password,
             full_name=full_name,
+            password=password
         )
         user.is_admin = True
         user.save(using=self._db)
         return user
+    
+    def generate_random_password(self):
+        characters = string.ascii_letters + string.digits
+        password = ''.join(random.choice(characters) for i in range(32))
+        return password
 
 
 class User(AbstractBaseUser):
@@ -84,13 +97,26 @@ class OTP(models.Model):
         return f"OTP for {self.user.full_name}"
 
     def generate_otp(self):
-        self.otp = str(randint(100000, 999999))
+        self.otp = str(random.randint(100000, 999999))
         self.expired_at = timezone.now() + timezone.timedelta(minutes=5)
         self.save()
         return self.otp
 
-    def validate_otp(self, otp):
-        return self.otp == otp and self.expired_at > timezone.now()
+    def validate_otp(self, otp_code):
+        # Retrun True if otp_code is valid and not expired
+        return self.otp == otp_code and self.expired_at > timezone.now()
+    
+    def send_otp_wa(self):
+        otp_code = self.generate_otp()
+        with httpx.Client() as client:
+            client.post(
+                url='https://api.fonnte.com/send', 
+                headers={'Authorization': settings.FONNTE_API_KEY},
+                json={
+                    'target': self.user.whatsapp, 
+                    'message': f'Kode OTP kamu: {otp_code}'
+                }
+            )
     
 
 class ParentManager(CustomUserManager):

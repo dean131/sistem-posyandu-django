@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAdminUser
+from rest_framework import status
 
 from rest_framework_simplejwt.tokens import RefreshToken
 
@@ -35,7 +36,7 @@ class UserViewSet(ModelViewSet):
     permission_classes = [IsAdminUser,]
 
     def get_permissions(self):
-        if self.action == "login_password":
+        if self.action in ["login_password", "login_otp", "login_otp_validate"]:
             return [AllowAny(),]
         return super().get_permissions()
 
@@ -44,16 +45,86 @@ class UserViewSet(ModelViewSet):
         whatsapp = request.data.get("whatsapp")
         password = request.data.get("password")
 
+        if not whatsapp or not password: 
+            return Response(
+                {"message": _("Silahkan masukkan nomor whatsapp dan password")},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
         user = authenticate(request, whatsapp=whatsapp, password=password)
         if user is not None:
             login(request, user)
             refresh = RefreshToken.for_user(user)
-            return Response({
+            refresh["role"] = user.role
+            return Response(
+                {
+                    'refresh': str(refresh),
+                    'access': str(refresh.access_token),
+                },
+                status=status.HTTP_200_OK
+            )
+        else:
+            return Response(
+                {"message": _("Kredential tidak valid")},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+    @action(detail=False, methods=["post"])
+    def login_otp(self, request):
+        whatsapp = request.data.get("whatsapp")
+
+        if not whatsapp:
+            return Response(
+                {"message": _("Silahtkan masukkan nomor whatsapp Anda")},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        user = User.objects.filter(whatsapp=whatsapp, is_active=True).first()
+        if user is None:
+            return Response(
+                {"message": _("Pelanggan tidak ditemukan")},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        user.otp.send_otp_wa()
+        return Response(
+            {"message": _("OTP telah dikirim ke nomor whatsapp Anda")},
+            status=status.HTTP_200_OK
+        )
+    
+    @action(detail=False, methods=["post"])
+    def login_otp_validate(self, request):
+        whatsapp = request.data.get("whatsapp")
+        otp_code = request.data.get("otp_code")
+
+        if not whatsapp or not otp_code:
+            return Response(
+                {"message": _("Silahkan masukkan nomor whatsapp dan kode OTP")},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        user = User.objects.filter(whatsapp=whatsapp, is_active=True).first()
+        if user is None:
+            return Response(
+                {"message": _("Pengguna tidak ditemukan")},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        if not user.otp.validate_otp(otp_code):
+            return Response(
+                {"message": _("OTP tidak valid atau sudah kadaluarsa")},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        refresh = RefreshToken.for_user(user)
+        refresh["role"] = user.role
+        return Response(
+            {
                 'refresh': str(refresh),
                 'access': str(refresh.access_token),
-            })
-        else:
-            return Response({"message": _("Invalid whatsapp or password.")})
+            },
+            status=status.HTTP_200_OK
+        )
     
 
 class ParentViewSet(ModelViewSet):

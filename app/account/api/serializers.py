@@ -1,6 +1,4 @@
-import httpx
 
-from django.conf import settings
 
 from rest_framework import serializers
 
@@ -52,16 +50,8 @@ class CadreSerializer(serializers.ModelSerializer):
 class RegisterSerializer(serializers.ModelSerializer):
     def send_otp_wa(self, user):
         otp, created = OTP.objects.get_or_create(user=user)
-        otp_code = otp.generate_otp()
-        # with httpx.Client() as client:
-        #     client.post(
-        #         url='https://api.fonnte.com/send', 
-        #         headers={'Authorization': settings.FONNTE_API_KEY},
-        #         json={
-        #             'target': user.whatsapp, 
-        #             'message': f'Kode OTP kamu: {otp_code}'
-        #         }
-        #     )
+        otp.send_otp_wa()
+
 
     def create(self, validated_data):
         instance = self.Meta.model.objects.create_user(**validated_data)
