@@ -157,4 +157,3 @@ class Cadre(User):
     class Meta:
         proxy = True
 
-

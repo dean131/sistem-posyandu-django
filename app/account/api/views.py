@@ -75,14 +75,14 @@ class UserViewSet(ModelViewSet):
 
         if not whatsapp:
             return Response(
-                {"message": _("Silahtkan masukkan nomor whatsapp Anda")},
+                {"message": _("Silahkan masukkan nomor whatsapp Anda")},
                 status=status.HTTP_400_BAD_REQUEST
             )
         
         user = User.objects.filter(whatsapp=whatsapp, is_active=True).first()
         if user is None:
             return Response(
-                {"message": _("Pelanggan tidak ditemukan")},
+                {"message": _("Pengguna tidak ditemukan")},
                 status=status.HTTP_404_NOT_FOUND
             )
         
@@ -126,6 +126,40 @@ class UserViewSet(ModelViewSet):
             status=status.HTTP_200_OK
         )
     
+    @action(detail=False, methods=["post"])
+    def register_otp_validate(self, request):
+        whatsapp = request.data.get("whatsapp")
+        otp_code = request.data.get("otp_code")
+
+        if not whatsapp or not otp_code:
+            return Response(
+                {"message": _("Silahkan masukkan nomor whatsapp dan kode OTP")},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        user = User.objects.filter(whatsapp=whatsapp, is_active=False).first()
+        if user is None:
+            return Response(
+                {"message": _("Pengguna tidak ditemukan")},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        if not user.otp.validate_otp(otp_code):
+            return Response(
+                {"message": _("OTP tidak valid atau sudah kadaluarsa")},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        refresh = RefreshToken.for_user(user)
+        refresh["role"] = user.role
+        return Response(
+            {
+                'refresh': str(refresh),
+                'access': str(refresh.access_token),
+            },
+            status=status.HTTP_200_OK
+        )
+
 
 class ParentViewSet(ModelViewSet):
     queryset = Parent.objects.all()
