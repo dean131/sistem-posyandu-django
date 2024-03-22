@@ -6,6 +6,8 @@ from django.conf import settings
 from django.utils import timezone
 from django.db import models
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 
 class CustomUserManager(BaseUserManager):
@@ -108,15 +110,15 @@ class OTP(models.Model):
     
     def send_otp_wa(self):
         otp_code = self.generate_otp()
-        with httpx.Client() as client:
-            client.post(
-                url='https://api.fonnte.com/send', 
-                headers={'Authorization': settings.FONNTE_API_KEY},
-                json={
-                    'target': self.user.whatsapp, 
-                    'message': f'Kode OTP kamu: {otp_code}'
-                }
-            )
+        # with httpx.Client() as client:
+        #     client.post(
+        #         url='https://api.fonnte.com/send', 
+        #         headers={'Authorization': settings.FONNTE_API_KEY},
+        #         json={
+        #             'target': self.user.whatsapp, 
+        #             'message': f'Kode OTP kamu: {otp_code}'
+        #         }
+        #     )
     
 
 class ParentManager(CustomUserManager):
@@ -134,9 +136,49 @@ class CadreManager(CustomUserManager):
         return super().get_queryset(*args, **kwargs).filter(role=User.Role.CADRE)
     
 
+class ParentProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    national_id_number = models.CharField(max_length=30, null=True, blank=True)
+    family_card_number = models.CharField(max_length=30, null=True, blank=True)
+    address = models.CharField(max_length=100, null=True, blank=True)
+    neighborhood = models.CharField(max_length=3, null=True, blank=True)
+    ward = models.CharField(max_length=3, null=True, blank=True)
+
+    def __str__(self):
+        return f"Profile of {self.user.full_name}"
+
+    @property
+    def is_complete(self):
+        return all([
+            self.national_id_number,
+            self.family_card_number,
+            self.address,
+            self.neighborhood,
+            self.ward
+        ])
+    
+
+class MidwifeProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    address = models.CharField(max_length=100, null=True, blank=True)
+    neighborhood = models.CharField(max_length=3, null=True, blank=True)
+    ward = models.CharField(max_length=3, null=True, blank=True)
+
+
+class CadreProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    address = models.CharField(max_length=100, null=True, blank=True)
+    neighborhood = models.CharField(max_length=3, null=True, blank=True)
+    ward = models.CharField(max_length=3, null=True, blank=True)
+    
+
 class Parent(User):
     base_role = User.Role.PARENT
     objects = ParentManager()
+
+    @property
+    def profile(self):
+        return self.parentprofile
 
     class Meta:
         proxy = True 
@@ -146,6 +188,10 @@ class Midwife(User):
     base_role = User.Role.MIDWIFE
     objects = MidwifeManager()
 
+    @property
+    def profile(self):
+        return self.midwifeprofile
+
     class Meta:
         proxy = True
 
@@ -154,6 +200,9 @@ class Cadre(User):
     base_role = User.Role.CADRE
     objects = CadreManager()
 
+    @property
+    def profile(self):
+        return self.cadreprofile
+
     class Meta:
         proxy = True
-

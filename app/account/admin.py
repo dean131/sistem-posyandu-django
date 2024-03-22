@@ -5,7 +5,9 @@ from .models import (
     Parent, 
     Midwife, 
     Cadre,
-    OTP
+    OTP,
+
+    ParentProfile,
 )
 
 class OTPAdmin(admin.ModelAdmin):
@@ -20,3 +22,5 @@ admin.site.register(Parent)
 admin.site.register(Midwife)
 admin.site.register(Cadre)
 admin.site.register(OTP, OTPAdmin)
+
+admin.site.register(ParentProfile)

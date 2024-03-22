@@ -161,7 +161,14 @@ class UserViewSet(ModelViewSet):
         )
 
 
-class ParentViewSet(ModelViewSet):
+class CustomUserModelViewSet(ModelViewSet):
+    def get_permissions(self):
+        if self.action == "create":
+            return [AllowAny(),]
+        return super().get_permissions()
+
+
+class ParentViewSet(CustomUserModelViewSet):
     queryset = Parent.objects.all()
     serializer_class = ParentSerializer
 
@@ -170,13 +177,24 @@ class ParentViewSet(ModelViewSet):
             return ParentRegistrationSerializer
         return super().get_serializer_class()
     
-    def get_permissions(self):
-        if self.action == "create":
-            return [AllowAny(),]
-        return super().get_permissions()
+    def create(self, request, *args, **kwargs):
+        user = Parent.objects.filter(whatsapp=request.data.get("whatsapp")).first()
+        if user is not None and not user.profile.is_complete:
+            user.otp.send_otp_wa()
+            user.save()
+            return Response(
+                {"message": _("OTP telah dikirim ke nomor whatsapp Anda")},
+                status=status.HTTP_200_OK
+            )
+        
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
 
-class MidwifeViewSet(ModelViewSet):
+class MidwifeViewSet(CustomUserModelViewSet):
     queryset = Midwife.objects.all()
     serializer_class = MidwifeSerializer
 
@@ -185,20 +203,10 @@ class MidwifeViewSet(ModelViewSet):
             return MidwifeRegistrationSerializer
         return super().get_serializer_class()
     
-    def get_permissions(self):
-        if self.action == "create":
-            return [AllowAny(),]
-        return super().get_permissions()
-    
 
-class CadreViewSet(ModelViewSet):
+class CadreViewSet(CustomUserModelViewSet):
     queryset = Cadre.objects.all()
     serializer_class = CadreSerializer
-
-    def get_permissions(self):
-        if self.action == "create":
-            return [AllowAny(),]
-        return super().get_permissions()
     
     def get_serializer_class(self):
         if self.action == "create":
