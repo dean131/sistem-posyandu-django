@@ -36,7 +36,11 @@ class UserViewSet(ModelViewSet):
     permission_classes = [IsAdminUser,]
 
     def get_permissions(self):
-        if self.action in ["login_password", "login_otp", "login_otp_validate"]:
+        if self.action in [
+            "login_password", 
+            "login_otp", 
+            "login_otp_validate",
+            "register_otp_validate"]:
             return [AllowAny(),]
         return super().get_permissions()
 
@@ -137,7 +141,7 @@ class UserViewSet(ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        user = User.objects.filter(whatsapp=whatsapp, is_active=False).first()
+        user = User.objects.filter(whatsapp=whatsapp, is_registered=False).first()
         if user is None:
             return Response(
                 {"message": _("Pengguna tidak ditemukan")},
@@ -166,20 +170,11 @@ class CustomUserModelViewSet(ModelViewSet):
         if self.action == "create":
             return [AllowAny(),]
         return super().get_permissions()
-
-
-class ParentViewSet(CustomUserModelViewSet):
-    queryset = Parent.objects.all()
-    serializer_class = ParentSerializer
-
-    def get_serializer_class(self):
-        if self.action == "create":
-            return ParentRegistrationSerializer
-        return super().get_serializer_class()
     
     def create(self, request, *args, **kwargs):
-        user = Parent.objects.filter(whatsapp=request.data.get("whatsapp")).first()
-        if user is not None and not user.profile.is_complete:
+        whatsapp = request.data.get("whatsapp")
+        user = self.queryset.filter(whatsapp=whatsapp, is_registered=False).first()
+        if user is not None:
             user.otp.send_otp_wa()
             user.save()
             return Response(
@@ -192,6 +187,16 @@ class ParentViewSet(CustomUserModelViewSet):
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+
+class ParentViewSet(CustomUserModelViewSet):
+    queryset = Parent.objects.all()
+    serializer_class = ParentSerializer
+
+    def get_serializer_class(self):
+        if self.action == "create":
+            return ParentRegistrationSerializer
+        return super().get_serializer_class()
 
 
 class MidwifeViewSet(CustomUserModelViewSet):

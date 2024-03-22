@@ -65,6 +65,7 @@ class User(AbstractBaseUser):
     role = models.CharField(max_length=10, choices=Role.choices, default=base_role, null=True, blank=True)
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
+    is_registered = models.BooleanField(default=False)
 
     objects = CustomUserManager()
 
@@ -146,16 +147,6 @@ class ParentProfile(models.Model):
 
     def __str__(self):
         return f"Profile of {self.user.full_name}"
-
-    @property
-    def is_complete(self):
-        return all([
-            self.national_id_number,
-            self.family_card_number,
-            self.address,
-            self.neighborhood,
-            self.ward
-        ])
     
 
 class MidwifeProfile(models.Model):
