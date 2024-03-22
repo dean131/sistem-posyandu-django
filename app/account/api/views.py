@@ -141,10 +141,10 @@ class UserViewSet(ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        user = User.objects.filter(whatsapp=whatsapp, is_registered=False).first()
-        if user is None:
+        user = User.objects.filter(whatsapp=whatsapp, is_registered=True).first()
+        if user is not None:
             return Response(
-                {"message": _("Pengguna tidak ditemukan")},
+                {"message": _("Pengguna sudah terdaftar")},
                 status=status.HTTP_404_NOT_FOUND
             )
         
@@ -153,6 +153,9 @@ class UserViewSet(ModelViewSet):
                 {"message": _("OTP tidak valid atau sudah kadaluarsa")},
                 status=status.HTTP_400_BAD_REQUEST
             )
+        
+        user.is_registered = True
+        user.save()
         
         refresh = RefreshToken.for_user(user)
         refresh["role"] = user.role
