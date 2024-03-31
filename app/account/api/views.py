@@ -29,6 +29,8 @@ from account.models import (
     Cadre
 )
 
+from posyanduapp.utils.custom_response import CustomResponse
+
 
 class UserViewSet(ModelViewSet):
     queryset = User.objects.all()
@@ -83,11 +85,17 @@ class UserViewSet(ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        user = User.objects.filter(whatsapp=whatsapp, is_active=True).first()
+        user = User.objects.filter(whatsapp=whatsapp).first()
         if user is None:
             return Response(
                 {"message": _("Pengguna tidak ditemukan")},
                 status=status.HTTP_404_NOT_FOUND
+            )
+        
+        if not user.is_registered:
+            return Response(
+                {"message": _("Nomor whatsapp belum terdaftar")},
+                status=status.HTTP_400_BAD_REQUEST
             )
         
         user.otp.send_otp_wa()
@@ -107,11 +115,17 @@ class UserViewSet(ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        user = User.objects.filter(whatsapp=whatsapp, is_active=True).first()
+        user = User.objects.filter(whatsapp=whatsapp).first()
         if user is None:
             return Response(
-                {"message": _("Pengguna tidak ditemukan")},
+                {"message": _("Akun tidak ditemukan")},
                 status=status.HTTP_404_NOT_FOUND
+            )
+        
+        if not user.is_registered:
+            return Response(
+                {"message": _("Akun belum terdaftar")},
+                status=status.HTTP_400_BAD_REQUEST
             )
         
         if not user.otp.validate_otp(otp_code):
@@ -141,11 +155,17 @@ class UserViewSet(ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        user = User.objects.filter(whatsapp=whatsapp, is_registered=True).first()
-        if user is not None:
+        user = User.objects.filter(whatsapp=whatsapp).first()
+        if user is None:
             return Response(
-                {"message": _("Pengguna sudah terdaftar")},
+                {"message": _("Nomor Whatsapp yang Anda masukkan tidak salah")},
                 status=status.HTTP_404_NOT_FOUND
+            )
+        
+        if user.is_registered:
+            return Response(
+                {"message": _("Whatsapp sudah terdaftar")},
+                status=status.HTTP_400_BAD_REQUEST
             )
         
         if not user.otp.validate_otp(otp_code):
@@ -178,6 +198,8 @@ class CustomUserModelViewSet(ModelViewSet):
         whatsapp = request.data.get("whatsapp")
         user = self.queryset.filter(whatsapp=whatsapp, is_registered=False).first()
         if user is not None:
+            # update user fullname
+            user.fullname = request.data.get("full_name")
             user.otp.send_otp_wa()
             user.save()
             return Response(
@@ -186,10 +208,11 @@ class CustomUserModelViewSet(ModelViewSet):
             )
         
         serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+        if serializer.is_valid():
+            self.perform_create(serializer)
+            headers = self.get_success_headers(serializer.data)
+            return CustomResponse.ok("Data berhasil dibuat")
+        return CustomResponse.serializers_erros(serializer.errors)
 
 
 class ParentViewSet(CustomUserModelViewSet):
