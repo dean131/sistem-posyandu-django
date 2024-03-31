@@ -1,11 +1,8 @@
 from django.contrib.auth import authenticate, login
-from django.utils.translation import gettext_lazy as _
 
-from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAdminUser
-from rest_framework import status
 
 from rest_framework_simplejwt.tokens import RefreshToken
 
@@ -52,57 +49,33 @@ class UserViewSet(ModelViewSet):
         password = request.data.get("password")
 
         if not whatsapp or not password: 
-            return Response(
-                {"message": _("Silahkan masukkan nomor whatsapp dan password")},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            return CustomResponse.bad_request("Silahkan masukkan nomor whatsapp dan password")
 
         user = authenticate(request, whatsapp=whatsapp, password=password)
         if user is not None:
             login(request, user)
             refresh = RefreshToken.for_user(user)
             refresh["role"] = user.role
-            return Response(
-                {
-                    'refresh': str(refresh),
-                    'access': str(refresh.access_token),
-                },
-                status=status.HTTP_200_OK
-            )
+            return CustomResponse.jwt(refresh)
         else:
-            return Response(
-                {"message": _("Kredential tidak valid")},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            return CustomResponse.bad_request("Kredential tidak valid")
         
     @action(detail=False, methods=["post"])
     def login_otp(self, request):
         whatsapp = request.data.get("whatsapp")
 
         if not whatsapp:
-            return Response(
-                {"message": _("Silahkan masukkan nomor whatsapp Anda")},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            return CustomResponse.bad_request("Silahkan masukkan nomor whatsapp Anda")
         
         user = User.objects.filter(whatsapp=whatsapp).first()
         if user is None:
-            return Response(
-                {"message": _("Pengguna tidak ditemukan")},
-                status=status.HTTP_404_NOT_FOUND
-            )
+            return CustomResponse.bad_request("Pengguna tidak ditemukan")
         
         if not user.is_registered:
-            return Response(
-                {"message": _("Nomor whatsapp belum terdaftar")},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            return CustomResponse.bad_request("Nomor whatsapp belum terdaftar")
         
         user.otp.send_otp_wa()
-        return Response(
-            {"message": _("OTP telah dikirim ke nomor whatsapp Anda")},
-            status=status.HTTP_200_OK
-        )
+        return CustomResponse.ok("OTP telah dikirim ke nomor whatsapp Anda")
     
     @action(detail=False, methods=["post"])
     def login_otp_validate(self, request):
@@ -110,39 +83,21 @@ class UserViewSet(ModelViewSet):
         otp_code = request.data.get("otp_code")
 
         if not whatsapp or not otp_code:
-            return Response(
-                {"message": _("Silahkan masukkan nomor whatsapp dan kode OTP")},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            return CustomResponse.bad_request("Silahkan masukkan nomor whatsapp dan kode OTP")
         
         user = User.objects.filter(whatsapp=whatsapp).first()
         if user is None:
-            return Response(
-                {"message": _("Akun tidak ditemukan")},
-                status=status.HTTP_404_NOT_FOUND
-            )
+            return CustomResponse.bad_request("Akun tidak ditemukan")
         
         if not user.is_registered:
-            return Response(
-                {"message": _("Akun belum terdaftar")},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            return CustomResponse.bad_request("Akun belum terdaftar")
         
         if not user.otp.validate_otp(otp_code):
-            return Response(
-                {"message": _("OTP tidak valid atau sudah kadaluarsa")},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            return CustomResponse.bad_request("OTP tidak valid atau sudah kadaluarsa")
         
         refresh = RefreshToken.for_user(user)
         refresh["role"] = user.role
-        return Response(
-            {
-                'refresh': str(refresh),
-                'access': str(refresh.access_token),
-            },
-            status=status.HTTP_200_OK
-        )
+        return CustomResponse.jwt(refresh)
     
     @action(detail=False, methods=["post"])
     def register_otp_validate(self, request):
@@ -150,42 +105,24 @@ class UserViewSet(ModelViewSet):
         otp_code = request.data.get("otp_code")
 
         if not whatsapp or not otp_code:
-            return Response(
-                {"message": _("Silahkan masukkan nomor whatsapp dan kode OTP")},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            return CustomResponse.bad_request("Silahkan masukkan nomor whatsapp dan kode OTP")
         
         user = User.objects.filter(whatsapp=whatsapp).first()
         if user is None:
-            return Response(
-                {"message": _("Nomor Whatsapp yang Anda masukkan tidak salah")},
-                status=status.HTTP_404_NOT_FOUND
-            )
+            return CustomResponse.bad_request("Nomor Whatsapp yang Anda masukkan tidak salah")
         
         if user.is_registered:
-            return Response(
-                {"message": _("Whatsapp sudah terdaftar")},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            return CustomResponse.bad_request("Whatsapp sudah terdaftar")
         
         if not user.otp.validate_otp(otp_code):
-            return Response(
-                {"message": _("OTP tidak valid atau sudah kadaluarsa")},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            return CustomResponse.bad_request("OTP tidak valid atau sudah kadaluarsa")
         
         user.is_registered = True
         user.save()
         
         refresh = RefreshToken.for_user(user)
         refresh["role"] = user.role
-        return Response(
-            {
-                'refresh': str(refresh),
-                'access': str(refresh.access_token),
-            },
-            status=status.HTTP_200_OK
-        )
+        return CustomResponse.jwt(refresh)
 
 
 class CustomUserModelViewSet(ModelViewSet):
@@ -202,10 +139,7 @@ class CustomUserModelViewSet(ModelViewSet):
             user.fullname = request.data.get("full_name")
             user.otp.send_otp_wa()
             user.save()
-            return Response(
-                {"message": _("OTP telah dikirim ke nomor whatsapp Anda")},
-                status=status.HTTP_200_OK
-            )
+            return CustomResponse.ok("OTP telah dikirim ke nomor whatsapp Anda")
         
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
