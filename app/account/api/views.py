@@ -136,7 +136,7 @@ class CustomUserModelViewSet(ModelViewSet):
         user = self.queryset.filter(whatsapp=whatsapp, is_registered=False).first()
         if user is not None:
             # update user fullname
-            user.fullname = request.data.get("full_name")
+            user.full_name = request.data.get("full_name")
             user.otp.send_otp_wa()
             user.save()
             return CustomResponse.ok("OTP telah dikirim ke nomor whatsapp Anda")
