@@ -1,6 +1,6 @@
 from rest_framework.viewsets import ModelViewSet
 
-from base.api.serializers.midwifeassignment import MidwifeAssignmentSerializer
+from base.api.serializers.midwife_assignment import MidwifeAssignmentSerializer
 
 from posyanduapp.utils.custom_response import CustomResponse
 
