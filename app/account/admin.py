@@ -5,6 +5,7 @@ from .models import (
     Parent, 
     Midwife, 
     Cadre,
+    Puskesmas,
     OTP,
 
     ParentProfile,
@@ -24,6 +25,7 @@ admin.site.register(User)
 admin.site.register(Parent)
 admin.site.register(Midwife)
 admin.site.register(Cadre)
+admin.site.register(Puskesmas)
 admin.site.register(OTP, OTPAdmin)
 # Profiles
 admin.site.register(ParentProfile)

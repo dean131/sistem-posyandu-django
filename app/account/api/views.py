@@ -36,7 +36,7 @@ from posyanduapp.utils.custom_response import CustomResponse
 class UserViewSet(ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [IsAdminUser,]
+    # permission_classes = [IsAdminUser,]
 
     def get_permissions(self):
         if self.action in [
@@ -149,8 +149,7 @@ class CustomUserModelViewSet(ModelViewSet):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             self.perform_create(serializer)
-            # headers = self.get_success_headers(serializer.data) ## not used
-            return CustomResponse.ok("Data berhasil dibuat")
+            return CustomResponse.ok("Berhasil menambahkan data")
         return CustomResponse.serializers_erros(serializer.errors)
 
 
