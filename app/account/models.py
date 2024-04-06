@@ -1,6 +1,8 @@
 import string
 import random
 
+from uuid import uuid4
+
 from django.utils import timezone
 from django.db import models
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
@@ -32,6 +34,7 @@ class CustomUserManager(BaseUserManager):
             full_name=full_name,
             password=password
         )
+        user.is_registered = True
         user.is_admin = True
         user.save(using=self._db)
         return user
@@ -48,17 +51,21 @@ class User(AbstractBaseUser):
         MIDWIFE = "MIDWIFE", "Midwife"
         PARENT = "PARENT", "Parent"
         CADRE = "CADRE", "Cadre"
+        PUSKESMAS = "PUSKESMAS", "Puskesmas"
 
     base_role = Role.USER
 
+    id = models.UUIDField(primary_key=True, editable=False)
     full_name = models.CharField(max_length=255)
     password = models.CharField(max_length=255, null=True, blank=True)
     whatsapp = models.CharField(max_length=15, unique=True)
     email = models.EmailField(max_length=255, unique=True, null=True, blank=True)
     profile_picture = models.ImageField(upload_to="profile_pictures/", null=True, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
 
-    role = models.CharField(max_length=10, choices=Role.choices, default=base_role, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    role = models.CharField(max_length=13, choices=Role.choices, default=base_role, null=True, blank=True)
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
     is_registered = models.BooleanField(default=False)
@@ -72,8 +79,9 @@ class User(AbstractBaseUser):
         return self.full_name
     
     def save(self, *args, **kwargs):
-        if not self.pk:
-            self.role = self.base_role
+        if not self.pk: # If object is new
+            self.role = self.base_role # Set default role
+            self.id = uuid4() # Generate UUID4
         super().save(*args, **kwargs)
 
     def has_perm(self, perm, obj=None):
@@ -118,6 +126,18 @@ class OTP(models.Model):
         #     )
     
 
+class Address(models.Model):
+    province = models.CharField(max_length=100)
+    city = models.CharField(max_length=100)
+    subdistrict = models.CharField(max_length=100)
+    village = models.CharField(max_length=100)
+    address = models.CharField(max_length=255)
+    rw = models.CharField(max_length=3)
+    rt = models.CharField(max_length=3)
+    # Foreign Keys
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+
+
 class ParentManager(CustomUserManager):
     def get_queryset(self, *args, **kwargs):
         return super().get_queryset(*args, **kwargs).filter(role=User.Role.PARENT)
@@ -133,63 +153,79 @@ class CadreManager(CustomUserManager):
         return super().get_queryset(*args, **kwargs).filter(role=User.Role.CADRE)
     
 
-class ParentProfile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    national_id_number = models.CharField(max_length=30, null=True, blank=True)
-    family_card_number = models.CharField(max_length=30, null=True, blank=True)
-    address = models.CharField(max_length=100, null=True, blank=True)
-    neighborhood = models.CharField(max_length=3, null=True, blank=True)
-    ward = models.CharField(max_length=3, null=True, blank=True)
+class PuskesmasManager(CustomUserManager):
+    def get_queryset(self, *args, **kwargs):
+        return super().get_queryset(*args, **kwargs).filter(role=User.Role.PUSKESMAS)
 
-    def __str__(self):
-        return f"Profile of {self.user.full_name}"
-    
-
-class MidwifeProfile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    address = models.CharField(max_length=100, null=True, blank=True)
-    neighborhood = models.CharField(max_length=3, null=True, blank=True)
-    ward = models.CharField(max_length=3, null=True, blank=True)
-
-
-class CadreProfile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    address = models.CharField(max_length=100, null=True, blank=True)
-    neighborhood = models.CharField(max_length=3, null=True, blank=True)
-    ward = models.CharField(max_length=3, null=True, blank=True)
-    
-
+# Orang Tua
 class Parent(User):
     base_role = User.Role.PARENT
     objects = ParentManager()
+
+    class Meta:
+        proxy = True 
 
     @property
     def profile(self):
         return self.parentprofile
 
-    class Meta:
-        proxy = True 
-    
-
+# Bidan
 class Midwife(User):
     base_role = User.Role.MIDWIFE
     objects = MidwifeManager()
+
+    class Meta:
+        proxy = True
 
     @property
     def profile(self):
         return self.midwifeprofile
 
-    class Meta:
-        proxy = True
-
-
+# Kader
 class Cadre(User):
     base_role = User.Role.CADRE
     objects = CadreManager()
+
+    class Meta:
+        proxy = True
 
     @property
     def profile(self):
         return self.cadreprofile
 
+# Pushkesmas
+class Puskesmas(User):
+    base_role = User.Role.PUSKESMAS
+    objects = PuskesmasManager()
+
     class Meta:
         proxy = True
+
+# Profile Orang Tua
+class ParentProfile(models.Model):
+    national_id_number = models.CharField(max_length=50, null=True, blank=True)
+    family_card_number = models.CharField(max_length=30, null=True, blank=True)
+    # Foreign Keys
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"Profile of {self.user.full_name}"
+    
+# Profile Bidan
+class MidwifeProfile(models.Model):
+    midwife_id_number = models.CharField(max_length=50, null=True, blank=True)
+    # Foreign Keys
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+
+# Profile Kader
+class CadreProfile(models.Model):
+    national_id_number = models.CharField(max_length=50, null=True, blank=True)
+    # Foreign Keys
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    
+# Profile Puskesmas
+class PuskesmasProfile(models.Model):
+    website = models.URLField(null=True, blank=True)
+    phone_number = models.CharField(max_length=15, null=True, blank=True)
+    # Foreign Keys
+    user = models.OneToOneField(User, on_delete=models.CASCADE)

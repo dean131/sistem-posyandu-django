@@ -7,6 +7,7 @@ from account.models import (
     Parent, 
     Midwife, 
     Cadre, 
+    Puskesmas,
     OTP,
 )
 
@@ -47,6 +48,15 @@ class CadreSerializer(serializers.ModelSerializer):
         }
 
 
+class PuskesmasSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Puskesmas
+        fields = '__all__'
+        extra_kwargs = {
+            'password': {'write_only': True}
+        }
+
+
 class RegisterSerializer(serializers.ModelSerializer):
     def send_otp_wa(self, user):
         otp, created = OTP.objects.get_or_create(user=user)
@@ -68,4 +78,8 @@ class MidwifeRegistrationSerializer(MidwifeSerializer, RegisterSerializer):
     
     
 class CadreRegistrationSerializer(CadreSerializer, RegisterSerializer):
+    pass
+
+
+class PuskesmasRegistrationSerializer(PuskesmasSerializer, RegisterSerializer):
     pass

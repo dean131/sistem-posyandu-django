@@ -8,6 +8,9 @@ from .models import (
     OTP,
 
     ParentProfile,
+    MidwifeProfile,
+    CadreProfile,
+    PuskesmasProfile,
 )
 
 class OTPAdmin(admin.ModelAdmin):
@@ -16,11 +19,14 @@ class OTPAdmin(admin.ModelAdmin):
         model = OTP
         
 
-# Register your models here.
+# Entities
 admin.site.register(User)
 admin.site.register(Parent)
 admin.site.register(Midwife)
 admin.site.register(Cadre)
 admin.site.register(OTP, OTPAdmin)
-
+# Profiles
 admin.site.register(ParentProfile)
+admin.site.register(MidwifeProfile)
+admin.site.register(CadreProfile)
+admin.site.register(PuskesmasProfile)

@@ -17,13 +17,17 @@ from account.api.serializers import (
 
     CadreSerializer,
     CadreRegistrationSerializer,
+
+    PuskesmasSerializer,
+    PuskesmasRegistrationSerializer,
 )
 
 from account.models import (
     User, 
     Parent, 
     Midwife, 
-    Cadre
+    Cadre,
+    Puskesmas,
 )
 
 from posyanduapp.utils.custom_response import CustomResponse
@@ -140,7 +144,6 @@ class CustomUserModelViewSet(ModelViewSet):
             user.otp.send_otp_wa()
             user.save()
             return CustomResponse.ok("OTP telah dikirim ke nomor whatsapp Anda")
-        
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             self.perform_create(serializer)
@@ -176,4 +179,14 @@ class CadreViewSet(CustomUserModelViewSet):
     def get_serializer_class(self):
         if self.action == "create":
             return CadreRegistrationSerializer
+        return super().get_serializer_class()
+    
+
+class PuskesmasViewSet(CustomUserModelViewSet):
+    queryset = Puskesmas.objects.all()
+    serializer_class = PuskesmasSerializer
+
+    def get_serializer_class(self):
+        if self.action == "create":
+            return PuskesmasRegistrationSerializer
         return super().get_serializer_class()

@@ -7,6 +7,7 @@ from account.api.views import (
     ParentViewSet,
     MidwifeViewSet,
     CadreViewSet,
+    PuskesmasViewSet,
 )
 
 
@@ -15,6 +16,7 @@ router.register(r'users', UserViewSet, basename='user')
 router.register(r'parents', ParentViewSet, basename='parent')
 router.register(r'midwives', MidwifeViewSet, basename='midwife')
 router.register(r'cadres', CadreViewSet, basename='cadre')
+router.register(r'puskesmas', PuskesmasViewSet, basename='puskesmas')
 
 urlpatterns = [
     path('', include(router.urls)),
