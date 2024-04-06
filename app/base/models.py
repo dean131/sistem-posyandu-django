@@ -1,3 +1,5 @@
+from datetime import date
+
 from django.db import models
 from django.conf import settings
 
@@ -119,14 +121,24 @@ class ChildMeasurement(models.Model):
     Merepresentasikan pengukuran seorang Anak.
     """
 
+    MEASUREMENT_METHOD_CHOICES = [
+        ("STANDING", "Standing"),
+        ("SUPINE", "Supine"),
+    ]
+
+    WEIGHT_GAIN_CHOICES = [
+        ("O", "O"),
+        ("T", "T")
+    ]
+
     weight = models.DecimalField(max_digits=5, decimal_places=2)
     height = models.DecimalField(max_digits=5, decimal_places=2)
     # lingkar kepala
     head_circumference = models.DecimalField(max_digits=5, decimal_places=2)
-    # usia saat pengukuran dalam bulan
-    age = models.PositiveIntegerField()
+    # usia saat pengukuran dalam tahun, bulan, hari
+    age = models.CharField(max_length=50)
     # cara ukur
-    measurement_method = models.CharField(max_length=255)
+    measurement_method = models.CharField(max_length=8, choices=MEASUREMENT_METHOD_CHOICES)
     # lingkar lengan atas / lila
     arm_circumference = models.DecimalField(max_digits=5, decimal_places=2)
     # bb/u
@@ -142,15 +154,15 @@ class ChildMeasurement(models.Model):
     # z score bb/tb 
     z_score_weight_for_height = models.DecimalField(max_digits=5, decimal_places=2)
     # naik berat badan
-    weight_gain = models.CharField(max_length=255)
+    weight_gain = models.CharField(max_length=1, choices=WEIGHT_GAIN_CHOICES)
     # pmt diterima (kg)
-    pmt_received = models.DecimalField(max_digits=5, decimal_places=2)
+    pmt_received = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True)
     # jumlah vitamin A
-    vitamin_a_count = models.PositiveIntegerField()
+    vitamin_a_count = models.PositiveIntegerField(blank=True, null=True)
     # kpsp
-    kpsp = models.BooleanField()
+    kpsp = models.BooleanField(blank=True, null=True)
     # kia
-    kia = models.BooleanField()
+    kia = models.BooleanField(blank=True, null=True)
     # Time Fields
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -160,3 +172,38 @@ class ChildMeasurement(models.Model):
 
     def __str__(self):
         return f"Pengukuran Anak {self.child.full_name}"
+    
+    def save(self, *args, **kwargs):
+        self.age = self.calculate_age()
+        super().save(*args, **kwargs)
+    
+    def calculate_age(self):
+        """
+        Menghitung usia dari tanggal lahir.
+
+        Args:
+            birthdate: Tanggal lahir dalam format YYYY-MM-DD.
+
+        Returns:
+            Usia dalam format "tahun, bulan, hari".
+        """
+
+        today = date.today()
+        birth_date = date.fromisoformat(self.child.birth_date)
+
+        years = today.year - birth_date.year
+        months = today.month - birth_date.month
+
+        if months < 0:
+            years -= 1
+            months += 12
+
+        days = today.day - birth_date.day
+
+        if days < 0:
+            months -= 1
+            days += birth_date.day
+
+        return f"{years} tahun, {months} bulan, {days} hari"
+
+
