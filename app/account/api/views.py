@@ -139,7 +139,9 @@ class CustomUserModelViewSet(ModelViewSet):
         whatsapp = request.data.get("whatsapp")
         user = self.queryset.filter(whatsapp=whatsapp, is_registered=False).first()
         if user is not None:
-            # update user fullname
+            # Jika user registrasi dengan nomor whatsapp yang sama
+            # tapi belum menyelesaikan proses registrasi.
+            # Maka akan dikirimkan ulang kode OTP
             user.full_name = request.data.get("full_name")
             user.otp.send_otp_wa()
             user.save()
@@ -147,7 +149,7 @@ class CustomUserModelViewSet(ModelViewSet):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             self.perform_create(serializer)
-            headers = self.get_success_headers(serializer.data)
+            # headers = self.get_success_headers(serializer.data) ## not used
             return CustomResponse.ok("Data berhasil dibuat")
         return CustomResponse.serializers_erros(serializer.errors)
 
