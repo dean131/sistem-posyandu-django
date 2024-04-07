@@ -22,6 +22,7 @@ class CustomUserManager(BaseUserManager):
             whatsapp=whatsapp,
             full_name=full_name,
             password=password,
+            email=extra_fields.get("email", None)
         )
 
         user.set_password(password)

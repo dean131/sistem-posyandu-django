@@ -50,7 +50,7 @@ class MidwifeAssignment(models.Model):
     village = models.ForeignKey(Village, on_delete=models.CASCADE)
 
     def __str__(self):
-        return f"{self.midwife.full_name} di {self.Village.name}"
+        return f"{self.midwife.full_name} di {self.village.name}"
     
 
 class CadreAssignment(models.Model):

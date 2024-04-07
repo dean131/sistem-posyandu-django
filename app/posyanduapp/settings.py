@@ -15,6 +15,8 @@ import os
 from pathlib import Path
 from datetime import timedelta
 
+from django.contrib.messages import constants as messages
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -198,3 +200,8 @@ SIMPLE_JWT = {
 
 
 FONNTE_API_KEY = 'iCijKRQKHrpbGKfUhZ+1'
+
+# Ubah tag message error menjadi danger
+MESSAGE_TAGS = {
+    messages.ERROR: 'danger',
+}
