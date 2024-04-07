@@ -87,7 +87,7 @@ class CustomResponse:
         errors = errors.items()
         return Response(
             {
-                'message': [key for key, val in errors][0] + ': ' +  [val for key, val in errors][0][0],
+                'message': f"{[val for key, val in errors][0][0]} ({[key for key, val in errors][0]})",
             },
             status=status.HTTP_400_BAD_REQUEST,
         )

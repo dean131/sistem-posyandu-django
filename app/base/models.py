@@ -10,7 +10,7 @@ class Village(models.Model):
     Hanya dapat di-CRUD oleh pihak Puskesmas.
     """
 
-    name = models.CharField(max_length=255, unique=True)
+    name = models.CharField(max_length=255)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     # Foreign Keys
@@ -26,7 +26,7 @@ class Posyandu(models.Model):
     Hanya dapat di-CRUD oleh pihak Puskesmas.
     """
 
-    name = models.CharField(max_length=255, unique=True)
+    name = models.CharField(max_length=255)
     address = models.CharField(max_length=255)
     # Time Fields
     created_at = models.DateTimeField(auto_now_add=True)
@@ -95,7 +95,7 @@ class Child(models.Model):
         ("F", "Female"),
     ]
 
-    national_id_number = models.CharField(max_length=50, null=True, blank=True)
+    national_id_number = models.CharField(max_length=50)
     full_name = models.CharField(max_length=255)
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES)
     birth_date = models.DateField()

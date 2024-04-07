@@ -14,6 +14,13 @@ from .models import (
     PuskesmasProfile,
 )
 
+
+class ParentAdmin(admin.ModelAdmin):
+    list_display = ["id", "full_name"]
+    class Meta:
+        model = Parent
+
+
 class OTPAdmin(admin.ModelAdmin):
     list_display = ["user", "otp"]
     class Meta:
@@ -22,7 +29,7 @@ class OTPAdmin(admin.ModelAdmin):
 
 # Entities
 admin.site.register(User)
-admin.site.register(Parent)
+admin.site.register(Parent, ParentAdmin)
 admin.site.register(Midwife)
 admin.site.register(Cadre)
 admin.site.register(Puskesmas)
