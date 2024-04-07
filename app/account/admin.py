@@ -15,10 +15,34 @@ from .models import (
 )
 
 
+class UserAdmin(admin.ModelAdmin):
+    list_display = ["id", "full_name", "email", "role", "is_registered",]
+    class Meta:
+        model = User
+
+
 class ParentAdmin(admin.ModelAdmin):
-    list_display = ["id", "full_name"]
+    list_display = ["id", "full_name", "email", "role", "is_registered",]
     class Meta:
         model = Parent
+
+
+class MidwifeAdmin(admin.ModelAdmin):
+    list_display = ["id", "full_name", "email", "role", "is_registered",]
+    class Meta:
+        model = Midwife
+
+
+class CadreAdmin(admin.ModelAdmin):
+    list_display = ["id", "full_name", "email", "role", "is_registered",]
+    class Meta:
+        model = Cadre
+
+
+class PuskesmasAdmin(admin.ModelAdmin):
+    list_display = ["id", "full_name", "email", "role", "is_registered",]
+    class Meta:
+        model = Puskesmas
 
 
 class OTPAdmin(admin.ModelAdmin):
@@ -28,11 +52,11 @@ class OTPAdmin(admin.ModelAdmin):
         
 
 # Entities
-admin.site.register(User)
+admin.site.register(User, UserAdmin)
 admin.site.register(Parent, ParentAdmin)
-admin.site.register(Midwife)
-admin.site.register(Cadre)
-admin.site.register(Puskesmas)
+admin.site.register(Midwife, MidwifeAdmin)
+admin.site.register(Cadre, CadreAdmin)
+admin.site.register(Puskesmas, PuskesmasAdmin)
 admin.site.register(OTP, OTPAdmin)
 # Profiles
 admin.site.register(ParentProfile)
