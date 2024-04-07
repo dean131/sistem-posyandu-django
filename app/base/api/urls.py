@@ -9,6 +9,7 @@ from base.api.views import (
     cadre_assignment,
     posyandu_activity,
     child,
+    child_measurement,
 )
 
 
@@ -19,6 +20,7 @@ router.register(r'midwifeassignments', midwife_assignment.MidwifeAssignmentViewS
 router.register(r'cadreassignments', cadre_assignment.CadreAssignmentViewSet, basename='cadreassignment')
 router.register(r'posyanduactivities', posyandu_activity.PosyanduActivityViewSet, basename='posyanduactivity')
 router.register(r'children', child.ChildViewSet, basename='child')
+router.register(r'childmeasurements', child_measurement.ChildMeasurementViewSet, basename='childmeasurement')
 
 urlpatterns = [
     path('', include(router.urls)),
