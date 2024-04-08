@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+<section class="section">
+    <div class="section-header">
+        <h1>Desa</h1>
+    </div>
+    <div class="section-body">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="mr-auto">
+                            <button class="btn btn-icon icon-left btn-primary" data-toggle="modal"
+                                data-target="#modalVillage">
+                                <i class="fas fa-plus"></i>
+                                Tambah
+                            </button>
+                        </div>
+                        <div class="card-header-form">
+                            <form>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" placeholder="Search">
+                                    <div class="input-group-btn">
+                                        <button class="btn btn-primary"><i class="fas fa-search"></i></button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <tr>
+                                    <th>No</th>
+                                    <th>Nama Desa</th>
+                                    <th>Aksi</th>
+                                </tr>
+                                {% for village in villages %}
+                                <tr>
+                                    <td>
+                                        {{ forloop.counter }}
+                                    </td>
+                                    <td>
+                                        {{ village.name }}
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-icon btn-info">
+                                            <i class="fas fa-info-circle"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% include 'adminapp/modals/modal_village.html' %}
+{% endblock %}
+
+{% block page_js %}
+<script src="{% static 'assets/js/page/components-table.js' %}"></script>
+<script>
+    $("#modal-village").fireModal({ body: 'Modal body text goes here.', center: true });
+</script>
+{% endblock %}

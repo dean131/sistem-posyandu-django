@@ -7,7 +7,13 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 
-from account.models import User
+from account.models import (
+    Puskesmas,
+)
+
+from base.models import (
+    Village,
+)
 
 
 class LoginView(View):
@@ -22,7 +28,7 @@ class LoginView(View):
         email = request.POST.get("email")
         password = request.POST.get("password")
         
-        user = User.objects.filter(email=email).first()
+        user = Puskesmas.objects.filter(email=email).first()
         if user is not None and user.role == "PUSKESMAS":
             is_password_valid = user.check_password(password)
             if is_password_valid:
@@ -46,4 +52,11 @@ class DashboardView(View):
         return render(request, "adminapp/dashboard.html", context)
 
     
-
+class VillageListView(View):
+    def get(self, request, *args, **kwargs):
+        puskesmas = request.user
+        villages = Village.objects.filter(puskesmas=puskesmas)
+        context = {
+            "villages": villages
+        }
+        return render(request, "adminapp/village_list.html", context)

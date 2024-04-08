@@ -9,30 +9,21 @@
         </div>
         <ul class="sidebar-menu">
             <li class="menu-header">Dashboard</li>
-            <li class="nav-item dropdown {% if request.path == '/' %} active {% endif %}">
-                <a href="#" class="nav-link"><i class="fas fa-fire"></i><span>Dashboard</span></a>
+
+            <li class="{% if request.path == '/' %} active {% endif %}">
+                <a class="nav-link" href="{% url 'dashboard' %}">
+                    <i class="fas fa-fire"></i>
+                    <span>Dashboard</span>
+                </a>
             </li>
 
-            <li class="nav-item dropdown {% if request.path == '/login/' %} active {% endif %}">
-                <a href="#" class="nav-link has-dropdown"><i class="fas fa-fire"></i><span>Dashboard</span></a>
-                <ul class="dropdown-menu">
-                    <li class="{% if request.path == '/login/' %} active {% endif %}">
-                        <a class="nav-link" href="index-0.html">General Dashboard</a>
-                    </li>
-                    <li>
-                        <a class="nav-link" href="index.html">Ecommerce Dashboard</a>
-                    </li>
-                </ul>
+            <li class="{% if request.path == '/village_list/' %} active {% endif %}">
+                <a class="nav-link" href="{% url 'village_list' %}">
+                    <i class="fas fa-fire"></i>
+                    <span>Desa</span>
+                </a>
             </li>
         </ul>
-
-
-
-        <!-- <div class="mt-4 mb-4 p-3 hide-sidebar-mini">
-            <a href="https://getstisla.com/docs" class="btn btn-primary btn-lg btn-block btn-icon-split">
-                <i class="fas fa-rocket"></i> Documentation
-            </a>
-        </div> -->
     </aside>
 </div>
 {% endblock content %}
