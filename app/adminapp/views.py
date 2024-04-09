@@ -13,6 +13,7 @@ from account.models import (
 
 from base.models import (
     Village,
+    Child
 )
 
 
@@ -22,7 +23,7 @@ class LoginView(View):
         if request.user.is_authenticated:
             # Redirect to previous page or home page
             return redirect(next_page if next_page != '/login/' else '/')
-        return render(request, "adminapp/auth-login.html")
+        return render(request, "adminapp/auth_login.html")
     
     def post(self, request, *args, **kwargs):
         email = request.POST.get("email")
@@ -48,15 +49,20 @@ class LogoutView(View):
 @method_decorator(login_required(login_url='login'), name='dispatch')
 class DashboardView(View):
     def get(self, request, *args, **kwargs):
-        context = {}
+        children = Child.objects.filter(
+            parent__address__subdistrict=request.user.address.subdistrict
+        ).count()
+        context = {
+            "children": children
+        }
         return render(request, "adminapp/dashboard.html", context)
 
     
-class VillageListView(View):
-    def get(self, request, *args, **kwargs):
-        puskesmas = request.user
-        villages = Village.objects.filter(puskesmas=puskesmas)
-        context = {
-            "villages": villages
-        }
-        return render(request, "adminapp/village_list.html", context)
+# class VillageListView(View):
+#     def get(self, request, *args, **kwargs):
+#         puskesmas = request.user
+#         villages = Village.objects.filter(puskesmas=puskesmas)
+#         context = {
+#             "villages": villages
+#         }
+#         return render(request, "adminapp/village_list.html", context)

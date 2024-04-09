@@ -12,6 +12,8 @@ from .models import (
     MidwifeProfile,
     CadreProfile,
     PuskesmasProfile,
+
+    Address,
 )
 
 
@@ -63,3 +65,5 @@ admin.site.register(ParentProfile)
 admin.site.register(MidwifeProfile)
 admin.site.register(CadreProfile)
 admin.site.register(PuskesmasProfile)
+# Address
+admin.site.register(Address)

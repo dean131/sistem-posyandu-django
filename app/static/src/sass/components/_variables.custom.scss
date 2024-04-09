@@ -1,0 +1,12 @@
+//
+// Override global variables here by referring to _variables.scss.
+// Note that this file is included before _variables.scss and the global bootstrap variables defined in _variables.scss
+// are not accessible here but you can override each of theme here as shown below
+//
+
+// Theme colors
+// Override primary color variants
+$primary:       									#6993FF;
+$primary-hover:    									#4A7DFF;
+$primary-light:    									#E1E9FF;
+$primary-inverse:  									#FFFFFF;

@@ -115,6 +115,23 @@ class Child(models.Model):
     def __str__(self):
         return self.full_name
     
+    @property
+    def current_age(self):
+        """
+        Menghitung usia anak saat ini.
+        """
+
+        today = date.today()
+        birth_date = self.birth_date
+
+        years = today.year - birth_date.year
+        months = today.month - birth_date.month
+
+        if months < 0:
+            years -= 1
+            months += 12
+
+        return f"{years} tahun, {months} bulan"
 
 class ChildMeasurement(models.Model):
     """
