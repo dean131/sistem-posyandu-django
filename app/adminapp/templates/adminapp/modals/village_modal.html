@@ -1,0 +1,31 @@
+<div class="modal fade" id="villageModal" tabindex="-1" role="dialog" aria-labelledby="villageModalLabel"
+    data-backdrop="static" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="villageModalLabel">Modal Title</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <i aria-hidden="true" class="ki ki-close"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form class="form">
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label>Nama Desa</label>
+                            <input type="email" class="form-control form-control-solid"
+                                placeholder="Masukan nama desa" />
+                            <span class="form-text text-muted">
+                                Silahkan masukan nama desa yang ada di kecamatan {{ request.user.address.subdistrict }}
+                            </span>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light-primary font-weight-bold" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary font-weight-bold">Simpan</button>
+            </div>
+        </div>
+    </div>
+</div>

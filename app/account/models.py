@@ -128,13 +128,13 @@ class OTP(models.Model):
     
 
 class Address(models.Model):
-    province = models.CharField(max_length=100)
-    city = models.CharField(max_length=100)
-    subdistrict = models.CharField(max_length=100)
-    village = models.CharField(max_length=100)
-    address = models.CharField(max_length=255)
-    rw = models.CharField(max_length=3)
-    rt = models.CharField(max_length=3)
+    province = models.CharField(max_length=100, null=True, blank=True)
+    city = models.CharField(max_length=100, null=True, blank=True)
+    subdistrict = models.CharField(max_length=100, null=True, blank=True)
+    village = models.CharField(max_length=100, null=True, blank=True)
+    address = models.CharField(max_length=255, null=True, blank=True)
+    rw = models.CharField(max_length=3, null=True, blank=True)
+    rt = models.CharField(max_length=3, null=True, blank=True)
     # Foreign Keys
     user = models.OneToOneField(User, on_delete=models.CASCADE)
 

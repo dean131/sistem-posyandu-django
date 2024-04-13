@@ -7,6 +7,7 @@ from .models import (
     Midwife, 
     Cadre,
     Puskesmas,
+    Address,
 
     ParentProfile,
     MidwifeProfile,
@@ -19,22 +20,26 @@ from .models import (
 def create_parent_profile(sender, instance, created, **kwargs):
     if created:
         ParentProfile.objects.create(user=instance)
+        Address.objects.create(user=instance)
 
 # Membuat Profile setiap kali akun Cadre baru dibuat
 @receiver(post_save, sender=Cadre)
 def create_cadre_profile(sender, instance, created, **kwargs):
     if created:
         CadreProfile.objects.create(user=instance)
+        Address.objects.create(user=instance)
 
 # Membuat Profile setiap kali akun Midwife baru dibuat
 @receiver(post_save, sender=Midwife)
 def create_midwife_profile(sender, instance, created, **kwargs):
     if created:
         MidwifeProfile.objects.create(user=instance)
+        Address.objects.create(user=instance)
 
 # Membuat Profile setiap kali akun Puskesmas baru dibuat
 @receiver(post_save, sender=Puskesmas)
 def create_puskesmas_profile(sender, instance, created, **kwargs):
     if created:
         PuskesmasProfile.objects.create(user=instance)
+        Address.objects.create(user=instance)
 

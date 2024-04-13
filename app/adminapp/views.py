@@ -58,11 +58,11 @@ class DashboardView(View):
         return render(request, "adminapp/dashboard.html", context)
 
     
-# class VillageListView(View):
-#     def get(self, request, *args, **kwargs):
-#         puskesmas = request.user
-#         villages = Village.objects.filter(puskesmas=puskesmas)
-#         context = {
-#             "villages": villages
-#         }
-#         return render(request, "adminapp/village_list.html", context)
+class VillageListView(View):
+    def get(self, request, *args, **kwargs):
+        puskesmas = request.user
+        villages = Village.objects.filter(puskesmas=puskesmas)
+        context = {
+            "villages": villages
+        }
+        return render(request, "adminapp/village_list.html", context)
