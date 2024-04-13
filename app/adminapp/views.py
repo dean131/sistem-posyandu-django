@@ -60,8 +60,16 @@ class DashboardView(View):
     
 class VillageListView(View):
     def get(self, request, *args, **kwargs):
+        search = request.GET.get("search")
         puskesmas = request.user
-        villages = Village.objects.filter(puskesmas=puskesmas).order_by("-created_at")
+        
+        if search is not None:
+            villages = Village.objects.filter(
+                puskesmas=puskesmas,
+                name__icontains=search
+            )
+        else:
+            villages = Village.objects.filter(puskesmas=puskesmas)
         context = {
             "villages": villages
         }

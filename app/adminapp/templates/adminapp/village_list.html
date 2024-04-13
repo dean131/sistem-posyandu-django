@@ -14,6 +14,7 @@
 {% endblock %}
 {% block content %}
 <div class="container">
+    <h2>{% if request.GET.search %} Hasil untuk "{{request.GET.search}}" {% endif %}</h2>
     {% include 'includes/alerts.html' %}
     <!--begin::Advance Table Widget 8-->
     <div class="card card-custom gutter-b">
@@ -43,9 +44,9 @@
             </div>
             <div class="card-toolbar">
                 <div class="input-group">
-                    <input type="search" class="form-control" placeholder="Search for..." />
+                    <input id="search-input" type="search" class="form-control" placeholder="Search for..." />
                     <div class="input-group-append">
-                        <button class="btn btn-secondary" type="button">Cari</button>
+                        <button class="btn btn-secondary search-button" type="button">Cari</button>
                     </div>
                 </div>
             </div>
@@ -163,6 +164,17 @@
 
         $('.delete-button').click(function () {
             $('input[name="pk"]').val($(this).closest('tr').find('td').eq(0).text());
+        });
+
+        $('.search-button').click(function () {
+            const search = $('input[type="search"]').val();
+            window.location.href = `{% url 'village_list' %}?search=${search}`;
+        });
+
+        $('#search-input').on('keyup', function (e) {
+            if (e.keyCode === 13) {
+                $('.search-button').click();
+            }
         });
     });
 

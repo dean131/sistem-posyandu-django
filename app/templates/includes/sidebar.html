@@ -59,6 +59,17 @@
                     </a>
                 </li>
                 <!--end::Menu Item-->
+                <!--begin::Menu Item-->
+                <li class="menu-item {% if request.path == '/posyandu/' %} menu-item-active {% endif %}"
+                    aria-haspopup="true">
+                    <a href="{% url 'posyandu' %}" class="menu-link">
+                        <span class="svg-icon menu-icon">
+                            <i class="fas fa-home text-primary"></i>
+                        </span>
+                        <span class="menu-text">Posyandu</span>
+                    </a>
+                </li>
+                <!--end::Menu Item-->
             </ul>
             <!--end::Menu Nav-->
         </div>
