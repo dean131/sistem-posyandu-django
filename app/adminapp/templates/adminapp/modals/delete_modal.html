@@ -1,0 +1,25 @@
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel"
+    data-backdrop="static" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Hapus</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <i aria-hidden="true" class="ki ki-close"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Anda yakin ingin hapus?</p>
+                <form id="deleteForm" class="form" method="post" hidden>
+                    {% csrf_token %}
+                    <input type="text" name="form-action" value="delete">
+                    <input type="text" name="pk">
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light-primary font-weight-bold" data-dismiss="modal">Close</button>
+                <button type="submit" form="deleteForm" class="btn btn-primary font-weight-bold">Simpan</button>
+            </div>
+        </div>
+    </div>
+</div>

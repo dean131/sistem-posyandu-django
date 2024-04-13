@@ -61,8 +61,44 @@ class DashboardView(View):
 class VillageListView(View):
     def get(self, request, *args, **kwargs):
         puskesmas = request.user
-        villages = Village.objects.filter(puskesmas=puskesmas)
+        villages = Village.objects.filter(puskesmas=puskesmas).order_by("-created_at")
         context = {
             "villages": villages
         }
         return render(request, "adminapp/village_list.html", context)
+    
+    def post(self, request, *args, **kwargs):
+        action = request.POST.get("form-action")
+        match action:
+            case "add": self.add_village(request)
+            case "edit": self.edit_village(request)
+            case "delete": self.delete_village(request)
+        return redirect("village_list") 
+    
+    def add_village(self, request):
+        name = request.POST.get("village-name")
+        village = Village.objects.create(
+            puskesmas=request.user,
+            name=name
+        )
+        messages.success(request, "Desa berhasil ditambahkan")
+        return redirect("village_list") 
+    
+    def delete_village(self, request):
+        village_id = request.POST.get("pk")
+        village = Village.objects.filter(id=village_id).first()
+        if village is not None:
+            village.delete()
+            messages.success(request, "Desa berhasil dihapus")
+        return redirect("village_list")
+    
+    def edit_village(self, request):
+        village_id = request.POST.get("pk")
+        name = request.POST.get("village-name")
+        village = Village.objects.filter(id=village_id).first()
+        if village is not None:
+            village.name = name
+            village.save()
+            messages.success(request, "Desa berhasil diubah")
+        return redirect("village_list")
+

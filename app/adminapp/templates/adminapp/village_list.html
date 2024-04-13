@@ -14,12 +14,14 @@
 {% endblock %}
 {% block content %}
 <div class="container">
+    {% include 'includes/alerts.html' %}
     <!--begin::Advance Table Widget 8-->
     <div class="card card-custom gutter-b">
         <!--begin::Header-->
         <div class="card-header border-0 py-5">
             <div class="card-toolbar">
-                <a href="#" class="btn btn-success font-weight-bolder font-size-sm">
+                <button class="btn btn-success font-weight-bolder font-size-sm add-button" data-toggle="modal"
+                    data-target="#villageModal">
                     <span class="svg-icon svg-icon-md svg-icon-white">
                         <!--begin::Svg Icon | path:assets/media/svg/icons/Communication/Add-user.svg-->
                         <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24px"
@@ -37,7 +39,7 @@
                         <!--end::Svg Icon-->
                     </span>
                     Tambah Desa
-                </a>
+                </button>
             </div>
             <div class="card-toolbar">
                 <div class="input-group">
@@ -66,6 +68,8 @@
                     <tbody>
                         {% for village in villages %}
                         <tr>
+                            <td hidden>
+                                {{ village.id}}
                             </td>
                             <td>
                                 <span class="text-dark-75 font-weight-bolder d-block font-size-lg">
@@ -78,9 +82,9 @@
                                 </span>
                             </td>
                             <td class="pr-0 text-right">
-                                <a class="btn btn-icon btn-light btn-hover-primary btn-sm mx-3" data-toggle="modal"
-                                    data-target="#villageModal">
-                                    <span class="svg-icon svg-icon-md svg-icon-primary">
+                                <button class="btn btn-icon btn-light btn-hover-warning btn-sm mx-3 edit-button"
+                                    data-toggle="modal" data-target="#villageModal">
+                                    <span class="svg-icon svg-icon-md svg-icon-warning">
                                         <!--begin::Svg Icon | path:assets/media/svg/icons/Communication/Write.svg-->
                                         <svg xmlns="http://www.w3.org/2000/svg"
                                             xmlns:xlink="http://www.w3.org/1999/xlink" width="24px" height="24px"
@@ -98,9 +102,10 @@
                                         </svg>
                                         <!--end::Svg Icon-->
                                     </span>
-                                </a>
-                                <a href="#" class="btn btn-icon btn-light btn-hover-primary btn-sm">
-                                    <span class="svg-icon svg-icon-md svg-icon-primary">
+                                </button>
+                                <button class="btn btn-icon btn-light btn-hover-danger btn-sm delete-button"
+                                    data-toggle="modal" data-target="#deleteModal">
+                                    <span class="svg-icon svg-icon-md svg-icon-danger">
                                         <!--begin::Svg Icon | path:assets/media/svg/icons/General/Trash.svg-->
                                         <svg xmlns="http://www.w3.org/2000/svg"
                                             xmlns:xlink="http://www.w3.org/1999/xlink" width="24px" height="24px"
@@ -117,7 +122,7 @@
                                         </svg>
                                         <!--end::Svg Icon-->
                                     </span>
-                                </a>
+                                </button>
                             </td>
                         </tr>
                         {% endfor %}
@@ -132,4 +137,34 @@
 </div>
 
 {% include 'adminapp/modals/village_modal.html' %}
+{% include 'adminapp/modals/delete_modal.html' %}
+{% endblock %}
+
+{% block js_page %}
+<script>
+    const csrf_token = '{{ csrf_token }}'
+
+    $(document).ready(function () {
+        $('.add-button').click(function () {
+            $('input').val('');
+            $('input[name="csrfmiddlewaretoken"]').val(csrf_token);
+            $('input[name="form-action"]').val('add');
+            $('#villageModalLabel').text('Tambah Desa');
+        });
+
+        $('.edit-button').click(function () {
+            $('input').val('');
+            $('input[name="csrfmiddlewaretoken"]').val(csrf_token);
+            $('input[name="form-action"]').val('edit');
+            $('input[name="pk"]').val($(this).closest('tr').find('td').eq(0).text());
+            $('input[name="village-name"]').val($(this).closest('tr').find('td').eq(2).text().trim());
+            $('#villageModalLabel').text('Edit Desa');
+        });
+
+        $('.delete-button').click(function () {
+            $('input[name="pk"]').val($(this).closest('tr').find('td').eq(0).text());
+        });
+    });
+
+</script>
 {% endblock %}
