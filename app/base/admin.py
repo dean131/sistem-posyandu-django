@@ -4,6 +4,7 @@ from django.contrib import admin
 from base.models import (
     Village,
     Child,
+    Posyandu,
 )
 
 
@@ -12,3 +13,4 @@ class ChildAdmin(admin.ModelAdmin):
 
 admin.site.register(Village) 
 admin.site.register(Child, ChildAdmin)   
+admin.site.register(Posyandu)

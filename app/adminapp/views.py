@@ -13,7 +13,8 @@ from account.models import (
 
 from base.models import (
     Village,
-    Child
+    Child,
+    Posyandu,
 )
 
 
@@ -60,16 +61,19 @@ class DashboardView(View):
     
 class VillageListView(View):
     def get(self, request, *args, **kwargs):
-        search = request.GET.get("search")
+        query = request.GET.get("q", "")
         puskesmas = request.user
         
-        if search is not None:
+        if query:
             villages = Village.objects.filter(
                 puskesmas=puskesmas,
-                name__icontains=search
-            )
+                name__icontains=query
+            ).order_by("-created_at")
         else:
-            villages = Village.objects.filter(puskesmas=puskesmas)
+            villages = Village.objects.filter(
+                puskesmas=puskesmas
+            ).order_by("-created_at")
+
         context = {
             "villages": villages
         }
@@ -85,7 +89,7 @@ class VillageListView(View):
     
     def add_village(self, request):
         name = request.POST.get("village-name")
-        village = Village.objects.create(
+        Village.objects.create(
             puskesmas=request.user,
             name=name
         )
@@ -98,6 +102,8 @@ class VillageListView(View):
         if village is not None:
             village.delete()
             messages.success(request, "Desa berhasil dihapus")
+        else:
+            messages.error(request, "Desa tidak ditemukan")
         return redirect("village_list")
     
     def edit_village(self, request):
@@ -108,5 +114,78 @@ class VillageListView(View):
             village.name = name
             village.save()
             messages.success(request, "Desa berhasil diubah")
+        else:
+            messages.error(request, "Desa tidak ditemukan")
         return redirect("village_list")
 
+
+class PosyanduView(View):
+    def get(self, request, *args, **kwargs):
+        query = request.GET.get("q", "")
+
+        if query:
+            posyandus = Posyandu.objects.filter(
+                village__puskesmas=request.user,
+                name__icontains=query
+            ).order_by("-created_at")
+        else:
+            posyandus = Posyandu.objects.filter(
+                village__puskesmas=request.user
+            ).order_by("-created_at")
+
+        context = {
+            "posyandus": posyandus 
+        }
+        return render(request, "adminapp/posyandu_page.html", context)
+    
+    def post(self, request, *args, **kwargs):
+        action = request.POST.get("form-action")
+        match action:
+            case "add": self.add_posyandu(request)
+            case "edit": self.edit_posyandu(request)
+            case "delete": self.delete_posyandu(request)
+        return redirect("posyandu") 
+    
+    def add_posyandu(self, request):
+        name = request.POST.get("posyandu-name")
+        address = request.POST.get("posyandu-address")
+        village_id = request.POST.get("village-id")
+        village = Village.objects.filter(id=village_id).first()
+        if village is not None:
+            Posyandu.objects.create(
+                name=name,
+                address=address,
+                village=village
+            )
+            messages.success(request, "Posyandu berhasil ditambahkan")
+        else:
+            messages.error(request, "Desa tidak ditemukan")
+        return redirect("posyandu")
+    
+    def edit_posyandu(self, request):
+        posyandu_id = request.POST.get("pk")
+        name = request.POST.get("posyandu-name")
+        address = request.POST.get("posyandu-address")
+        village_id = request.POST.get("village-id")
+        posyandu = Posyandu.objects.filter(id=posyandu_id).first()
+        village = Village.objects.filter(id=village_id).first()
+        if posyandu is not None:
+            posyandu.name = name
+            posyandu.address = address
+            posyandu.village = village
+            posyandu.save()
+            messages.success(request, "Posyandu berhasil diubah")
+        else:
+            messages.error(request, "Posyandu tidak ditemukan")
+        return redirect("posyandu")
+    
+    def delete_posyandu(self, request):
+        posyandu_id = request.POST.get("pk")
+        posyandu = Posyandu.objects.filter(id=posyandu_id).first()
+        if posyandu is not None:
+            posyandu.delete()
+            messages.success(request, "Posyandu berhasil dihapus")
+        else:
+            messages.error(request, "Posyandu tidak ditemukan")
+        return redirect("posyandu")
+    

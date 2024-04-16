@@ -5,7 +5,7 @@
         <!--begin::Info-->
         <div class="d-flex align-items-center flex-wrap mr-2">
             <!--begin::Page Title-->
-            <h5 class="text-dark font-weight-bold mt-2 mb-2 mr-5">List Desa</h5>
+            <h5 class="text-dark font-weight-bold mt-2 mb-2 mr-5">List Posyandu</h5>
             <!--end::Page Title-->
         </div>
         <!--end::Info-->
@@ -22,7 +22,7 @@
         <div class="card-header border-0 py-5">
             <div class="card-toolbar">
                 <button class="btn btn-success font-weight-bolder font-size-sm add-button" data-toggle="modal"
-                    data-target="#villageModal">
+                    data-target="#posyanduModal">
                     <span class="svg-icon svg-icon-md svg-icon-white">
                         <!--begin::Svg Icon | path:assets/media/svg/icons/Communication/Add-user.svg-->
                         <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24px"
@@ -39,12 +39,12 @@
                         </svg>
                         <!--end::Svg Icon-->
                     </span>
-                    Tambah Desa
+                    Tambah Posyandu
                 </button>
             </div>
             <div class="card-toolbar">
                 <div class="input-group">
-                    <input id="search-input" type="search" class="form-control" placeholder="Cari Desa..." />
+                    <input id="search-input" type="search" class="form-control" placeholder="Cari Posyandu..." />
                     <div class="input-group-append">
                         <button class="btn btn-secondary search-button" type="button">Cari</button>
                     </div>
@@ -59,24 +59,28 @@
                 <table class="table table-head-custom table-head-bg table-vertical-center table-borderless">
                     <thead>
                         <tr class="bg-gray-100 text-left">
-                            <th hidden>PK</th>
                             <th>
                                 <span class="text-dark-75">No</span>
                             </th>
                             <th class="pl-7">
                                 <span class="text-dark-75">Nama</span>
                             </th>
+                            <th class="pl-7">
+                                <span class="text-dark-75">Desa</span>
+                            </th>
+                            <th class="pl-7">
+                                <span class="text-dark-75">Alamat</span>
+                            </th>
                             <th>
                                 <span class="text-dark-75">Aksi</span>
                             </th>
+                            <th hidden>PK</th>
+                            <th hidden>VILAGE ID</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for village in villages %}
+                        {% for posyandu in posyandus %}
                         <tr>
-                            <td hidden>
-                                {{ village.id}}
-                            </td>
                             <td>
                                 <span class="text-dark-75 font-weight-bolder d-block font-size-lg">
                                     {{ forloop.counter }}
@@ -84,12 +88,22 @@
                             </td>
                             <td>
                                 <span class="text-dark-75 font-weight-bolder d-block font-size-lg">
-                                    {{ village.name}}
+                                    {{ posyandu.name}}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="text-dark-75 font-weight-bolder d-block font-size-lg">
+                                    {{ posyandu.village.name }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="text-dark-75 font-weight-bolder d-block font-size-lg">
+                                    {{ posyandu.address }}
                                 </span>
                             </td>
                             <td class="pr-0 text-center">
                                 <button class="btn btn-icon btn-light btn-hover-warning btn-sm mx-3 edit-button"
-                                    data-toggle="modal" data-target="#villageModal">
+                                    data-toggle="modal" data-target="#posyanduModal">
                                     <span class="svg-icon svg-icon-md svg-icon-warning">
                                         <!--begin::Svg Icon | path:assets/media/svg/icons/Communication/Write.svg-->
                                         <svg xmlns="http://www.w3.org/2000/svg"
@@ -130,6 +144,12 @@
                                     </span>
                                 </button>
                             </td>
+                            <td hidden>
+                                {{ posyandu.id}}
+                            </td>
+                            <td hidden>
+                                {{ posyandu.village.id }}
+                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -142,7 +162,7 @@
     <!--end::Advance Table Widget 8-->
 </div>
 
-{% include 'adminapp/modals/village_modal.html' %}
+{% include 'adminapp/modals/posyandu_modal.html' %}
 {% include 'adminapp/modals/delete_modal.html' %}
 {% endblock %}
 
@@ -155,25 +175,27 @@
             $('input').val('');
             $('input[name="csrfmiddlewaretoken"]').val(csrf_token);
             $('input[name="form-action"]').val('add');
-            $('#villageModalLabel').text('Tambah Desa');
+            $('#posyanduModalLabel').text('Tambah Posyandu');
         });
 
         $('.edit-button').click(function () {
             $('input').val('');
             $('input[name="csrfmiddlewaretoken"]').val(csrf_token);
             $('input[name="form-action"]').val('edit');
-            $('input[name="pk"]').val($(this).closest('tr').find('td').eq(0).text().trim());
-            $('input[name="village-name"]').val($(this).closest('tr').find('td').eq(2).text().trim());
-            $('#villageModalLabel').text('Edit Desa');
+            $('input[name="posyandu-name"]').val($(this).closest('tr').find('td').eq(1).text().trim());
+            $('input[name="posyandu-address"]').val($(this).closest('tr').find('td').eq(3).text().trim());
+            $('input[name="pk"]').val($(this).closest('tr').find('td').eq(5).text().trim());
+            $('select[name="village-id"]').val($(this).closest('tr').find('td').eq(6).text().trim());
+            $('#posyanduModalLabel').text('Edit Posyandu');
         });
 
         $('.delete-button').click(function () {
-            $('input[name="pk"]').val($(this).closest('tr').find('td').eq(0).text().trim());
+            $('input[name="pk"]').val($(this).closest('tr').find('td').eq(0).text());
         });
 
         $('.search-button').click(function () {
             const query = $('input[type="search"]').val();
-            window.location.href = `{% url 'village_list' %}?q=${query}`;
+            window.location.href = `{% url 'posyandu' %}?q=${query}`;
         });
 
         $('#search-input').on('keyup', function (e) {
