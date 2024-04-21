@@ -66,12 +66,11 @@
                             </a>
                         </td>
                         <td class="pr-0 text-center">
-                            <a class="btn btn-icon btn-outline-warning btn-hover-warning btn-sm mx-3"
-                                data-toggle="modal" data-target="#midwifeAssignmentModal">
+                            <a class="btn btn-icon btn-light btn-hover-warning btn-sm assignment-button mx-3">
                                 <i class="fas fa-hammer"></i>
                             </a>
                             <a href="{% url 'midwife_info' midwife.id  %}"
-                                class="btn btn-icon btn-outline-info btn-hover-info btn-sm mx-3">
+                                class="btn btn-icon btn-light btn-hover-info btn-sm mx-3">
                                 <i class="fas fa-info text-hover-primary"></i>
                             </a>
                         </td>
@@ -87,6 +86,7 @@
 <!--end::Advance Table Widget 8-->
 
 {% include 'adminapp/modals/delete_modal.html' %}
+{% include 'adminapp/modals/midwife_assignment_modal.html' %}
 {% endblock %}
 
 {% block js_page %}
@@ -112,6 +112,11 @@
 
         $('.delete-button').click(function () {
             $('input[name="pk"]').val($(this).closest('tr').find('td').eq(0).text().trim());
+        });
+
+        $('.assignment-button').click(function () {
+            $('#midwifeAssignmentModal').modal('show');
+            $('input[name="midwife-id"]').val($(this).closest('tr').find('td').eq(0).text().trim());
         });
 
         $('.search-button').click(function () {

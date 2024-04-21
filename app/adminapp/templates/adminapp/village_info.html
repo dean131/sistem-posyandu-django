@@ -30,17 +30,17 @@
                 </div>
             </div>
             {% else %}
-            <div class="symbol symbol-light-success symbol-70 symbol-lg-100 mr-3">
-                <span class="symbol-label font-size-h5">{{ village.name.0 }}</span>
+            <div class="symbol symbol-light-success symbol-50 symbol-lg-70 mr-3">
+                <span class="symbol-label font-size-h2">{{ village.name.0 }}</span>
             </div>
             {% endif %}
             <!--end::Pic-->
             <!--begin::Info-->
-            <div class="flex-grow-1">
+            <div class="flex-grow-1 d-flex align-items-center">
                 <!--begin::Title-->
-                <div class="d-flex justify-content-between flex-wrap mt-3">
+                <div class="d-flex justify-content-between flex-wrap">
                     <div class="d-flex mr-3">
-                        <a href="#" class="text-dark-75 text-hover-primary font-size-h5 font-weight-bold mr-3">
+                        <a href="#" class="text-dark-75 text-hover-primary font-size-h2 font-weight-bolder mr-3">
                             {{ village.name }}
                         </a>
                     </div>
@@ -109,6 +109,7 @@
                         <th>
                             <span class="text-dark-75">Aksi</span>
                         </th>
+                        <th hidden>Midwife ID</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -123,12 +124,13 @@
                             </span>
                         </td>
                         <td>
-                            <a class="text-dark-75 text-hover-primary font-size-h5 font-weight-bold">
+                            <a href="{% url 'midwife_info' midwifeassisgnment.midwife.id  %}"
+                                class="text-dark-75 text-hover-primary font-size-h5 font-weight-bold">
                                 {{ midwifeassisgnment.midwife.full_name }}
                             </a>
                         </td>
                         <td class="pr-0 text-center">
-                            <button class="btn btn-icon btn-light btn-hover-danger btn-sm delete-button"
+                            <button class="btn btn-icon btn-light btn-hover-danger btn-sm delete-assignment-button"
                                 data-toggle="modal" data-target="#deleteModal">
                                 <span class="svg-icon svg-icon-md svg-icon-danger">
                                     <!--begin::Svg Icon | path:assets/media/svg/icons/General/Trash.svg-->
@@ -148,6 +150,9 @@
                                 </span>
                             </button>
                         </td>
+                        <td hidden>
+                            {{ midwifeassisgnment.midwife.id }}
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -158,4 +163,21 @@
     <!--end::Body-->
 </div>
 <!--end::Advance Table Widget 8-->
+
+{% include 'adminapp/modals/delete_modal.html' %}
+{% endblock %}
+
+{% block js_page %}
+<script>
+    const csrf_token = '{{ csrf_token }}'
+
+    $(document).ready(function () {
+        $('.delete-assignment-button').click(function () {
+            const midwifeId = $(this).closest('tr').find('td').eq(4).text().trim();
+            $('#deleteForm').attr('action', '{% url "midwife_assignments" %}');
+            $('#deleteForm').append(`<input type="hidden" name="midwife-id" value="${midwifeId}">`);
+            $('input[name="pk"]').val($(this).closest('tr').find('td').eq(0).text().trim());
+        });
+    });
+</script>
 {% endblock %}

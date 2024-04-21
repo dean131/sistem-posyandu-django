@@ -15,4 +15,6 @@ urlpatterns = [
 
     path("midwives/", views.MidwifeView.as_view(), name="midwives"),
     path("midwife_info/<str:pk>/", views.MidwifeInfoView.as_view(), name="midwife_info"),
+
+    path("midwife_assignments/", views.MidwifeAssignmentView.as_view(), name="midwife_assignments"),
 ]

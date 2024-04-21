@@ -207,7 +207,6 @@ class PosyanduView(View):
             messages.success(request, "Posyandu berhasil diubah")
         else:
             messages.error(request, "Posyandu tidak ditemukan")
-        return redirect("posyandu")
     
     def delete_posyandu(self, request):
         posyandu_id = request.POST.get("pk")
@@ -217,7 +216,6 @@ class PosyanduView(View):
             messages.success(request, "Posyandu berhasil dihapus")
         else:
             messages.error(request, "Posyandu tidak ditemukan")
-        return redirect("posyandu")
     
 
 class MidwifeView(View):
@@ -245,18 +243,44 @@ class MidwifeInfoView(View):
         }
         return render(request, "adminapp/midwife_info.html", context)
     
+
+class MidwifeAssignmentView(View):
     def post(self, request, *args, **kwargs):
         action = request.POST.get("form-action")
+        midwife_id = request.POST.get("midwife-id")
         match action:
-            case "delete": return self.delete_midwifeassignment(request)
-        # return redirect("midwife_info", pk=midwife_id)
+            case "add": self.add_midwifeassignment(request)
+            case "delete": self.delete_midwifeassignment(request)
+        return redirect("midwife_info", pk=midwife_id)
     
+    def add_midwifeassignment(self, request):
+        midwife_id = request.POST.get("midwife-id")
+        village_id = request.POST.get("village-id")
+
+        is_exist = MidwifeAssignment.objects.filter(
+            midwife__id=midwife_id,
+            village__id=village_id
+        ).exists()
+        if is_exist:
+            messages.success(request, "Bidan sudah ditambahkan")
+            return
+        
+        midwife = Midwife.objects.filter(id=midwife_id).first()
+        village = Village.objects.filter(id=village_id).first()
+        if midwife is not None and village is not None:
+            MidwifeAssignment.objects.create(
+                midwife=midwife,
+                village=village
+            )
+            messages.success(request, "Bidan berhasil ditambahkan")
+        else:
+            messages.error(request, "Bidan atau desa tidak ditemukan")
+
     def delete_midwifeassignment(self, request):
         midwifeassignment_id = request.POST.get("pk")
         midwifeassignment = MidwifeAssignment.objects.filter(id=midwifeassignment_id).first()
         if midwifeassignment is not None:
             midwifeassignment.delete()
-            messages.success(request, "Bidan berhasil dihapus")
+            messages.success(request, "Penugasan berhasil dihapus")
         else:
-            messages.error(request, "Bidan tidak ditemukan")
-        return redirect("midwife_info", pk=midwifeassignment.midwife.id)
+            messages.error(request, "Penugasan tidak ditemukan")

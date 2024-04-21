@@ -5,6 +5,7 @@
         <!--begin::Logo-->
         <a href="{% url 'dashboard' %}" class="brand-logo">
             <!-- <img alt="Logo" src="{% static 'assets/media/logos/logo-dark.png' %}" /> -->
+            <h2 class="menu-title">{{ request.user.full_name }}</h2>
         </a>
         <!--end::Logo-->
         <!--begin::Toggle-->
