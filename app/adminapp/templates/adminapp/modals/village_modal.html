@@ -15,7 +15,7 @@
                         <div class="form-group">
                             <label>Nama Desa</label>
                             <input type="text" name="village-name" class="form-control form-control-solid"
-                                placeholder="Masukan nama desa" />
+                                placeholder="Masukan nama desa" oninput="this.value = this.value.toUpperCase()" />
                             <span class="form-text text-muted">
                                 Silahkan masukan nama desa yang ada di kecamatan {{ request.user.address.subdistrict }}
                             </span>

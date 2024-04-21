@@ -9,12 +9,16 @@ from django.utils.decorators import method_decorator
 
 from account.models import (
     Puskesmas,
+    Parent,
+    Midwife,
+    Cadre,
 )
 
 from base.models import (
     Village,
     Child,
     Posyandu,
+    MidwifeAssignment,
 )
 
 
@@ -47,7 +51,7 @@ class LogoutView(View):
         return redirect("login")
     
 
-@method_decorator(login_required(login_url='login'), name='dispatch')
+# @method_decorator(login_required(login_url='login'), name='dispatch')
 class DashboardView(View):
     def get(self, request, *args, **kwargs):
         children = Child.objects.filter(
@@ -117,6 +121,32 @@ class VillageListView(View):
         else:
             messages.error(request, "Desa tidak ditemukan")
         return redirect("village_list")
+
+
+class VillageInfoView(View):
+    def get(self, request, *args, **kwargs):
+        pk = kwargs.get("pk")
+        village = Village.objects.filter(id=pk).first()
+        children = Child.objects.filter(
+            parent__address__village=village.name
+        )
+        parents = Parent.objects.filter(
+            address__village=village.name
+        )
+        posyandus = Posyandu.objects.filter(
+            village=village
+        )
+        midwives = Midwife.objects.filter(
+            midwifeassignment__village=village
+        )
+        context = {
+            "village": village,
+            "children": children,
+            "parents": parents,
+            "posyandus": posyandus,
+            "midwives": midwives
+        }
+        return render(request, "adminapp/village_info.html", context) 
 
 
 class PosyanduView(View):
@@ -189,3 +219,44 @@ class PosyanduView(View):
             messages.error(request, "Posyandu tidak ditemukan")
         return redirect("posyandu")
     
+
+class MidwifeView(View):
+    def get(self, request, *args, **kwargs):
+        query = request.GET.get("q", "")
+
+        if query:
+            midwives = Midwife.objects.filter(
+                full_name__icontains=query
+            ).order_by("-created_at")
+        else:
+            midwives = Midwife.objects.filter().order_by("-created_at")
+
+        context = {
+            "midwives": midwives
+        }
+        return render(request, "adminapp/midwife.html", context)
+
+class MidwifeInfoView(View):
+    def get(self, request, *args, **kwargs):
+        pk = kwargs.get("pk")
+        midwife = Midwife.objects.filter(id=pk).first()
+        context = {
+            "midwife": midwife
+        }
+        return render(request, "adminapp/midwife_info.html", context)
+    
+    def post(self, request, *args, **kwargs):
+        action = request.POST.get("form-action")
+        match action:
+            case "delete": return self.delete_midwifeassignment(request)
+        # return redirect("midwife_info", pk=midwife_id)
+    
+    def delete_midwifeassignment(self, request):
+        midwifeassignment_id = request.POST.get("pk")
+        midwifeassignment = MidwifeAssignment.objects.filter(id=midwifeassignment_id).first()
+        if midwifeassignment is not None:
+            midwifeassignment.delete()
+            messages.success(request, "Bidan berhasil dihapus")
+        else:
+            messages.error(request, "Bidan tidak ditemukan")
+        return redirect("midwife_info", pk=midwifeassignment.midwife.id)

@@ -99,9 +99,12 @@
 					<!--end::Subheader-->
 					<!--begin::Entry-->
 					<div class="d-flex flex-column-fluid">
-						<!-- begin::Content -->
-						{% block content %}{% endblock %}
-						<!-- end::Content -->
+						<div class="container">
+							{% include 'includes/alerts.html' %}
+							<!-- begin::Content -->
+							{% block content %}{% endblock %}
+							<!-- end::Content -->
+						</div>
 					</div>
 					<!--end::Entry-->
 				</div>

@@ -138,6 +138,13 @@ class Address(models.Model):
     # Foreign Keys
     user = models.OneToOneField(User, on_delete=models.CASCADE)
 
+    def save(self, *args, **kwargs):
+        for field_name in ["province", "city", "subdistrict", "village", "address", "rw", "rt"]:
+            val = getattr(self, field_name, False)
+            if val:
+                setattr(self, field_name, val.upper())
+        super(Address, self).save(*args, **kwargs)
+
 
 class ParentManager(CustomUserManager):
     def get_queryset(self, *args, **kwargs):

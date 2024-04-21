@@ -5,6 +5,7 @@ from base.models import (
     Village,
     Child,
     Posyandu,
+    MidwifeAssignment,
 )
 
 
@@ -14,3 +15,4 @@ class ChildAdmin(admin.ModelAdmin):
 admin.site.register(Village) 
 admin.site.register(Child, ChildAdmin)   
 admin.site.register(Posyandu)
+admin.site.register(MidwifeAssignment)

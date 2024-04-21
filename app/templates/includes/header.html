@@ -3,8 +3,17 @@
     <!--begin::Container-->
     <div class="container-fluid d-flex align-items-stretch justify-content-between">
         <!--begin::Header Menu Wrapper JANGAN DIHAPUS-->
-        <div class="header-menu-wrapper header-menu-wrapper-left" id="kt_header_menu_wrapper">
+        <!--begin::Header Menu-->
+        <div id="kt_header_menu" class="header-menu header-menu-mobile header-menu-layout-default">
+            <!--begin::Header Nav-->
+            <ul class="menu-nav">
+                <li class="menu-item">
+                    <h2 class="menu-title">{{ request.user.full_name }}</h2>
+                </li>
+            </ul>
+            <!--end::Header Nav-->
         </div>
+        <!--end::Header Menu-->
         <!--end::Header Menu Wrapper JANGAN DIHAPUS-->
         <!--begin::Topbar-->
         <div class="topbar">
