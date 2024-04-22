@@ -6,6 +6,7 @@ from base.models import (
     Child,
     Posyandu,
     MidwifeAssignment,
+    PosyanduActivity,
 )
 
 
@@ -16,3 +17,4 @@ admin.site.register(Village)
 admin.site.register(Child, ChildAdmin)   
 admin.site.register(Posyandu)
 admin.site.register(MidwifeAssignment)
+admin.site.register(PosyanduActivity)

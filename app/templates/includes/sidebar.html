@@ -50,6 +50,17 @@
                 </li>
                 <!--end::Menu Item-->
                 <!--begin::Menu Item-->
+                <li class="menu-item {% if request.path == '/posyandu_activities/' %} menu-item-active {% endif %}"
+                    aria-haspopup="true">
+                    <a href="{% url 'posyandu_activities' %}" class="menu-link">
+                        <span class="svg-icon menu-icon">
+                            <i class="fas fa-home text-primary"></i>
+                        </span>
+                        <span class="menu-text">Kegiatan Posyandu</span>
+                    </a>
+                </li>
+                <!--end::Menu Item-->
+                <!--begin::Menu Item-->
                 <li class="menu-item {% if request.path == '/village_list/' %} menu-item-active {% endif %}"
                     aria-haspopup="true">
                     <a href="{% url 'village_list' %}" class="menu-link">
@@ -79,6 +90,28 @@
                             <i class="fas fa-home text-primary"></i>
                         </span>
                         <span class="menu-text">Bidan</span>
+                    </a>
+                </li>
+                <!--end::Menu Item-->
+                <!--begin::Menu Item-->
+                <li class="menu-item {% if request.path == '/parents/' %} menu-item-active {% endif %}"
+                    aria-haspopup="true">
+                    <a href="{% url 'parents' %}" class="menu-link">
+                        <span class="svg-icon menu-icon">
+                            <i class="fas fa-home text-primary"></i>
+                        </span>
+                        <span class="menu-text">Orang Tua</span>
+                    </a>
+                </li>
+                <!--end::Menu Item-->
+                <!--begin::Menu Item-->
+                <li class="menu-item {% if request.path == '/children/' %} menu-item-active {% endif %}"
+                    aria-haspopup="true">
+                    <a href="{% url 'children' %}" class="menu-link">
+                        <span class="svg-icon menu-icon">
+                            <i class="fas fa-home text-primary"></i>
+                        </span>
+                        <span class="menu-text">Anak</span>
                     </a>
                 </li>
                 <!--end::Menu Item-->

@@ -15,6 +15,7 @@ from account.models import (
 )
 
 from base.models import (
+    PosyanduActivity,
     Village,
     Child,
     Posyandu,
@@ -57,10 +58,52 @@ class DashboardView(View):
         children = Child.objects.filter(
             parent__address__subdistrict=request.user.address.subdistrict
         ).count()
+        parents = Parent.objects.filter(
+            address__subdistrict=request.user.address.subdistrict
+        ).count()
+        midwives = Midwife.objects.filter(
+            address__subdistrict=request.user.address.subdistrict
+        ).count()
+        cadres = Cadre.objects.filter(
+            address__subdistrict=request.user.address.subdistrict
+        ).count()
+
         context = {
-            "children": children
+            "children": children,
+            "parents": parents,
+            "midwives": midwives,
+            "cadres": cadres,
         }
         return render(request, "adminapp/dashboard.html", context)
+    
+
+class PosyanduActivitiesView(View):
+    def get(self, request, *args, **kwargs):
+        village_id = request.GET.get("village_id", "")
+        posyandu_id = request.GET.get("posyandu_id", "")
+        
+        if village_id:
+            village = Village.objects.filter(id=village_id).first()
+            posyandu_activities = PosyanduActivity.objects.filter(
+                posyandu__village__puskesmas=request.user,
+                posyandu__village__name=village
+            ).order_by("-created_at")
+
+        if posyandu_id:
+            posyandu = Posyandu.objects.filter(id=posyandu_id).first()
+            posyandu_activities = posyandu_activities.filter(
+                posyandu=posyandu
+            ).order_by("-created_at")
+
+        if not village_id and not posyandu_id:
+            posyandu_activities = PosyanduActivity.objects.filter(
+                posyandu__village__puskesmas=request.user
+            ).order_by("-created_at")
+
+        context = {
+            "posyandu_activities": posyandu_activities
+        }
+        return render(request, "adminapp/posyandu_activities.html", context)
 
     
 class VillageListView(View):
@@ -234,6 +277,7 @@ class MidwifeView(View):
         }
         return render(request, "adminapp/midwife.html", context)
 
+
 class MidwifeInfoView(View):
     def get(self, request, *args, **kwargs):
         pk = kwargs.get("pk")
@@ -284,3 +328,52 @@ class MidwifeAssignmentView(View):
             messages.success(request, "Penugasan berhasil dihapus")
         else:
             messages.error(request, "Penugasan tidak ditemukan")
+
+
+class ChildView(View):
+    def get(self, request, *args, **kwargs):
+        query = request.GET.get("q", "")
+
+        if query:
+            children = Child.objects.filter(
+                parent__address__subdistrict=request.user.address.subdistrict,
+                full_name__icontains=query
+            ).order_by("-created_at")
+        else:
+            children = Child.objects.filter(
+                parent__address__subdistrict=request.user.address.subdistrict
+            ).order_by("-created_at")
+
+        context = {
+            "children": children
+        }
+        return render(request, "adminapp/children.html", context)
+    
+    def post(self, request, *args, **kwargs):
+        action = request.POST.get("form-action")
+        match action:
+            case "add": self.add_child(request)
+            case "edit": self.edit_child(request)
+            case "delete": self.delete_child(request)
+        return redirect("children") 
+    
+
+class ParentView(View):
+    def get(self, request, *args, **kwargs):
+        query = request.GET.get("q", "")
+
+        if query:
+            parents = Parent.objects.filter(
+                address__subdistrict=request.user.address.subdistrict,
+                full_name__icontains=query
+            ).order_by("-created_at")
+        else:
+            parents = Parent.objects.filter(
+                address__subdistrict=request.user.address.subdistrict
+            ).order_by("-created_at")
+
+        context = {
+            "parents": parents
+        }
+        return render(request, "adminapp/parents.html", context)
+

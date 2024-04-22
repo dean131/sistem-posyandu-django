@@ -23,6 +23,7 @@ class Village(models.Model):
         self.name = self.name.upper()
         super().save(*args, **kwargs)
 
+
 class Posyandu(models.Model):
     """
     Meresentasikan sebuah Posyandu.

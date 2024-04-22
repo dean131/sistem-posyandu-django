@@ -8,6 +8,8 @@ urlpatterns = [
     path("login/", views.LoginView.as_view(), name="login"),
     path("logout/", views.LogoutView.as_view(), name="logout"),
 
+    path("posyandu_activities/", views.PosyanduActivitiesView.as_view(), name="posyandu_activities"),
+
     path("village_list/", views.VillageListView.as_view(), name="village_list"),
     path("village_info/<str:pk>/", views.VillageInfoView.as_view(), name="village_info"),
     
@@ -17,4 +19,8 @@ urlpatterns = [
     path("midwife_info/<str:pk>/", views.MidwifeInfoView.as_view(), name="midwife_info"),
 
     path("midwife_assignments/", views.MidwifeAssignmentView.as_view(), name="midwife_assignments"),
+
+    path("parents/" , views.ParentView.as_view(), name="parents"),
+
+    path("children/" , views.ChildView.as_view(), name="children"),
 ]

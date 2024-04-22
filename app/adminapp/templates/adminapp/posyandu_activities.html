@@ -1,0 +1,145 @@
+{% extends 'base.html' %}
+{% block subheader %}
+<div class="subheader py-2 py-lg-4 subheader-solid" id="kt_subheader">
+    <div class="container-fluid d-flex align-items-center justify-content-between flex-wrap flex-sm-nowrap">
+        <!--begin::Info-->
+        <div class="d-flex align-items-center flex-wrap mr-2">
+            <!--begin::Page Title-->
+            <h5 class="text-dark font-weight-bold mt-2 mb-2 mr-5">List Kegiatan Posyandu</h5>
+            <!--end::Page Title-->
+        </div>
+        <!--end::Info-->
+    </div>
+</div>
+{% endblock %}
+{% block content %}
+<h2>{% if request.GET.q %} Hasil untuk "{{request.GET.q}}" {% endif %}</h2>
+<!--begin::Advance Table Widget 8-->
+<div class="card card-custom gutter-b">
+    <!--begin::Header-->
+    <div class="card-header border-0 py-5">
+        <div class="card-toolbar">
+            <div class="row">
+                <label for="villageFilterSelect" class="col-auto col-form-label">Desa</label>
+                <div class="col-auto">
+                    <select class="form-control" id="villageFilterSelect">
+                        <option value="">Semua Desa</option>
+                        {% for village in request.user.village_set.all %}
+                        <option value="{{ village.id }}">{{ village.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-auto">
+                    <button id="filterButton" class="btn btn-primary">Filter</button>
+                </div>
+            </div>
+            </form>
+        </div>
+        <div class="card-toolbar">
+            <div class="input-group">
+                <input id="search-input" type="search" class="form-control" placeholder="Cari Kegiatan Posyandu..." />
+                <div class="input-group-append">
+                    <button class="btn btn-secondary search-button" type="button">Cari</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--end::Header-->
+    <!--begin::Body-->
+    <div class="card-body pt-0 pb-3">
+        <!--begin::Table-->
+        <div class="table-responsive">
+            <table class="table table-head-custom table-head-bg table-vertical-center table-borderless">
+                <thead>
+                    <tr class="bg-gray-100 text-left">
+                        <th hidden>PK</th>
+                        <th>
+                            <span class="text-dark-75">No</span>
+                        </th>
+                        <th class="pl-7">
+                            <span class="text-dark-75">Nama Kegiatan</span>
+                        </th>
+                        <th>
+                            <span class="text-dark-75">Nama Posyandu</span>
+                        </th>
+                        <th>
+                            <span class="text-dark-75">Tanggal</span>
+                        </th>
+                        <th>
+                            <span class="text-dark-75">Aksi</span>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for posyandu_activity in posyandu_activities %}
+                    <tr>
+                        <td hidden>
+                            {{ posyandu_activity.id}}
+                        </td>
+                        <td>
+                            <span class="text-dark-75 font-weight-bolder d-block font-size-lg">
+                                {{ forloop.counter }}
+                            </span>
+                        </td>
+                        <td>
+                            <a href="" class="text-dark-75 text-hover-primary font-size-h5 font-weight-bold">
+                                {{ posyandu_activity.name }}
+                            </a>
+                        </td>
+                        <td>
+                            <span class="text-dark-75 font-weight-bolder d-block font-size-lg">
+                                {{ posyandu_activity.posyandu.name }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="text-dark-75 font-weight-bolder d-block font-size-lg">
+                                {{ posyandu_activity.created_at }}
+                            </span>
+                        </td>
+                        <td class="pr-0 text-center">
+                            <a href="" class="btn btn-icon btn-light btn-hover-info btn-sm mx-3">
+                                <i class="fas fa-info text-hover-primary"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <!--end::Table-->
+    </div>
+    <!--end::Body-->
+</div>
+<!--end::Advance Table Widget 8-->
+{% endblock %}
+
+{% block js_page %}
+<script>
+    const csrf_token = '{{ csrf_token }}'
+
+    $(document).ready(function () {
+        $('#filterButton').click(() => {
+            const villageId = $('#villageFilterSelect').val();
+            window.location.href = `{% url 'posyandu_activities' %}?village_id=${villageId}`;
+        });
+
+        $('.search-button').click(function () {
+            const query = $('input[type="search"]').val();
+            window.location.href = `{% url 'children' %}?q=${query}`;
+        });
+
+        $('#search-input').on('keyup', function (e) {
+            if (e.keyCode === 13) {
+                $('.search-button').click();
+            }
+        });
+
+        // set select filter
+        const villageId = '{{ request.GET.village_id }}';
+        if (villageId) {
+            $('#villageFilterSelect').val(villageId);
+        }
+    });
+
+</script>
+{% endblock %}

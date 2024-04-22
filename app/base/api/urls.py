@@ -2,13 +2,13 @@ from django.urls import path, include
 
 from rest_framework.routers import DefaultRouter
 
+from base.api.views import child
 from base.api.views import (
     village,
     posyandu,
     midwife_assignment,
     cadre_assignment,
     posyandu_activity,
-    child,
     child_measurement,
 )
 
