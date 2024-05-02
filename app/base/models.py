@@ -104,8 +104,8 @@ class Child(models.Model):
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES)
     birth_date = models.DateField()
     birth_order = models.PositiveIntegerField()
-    birth_weight = models.DecimalField(max_digits=5, decimal_places=2)
-    birth_height = models.DecimalField(max_digits=5, decimal_places=2)
+    birth_weight = models.FloatField()
+    birth_height = models.FloatField()
     kia_number = models.CharField(max_length=50, null=True, blank=True)
     imd_number = models.CharField(max_length=50, null=True, blank=True)
     picture = models.ImageField(upload_to="child_pictures/", null=True, blank=True)
@@ -153,32 +153,32 @@ class ChildMeasurement(models.Model):
         ("T", "T")
     ]
 
-    weight = models.DecimalField(max_digits=5, decimal_places=2)
-    height = models.DecimalField(max_digits=5, decimal_places=2)
+    weight = models.FloatField()
+    height = models.FloatField()
     # lingkar kepala
-    head_circumference = models.DecimalField(max_digits=5, decimal_places=2)
+    head_circumference = models.FloatField()
     # usia saat pengukuran dalam tahun, bulan, hari
-    age = models.CharField(max_length=50)
+    age = models.CharField(max_length=50, null=True, blank=True)
     # cara ukur
     measurement_method = models.CharField(max_length=8, choices=MEASUREMENT_METHOD_CHOICES)
     # lingkar lengan atas / lila
-    arm_circumference = models.DecimalField(max_digits=5, decimal_places=2)
+    arm_circumference = models.FloatField()
     # bb/u
     weight_for_age = models.CharField(max_length=255)
     # z score bb/u
-    z_score_weight_for_age = models.DecimalField(max_digits=5, decimal_places=2)
+    z_score_weight_for_age = models.FloatField()
     # tb/u
     height_for_age = models.CharField(max_length=255)
     # z score tb/u
-    z_score_height_for_age = models.DecimalField(max_digits=5, decimal_places=2)
+    z_score_height_for_age = models.FloatField()
     # bb/tb
     weight_for_height = models.CharField(max_length=255)
     # z score bb/tb 
-    z_score_weight_for_height = models.DecimalField(max_digits=5, decimal_places=2)
+    z_score_weight_for_height = models.FloatField()
     # naik berat badan
     weight_gain = models.CharField(max_length=1, choices=WEIGHT_GAIN_CHOICES)
     # pmt diterima (kg)
-    pmt_received = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True)
+    pmt_received = models.FloatField(blank=True, null=True)
     # jumlah vitamin A
     vitamin_a_count = models.PositiveIntegerField(blank=True, null=True)
     # kpsp
@@ -238,3 +238,39 @@ class ParentPosyandu(models.Model):
 
     def __str__(self):
         return f"{self.parent.full_name} di {self.posyandu.name}"
+
+
+class LengthForAgeBoys(models.Model):
+    """
+    Merepresentasikan data panjang badan untuk anak laki-laki 
+    untuk umur 0-24 bulan.
+    """
+    age_months = models.PositiveSmallIntegerField(verbose_name="Umur (bulan)", unique=True)
+    sd_minus_3 = models.FloatField(verbose_name="-3 SD")
+    sd_minus_2 = models.FloatField(verbose_name="-2 SD")
+    sd_minus_1 = models.FloatField(verbose_name="-1 SD")
+    median = models.FloatField(verbose_name="Median")
+    sd_plus_1 = models.FloatField(verbose_name="+1 SD")
+    sd_plus_2 = models.FloatField(verbose_name="+2 SD")
+    sd_plus_3 = models.FloatField(verbose_name="+3 SD")
+
+    def __str__(self):
+        return f"Umur: {self.age_months} bulan"
+    
+
+class LengthForAgeGirls(models.Model):
+    """
+    Merepresentasikan data panjang badan untuk anak perempuan 
+    untuk umur 0-24 bulan.
+    """
+    age_months = models.PositiveSmallIntegerField(verbose_name="Umur (bulan)", unique=True)
+    sd_minus_3 = models.FloatField(verbose_name="-3 SD")
+    sd_minus_2 = models.FloatField(verbose_name="-2 SD")
+    sd_minus_1 = models.FloatField(verbose_name="-1 SD")
+    median = models.FloatField(verbose_name="Median")
+    sd_plus_1 = models.FloatField(verbose_name="+1 SD")
+    sd_plus_2 = models.FloatField(verbose_name="+2 SD")
+    sd_plus_3 = models.FloatField(verbose_name="+3 SD")
+
+    def __str__(self):
+        return f"Umur: {self.age_months} bulan"

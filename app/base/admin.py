@@ -8,6 +8,9 @@ from base.models import (
     MidwifeAssignment,
     PosyanduActivity,
     ParentPosyandu,
+    ChildMeasurement,
+    LengthForAgeBoys,
+    LengthForAgeGirls,
 )
 
 
@@ -23,3 +26,6 @@ admin.site.register(Posyandu, PosyanduAdmin)
 admin.site.register(MidwifeAssignment)
 admin.site.register(PosyanduActivity)
 admin.site.register(ParentPosyandu)
+admin.site.register(ChildMeasurement)
+admin.site.register(LengthForAgeBoys)
+admin.site.register(LengthForAgeGirls)

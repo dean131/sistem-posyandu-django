@@ -23,4 +23,7 @@ urlpatterns = [
     path("parents/" , views.ParentView.as_view(), name="parents"),
 
     path("children/" , views.ChildView.as_view(), name="children"),
+
+    path("length_for_age_boys/", views.LengthForAgeBoysView.as_view(), name="length_for_age_boys"),
+    path("length_for_age_girls/", views.LengthForAgeGirlsView.as_view(), name="length_for_age_girls"),
 ]
