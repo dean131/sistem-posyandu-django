@@ -11,6 +11,8 @@ from base.models import (
     ChildMeasurement,
     LengthForAgeBoys,
     LengthForAgeGirls,
+    HeightForAgeBoys,
+    HeightForAgeGirls,
 )
 
 
@@ -29,3 +31,5 @@ admin.site.register(ParentPosyandu)
 admin.site.register(ChildMeasurement)
 admin.site.register(LengthForAgeBoys)
 admin.site.register(LengthForAgeGirls)
+admin.site.register(HeightForAgeBoys)
+admin.site.register(HeightForAgeGirls)

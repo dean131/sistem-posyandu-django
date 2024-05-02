@@ -242,7 +242,7 @@ class ParentPosyandu(models.Model):
 
 class LengthForAgeBoys(models.Model):
     """
-    Merepresentasikan data panjang badan untuk anak laki-laki 
+    Merepresentasikan data standard panjang badan untuk anak laki-laki 
     untuk umur 0-24 bulan.
     """
     age_months = models.PositiveSmallIntegerField(verbose_name="Umur (bulan)", unique=True)
@@ -260,7 +260,43 @@ class LengthForAgeBoys(models.Model):
 
 class LengthForAgeGirls(models.Model):
     """
-    Merepresentasikan data panjang badan untuk anak perempuan 
+    Merepresentasikan data standard panjang badan untuk anak perempuan 
+    untuk umur 0-24 bulan.
+    """
+    age_months = models.PositiveSmallIntegerField(verbose_name="Umur (bulan)", unique=True)
+    sd_minus_3 = models.FloatField(verbose_name="-3 SD")
+    sd_minus_2 = models.FloatField(verbose_name="-2 SD")
+    sd_minus_1 = models.FloatField(verbose_name="-1 SD")
+    median = models.FloatField(verbose_name="Median")
+    sd_plus_1 = models.FloatField(verbose_name="+1 SD")
+    sd_plus_2 = models.FloatField(verbose_name="+2 SD")
+    sd_plus_3 = models.FloatField(verbose_name="+3 SD")
+
+    def __str__(self):
+        return f"Umur: {self.age_months} bulan"
+    
+
+class HeightForAgeBoys(models.Model):
+    """
+    Merepresentasikan data standard tinggi badan untuk anak laki-laki 
+    untuk umur 0-24 bulan.
+    """
+    age_months = models.PositiveSmallIntegerField(verbose_name="Umur (bulan)", unique=True)
+    sd_minus_3 = models.FloatField(verbose_name="-3 SD")
+    sd_minus_2 = models.FloatField(verbose_name="-2 SD")
+    sd_minus_1 = models.FloatField(verbose_name="-1 SD")
+    median = models.FloatField(verbose_name="Median")
+    sd_plus_1 = models.FloatField(verbose_name="+1 SD")
+    sd_plus_2 = models.FloatField(verbose_name="+2 SD")
+    sd_plus_3 = models.FloatField(verbose_name="+3 SD")
+
+    def __str__(self):
+        return f"Umur: {self.age_months} bulan"
+    
+
+class HeightForAgeGirls(models.Model):
+    """
+    Merepresentasikan data standard tinggi badan untuk anak perempuan 
     untuk umur 0-24 bulan.
     """
     age_months = models.PositiveSmallIntegerField(verbose_name="Umur (bulan)", unique=True)
