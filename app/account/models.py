@@ -1,8 +1,10 @@
 import string
 import random
+import httpx
 
 from uuid import uuid4
 
+from django.conf import settings
 from django.utils import timezone
 from django.db import models
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
@@ -116,15 +118,15 @@ class OTP(models.Model):
     
     def send_otp_wa(self):
         otp_code = self.generate_otp()
-        # with httpx.Client() as client:
-        #     client.post(
-        #         url='https://api.fonnte.com/send', 
-        #         headers={'Authorization': settings.FONNTE_API_KEY},
-        #         json={
-        #             'target': self.user.whatsapp, 
-        #             'message': f'Kode OTP kamu: {otp_code}'
-        #         }
-        #     )
+        with httpx.Client() as client:
+            client.post(
+                url='https://api.fonnte.com/send', 
+                headers={'Authorization': settings.FONNTE_API_KEY},
+                json={
+                    'target': self.user.whatsapp, 
+                    'message': f'Kode OTP kamu: {otp_code}'
+                }
+            )
     
 
 class Address(models.Model):

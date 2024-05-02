@@ -9,7 +9,7 @@ class CustomResponse:
     def list(message, data):
         return Response(
             {
-                'message': _(message),
+                'detail': _(message),
                 'results': data,
             },
             status=status.HTTP_200_OK,
@@ -18,7 +18,7 @@ class CustomResponse:
     def retrieve(message, data):
         return Response(
             {
-                'message': _(message),
+                'detail': _(message),
                 'results': data,
             },
             status=status.HTTP_200_OK,
@@ -27,7 +27,7 @@ class CustomResponse:
     def created(message, data, headers=None):
         return Response(
             {
-                'message': _(message),
+                'detail': _(message),
                 'results': data,
             },
             status=status.HTTP_201_CREATED,
@@ -37,7 +37,7 @@ class CustomResponse:
     def updated(message, data):
         return Response(
             {
-                'message': _(message),
+                'detail': _(message),
                 'results': data,
             },
             status=status.HTTP_200_OK,
@@ -46,7 +46,7 @@ class CustomResponse:
     def deleted(message):
         return Response(
             {
-                'message': _(message),
+                'detail': _(message),
             },
             status=status.HTTP_200_OK,
         )
@@ -54,7 +54,7 @@ class CustomResponse:
     def ok(message):
         return Response(
             {
-                'message': _(message),
+                'detail': _(message),
             },
             status=status.HTTP_200_OK,
         )
@@ -62,7 +62,7 @@ class CustomResponse:
     def bad_request(message):
         return Response(
             {
-                'message': _(message),
+                'detail': _(message),
             },
             status=status.HTTP_400_BAD_REQUEST,
         )
@@ -70,7 +70,7 @@ class CustomResponse:
     def not_found(message):
         return Response(
             {
-                'message': _(message),
+                'detail': _(message),
             },
             status=status.HTTP_404_NOT_FOUND,
         )
@@ -78,7 +78,7 @@ class CustomResponse:
     def method_not_allowed(message):
         return Response(
             {
-                'message': _(message),
+                'detail': _(message),
             },
             status=status.HTTP_405_METHOD_NOT_ALLOWED,
         )
@@ -87,7 +87,7 @@ class CustomResponse:
         errors = errors.items()
         return Response(
             {
-                'message': f"{[val for key, val in errors][0][0]} ({[key for key, val in errors][0]})",
+                'detail': f"{[val for key, val in errors][0][0]} ({[key for key, val in errors][0]})",
             },
             status=status.HTTP_400_BAD_REQUEST,
         )

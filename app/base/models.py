@@ -229,3 +229,12 @@ class ChildMeasurement(models.Model):
         return f"{years} tahun, {months} bulan, {days} hari"
 
 
+class ParentPosyandu(models.Model):
+    """
+    Merepresentasikan seorang Orang Tua yang terdaftar di Posyandu.
+    """
+    parent = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    posyandu = models.ForeignKey(Posyandu, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{self.parent.full_name} di {self.posyandu.name}"

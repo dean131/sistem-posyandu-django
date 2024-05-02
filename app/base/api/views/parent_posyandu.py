@@ -1,45 +1,42 @@
-from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
-from base.api.serializers.child import ChildSerializer
+from base.api.serializers.parent_posyandu import ParentPosyanduSerializer
 
 from posyanduapp.utils.custom_response import CustomResponse
 
-from base.models import Child
+from base.models import ParentPosyandu
 
 
-class ChildViewSet(ModelViewSet):
-    serializer_class = ChildSerializer
-    queryset = Child.objects.all()
-
-    def list(self, request, *args, **kwargs):
-        queryset = self.filter_queryset(self.get_queryset())
-
-        # Mendapatkan data dari queryset
-
-
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
-
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
+class ParentPosyanduViewSet(ModelViewSet):
+    serializer_class = ParentPosyanduSerializer
+    queryset = ParentPosyandu.objects.all()
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
         serializer = self.get_serializer(instance)
         return CustomResponse.retrieve(
-            "Child berhasil ditemukan",
+            "ParentPosyandu berhasil ditemukan",
             serializer.data
         )
 
     def create(self, request, *args, **kwargs):
+        parent = request.data.get('parent')
+        posyandu = request.data.get('posyandu')
+
+        # Cek apakah parent sudah ada di posyandu tersebut
+        if ParentPosyandu.objects.filter(parent=parent, posyandu=posyandu).exists():
+            return CustomResponse.bad_request("ParentPosyandu sudah ada")
+
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             self.perform_create(serializer)
-            return CustomResponse.ok("Child berhasil ditambahkan")
+            return CustomResponse.ok("ParentPosyandu berhasil ditambahkan")
         return CustomResponse.serializers_erros(serializer.errors)
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.perform_destroy(instance)
+        return CustomResponse.ok("ParentPosyandu berhasil dihapus")
     
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
@@ -52,12 +49,6 @@ class ChildViewSet(ModelViewSet):
                 # If 'prefetch_related' has been applied to a queryset, we need to
                 # forcibly invalidate the prefetch cache on the instance.
                 instance._prefetched_objects_cache = {}
-            
-            return CustomResponse.ok("Child berhasil diubah")
+
+            return CustomResponse.ok("ParentPosyandu berhasil diubah")
         return CustomResponse.serializers_erros(serializer.errors)
-    
-    def destroy(self, request, *args, **kwargs):
-        instance = self.get_object()
-        self.perform_destroy(instance)
-        return CustomResponse.ok("Child berhasil dihapus")
-    
