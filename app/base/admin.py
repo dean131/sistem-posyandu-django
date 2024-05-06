@@ -27,11 +27,14 @@ class PosyanduAdmin(admin.ModelAdmin):
 class ChildMeasurementAdmin(admin.ModelAdmin):
     list_display = ("child", "age", "age_in_month", "weight", "height", "height_for_age", "z_score_height_for_age", "weight_for_age", "z_score_weight_for_age")
 
+class PosyanduActivityAdmin(admin.ModelAdmin):
+    list_display = ('id', '__str__')
+
 admin.site.register(Village) 
 admin.site.register(Child, ChildAdmin)   
 admin.site.register(Posyandu, PosyanduAdmin)
 admin.site.register(MidwifeAssignment)
-admin.site.register(PosyanduActivity)
+admin.site.register(PosyanduActivity, PosyanduActivityAdmin)
 admin.site.register(ParentPosyandu)
 admin.site.register(ChildMeasurement, ChildMeasurementAdmin)
 admin.site.register(LengthForAgeBoys)

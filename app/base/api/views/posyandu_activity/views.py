@@ -3,7 +3,7 @@ from django.utils import timezone
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.decorators import action
 
-from base.api.views.posyandu_activity.serializers import PosyanduActivitySerializer
+from base.api.views.posyandu_activity.serializers import ChildSerializer, PosyanduActivitySerializer
 
 from posyanduapp.utils.custom_response import CustomResponse
 
@@ -75,5 +75,25 @@ class PosyanduActivityViewSet(ModelViewSet):
 
         serializer = self.get_serializer(queryset, many=True)
         return CustomResponse.list(serializer.data)
-
     
+    @action(detail=True, methods=['get'])
+    def children(self, request, *args, **kwargs):
+        instance = self.get_object()
+
+        # get data anak yang sudah di ukur
+        child_measured_ids = instance.childmeasurement_set.all().values_list('child', flat=True)
+
+        # Get data anak berdasarkan PosyanduActivity
+        children = []
+        parent_posyandus = instance.posyandu.parentposyandu_set.all()
+        for parent_posyandu in parent_posyandus:
+            children.extend(parent_posyandu.parent.child_set.all())
+
+        page = self.paginate_queryset(children)
+        if page is not None:
+            serializer = ChildSerializer(page, many=True, context={'child_measured_ids': child_measured_ids})
+            return self.get_paginated_response(serializer.data)
+
+        serializer = ChildSerializer(children, many=True, context={'child_measured_ids': child_measured_ids})
+        return CustomResponse.list(serializer.data)
+        
