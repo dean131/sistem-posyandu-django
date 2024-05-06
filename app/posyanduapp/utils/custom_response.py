@@ -6,21 +6,23 @@ from rest_framework import status
 
 class CustomResponse:
 
-    def list(message, data):
+    def list(data, message="success"):
         return Response(
-            {
-                'detail': _(message),
-                'results': data,
-            },
+            # {
+            #     'detail': _(message),
+            #     'results': data,
+            # },
+            data=data,
             status=status.HTTP_200_OK,
         )
     
     def retrieve(message, data):
         return Response(
-            {
-                'detail': _(message),
-                'results': data,
-            },
+            # {
+            #     'detail': _(message),
+            #     'results': data,
+            # },
+            data=data,
             status=status.HTTP_200_OK,
         )
 

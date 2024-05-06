@@ -118,15 +118,15 @@ class OTP(models.Model):
     
     def send_otp_wa(self):
         otp_code = self.generate_otp()
-        with httpx.Client() as client:
-            client.post(
-                url='https://api.fonnte.com/send', 
-                headers={'Authorization': settings.FONNTE_API_KEY},
-                json={
-                    'target': self.user.whatsapp, 
-                    'message': f'Kode OTP kamu: {otp_code}'
-                }
-            )
+        # with httpx.Client() as client:
+        #     client.post(
+        #         url='https://api.fonnte.com/send', 
+        #         headers={'Authorization': settings.FONNTE_API_KEY},
+        #         json={
+        #             'target': self.user.whatsapp, 
+        #             'message': f'Kode OTP kamu: {otp_code}'
+        #         }
+        #     )
     
 
 class Address(models.Model):
@@ -178,6 +178,10 @@ class Parent(User):
     @property
     def profile(self):
         return self.parentprofile
+    
+    @property
+    def children(self):
+        return self.child_set.all()
 
 # Bidan
 class Midwife(User):

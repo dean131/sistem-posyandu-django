@@ -25,7 +25,7 @@ class PosyanduAdmin(admin.ModelAdmin):
     list_display = ('name', 'id', 'village', 'address')
 
 class ChildMeasurementAdmin(admin.ModelAdmin):
-    list_display = ("child", "age", "age_in_month", "weight", "height", "height_for_age", "z_score_height_for_age")
+    list_display = ("child", "age", "age_in_month", "weight", "height", "height_for_age", "z_score_height_for_age", "weight_for_age", "z_score_weight_for_age")
 
 admin.site.register(Village) 
 admin.site.register(Child, ChildAdmin)   

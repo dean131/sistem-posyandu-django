@@ -23,9 +23,9 @@ class CadreAssignmentViewSet(ModelViewSet):
         cadre = request.data.get('cadre')
         posyandu = request.data.get('posyandu')
 
-        # Cek apakah cadre sudah ada di desa tersebut
+        # Cek apakah cadre sudah ada di posyandu tersebut
         if CadreAssignment.objects.filter(cadre=cadre, posyandu=posyandu).exists():
-            return CustomResponse.bad_request("CadreAssignment sudah ada")
+            return CustomResponse.bad_request("Kader sudah ditambahkan di posyandu lain")
 
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():

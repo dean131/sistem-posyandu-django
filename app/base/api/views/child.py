@@ -5,7 +5,7 @@ from base.api.serializers.child import ChildSerializer
 
 from posyanduapp.utils.custom_response import CustomResponse
 
-from base.models import Child
+from base.models import Child, PosyanduActivity
 
 
 class ChildViewSet(ModelViewSet):
@@ -16,7 +16,10 @@ class ChildViewSet(ModelViewSet):
         queryset = self.filter_queryset(self.get_queryset())
 
         # Mendapatkan data dari queryset
-
+        posyandu_activity_id = request.query_params.get('posyandu_activity_id', None)
+        if posyandu_activity is not None:
+            posyandu_activity = PosyanduActivity.objects.filter(id=posyandu_activity_id).first()
+            queryset = queryset.filter(parent__parentposyandu__posyandu=posyandu_activity.posyandu)
 
         page = self.paginate_queryset(queryset)
         if page is not None:

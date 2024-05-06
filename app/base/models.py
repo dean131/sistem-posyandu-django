@@ -8,8 +8,9 @@ import io
 
 from django.db import models
 from django.conf import settings
-
 from django.core.files.images import ImageFile
+
+from account.models import Cadre, Midwife, Parent
 
 
 class Village(models.Model):
@@ -58,7 +59,7 @@ class MidwifeAssignment(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     # Foreign Keys
-    midwife = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    midwife = models.ForeignKey(Midwife, on_delete=models.CASCADE)
     village = models.ForeignKey(Village, on_delete=models.CASCADE)
 
     def __str__(self):
@@ -73,7 +74,7 @@ class CadreAssignment(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     # Foreign Keys
-    cadre = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    cadre = models.ForeignKey(Cadre, on_delete=models.CASCADE)
     posyandu = models.ForeignKey(Posyandu, on_delete=models.CASCADE)
 
     def __str__(self):
@@ -85,8 +86,9 @@ class PosyanduActivity(models.Model):
     Merepresentasikan sebuah Kegiatan yang dilakukan di Posyandu.
     """
 
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255, default="Kegiatan Posyandu")
     description = models.TextField(blank=True, null=True)
+    date = models.DateField(null=True)
     # Time Fields
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -94,7 +96,7 @@ class PosyanduActivity(models.Model):
     posyandu = models.ForeignKey(Posyandu, on_delete=models.CASCADE)
 
     def __str__(self):
-        return self.name
+        return f"{self.name} di {self.posyandu.name}"
     
 
 class Child(models.Model):
@@ -121,7 +123,7 @@ class Child(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     # Foreign Keys
-    parent = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    parent = models.ForeignKey(Parent, on_delete=models.CASCADE)
 
 
     def __str__(self):
@@ -165,13 +167,16 @@ class Child(models.Model):
             months += 12
 
         return years * 12 + months
+    
+    # @property
+    # def is_measured(self):
 
 
 class ParentPosyandu(models.Model):
     """
     Merepresentasikan seorang Orang Tua yang terdaftar di Posyandu.
     """
-    parent = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    parent = models.ForeignKey(Parent, on_delete=models.CASCADE)
     posyandu = models.ForeignKey(Posyandu, on_delete=models.CASCADE)
 
     def __str__(self):
@@ -362,7 +367,8 @@ class GrowthChart(models.Model):
     """
     legth_for_age_chart = models.ImageField(upload_to="growth_charts/", null=True, blank=True)
     height_for_age_chart = models.ImageField(upload_to="growth_charts/", null=True, blank=True)
-    weight_for_age_chart = models.ImageField(upload_to="growth_charts/", null=True, blank=True)
+    weight_for_age_chart_0_24 = models.ImageField(upload_to="growth_charts/", null=True, blank=True)
+    weight_for_age_chart_24_60 = models.ImageField(upload_to="growth_charts/", null=True, blank=True)
     weight_for_height_chart = models.ImageField(upload_to="growth_charts/", null=True, blank=True)
     # Time Fields
     created_at = models.DateTimeField(auto_now_add=True, null=True)
@@ -436,14 +442,15 @@ class ChildMeasurement(models.Model):
     def save(self, *args, **kwargs):
         if not self.id:
             self.set_ages()
-        self.calculate_length_for_age()
+        self.calculate_length_and_height_for_age()
+        self.calculate_weight_for_age()
         super().save(*args, **kwargs)
 
     def set_ages(self):
         self.age = self.child.current_age
         self.age_in_month = self.child.curent_age_in_months
 
-    def calculate_length_for_age(self):
+    def calculate_length_and_height_for_age(self):
         def get_queryset_length_for_age(gender, child_age):
             if gender == "M":
                 if child_age < 24:
@@ -458,7 +465,6 @@ class ChildMeasurement(models.Model):
             return queryset
         
         def determine_sd_difference_length_for_age(sd):
-            sd_difference = None
             height_median_difference = self.height - sd.median
             if height_median_difference < 0:
                 sd_difference = sd.median - sd.sd_minus_1
@@ -466,20 +472,21 @@ class ChildMeasurement(models.Model):
                 sd_difference = sd.sd_plus_1 - sd.median
             return sd_difference
         
+        # get queryset
         child_age = self.age_in_month
         gender = self.child.gender
         queryset = get_queryset_length_for_age(gender, child_age)
-
+        # get standard data
         sd = queryset.filter(age_months=child_age).first()
         height = self.height
         median = sd.median
         height_median_difference = height - median
         sd_difference = determine_sd_difference_length_for_age(sd=sd)
-
+        # calculate z score
         z_score = height_median_difference / sd_difference
-
+        # determine height for age z score
         self.z_score_height_for_age = z_score
-
+        # determine height for age category
         if (z_score < -3):
             self.height_for_age = "Sangat Pendek"
         elif (z_score >= -3) and (z_score < -2):    
@@ -509,6 +516,9 @@ class ChildMeasurement(models.Model):
             pos_2 = np.append(pos_2, row.sd_plus_2)
             pos_3 = np.append(pos_3, row.sd_plus_3)
 
+        # mengatur ukuran grafik
+        plt.figure(figsize=(10, 5))
+
         plt.plot(age.astype(int), min_3.astype(float), label='-3 SD')
         plt.plot(age.astype(int), min_2.astype(float), label='-2 SD')
         # plt.plot(age.astype(int), min_1.astype(float), label='-1 SD')
@@ -524,6 +534,15 @@ class ChildMeasurement(models.Model):
         plt.grid()
         plt.legend()
 
+        # # step ticks for x axis
+        # min_age = int(age.min())
+        # max_age = int(age.max()+1)
+        # plt.xticks(range(min_age, max_age))
+
+        # # step ticks for y axis
+        # min_height = int(min_3.min())
+        # max_height = int(pos_3.max()+1)
+        # plt.yticks(range(min_height, max_height, 5))
 
         # jika anak berumur < 24 bulan maka simpan grafik panjang badan
         # jika anak berumur >= 24 bulan maka simpan grafik tinggi badan
@@ -616,3 +635,162 @@ class ChildMeasurement(models.Model):
             self.child.growthchart.height_for_age_chart.save(f"{self.child.id}_height_for_age_chart.png", content_file)
             plt.close() 
             figure.close()
+
+
+    def calculate_weight_for_age(self):
+        def get_queryset_weight_for_age(gender, child_age):
+            if gender == "M":
+                if child_age < 24:
+                    queryset = WeightForAgeBoys.objects.filter(age_months__lt=24)
+                else:
+                    queryset = WeightForAgeBoys.objects.filter(age_months__gte=24)
+            else:
+                if child_age < 24:
+                    queryset = WeightForAgeGirls.objects.filter(age_months__lt=24)
+                else:
+                    queryset = WeightForAgeGirls.objects.filter(age_months__gte=24)
+            return queryset
+        
+        def determine_sd_difference_weight_for_age(sd):
+            weight_median_difference = self.weight - sd.median
+            if weight_median_difference < 0:
+                sd_difference = sd.median - sd.sd_minus_1
+            else:
+                sd_difference = sd.sd_plus_1 - sd.median
+            return sd_difference
+
+        # get queryset
+        gender = self.child.gender
+        child_age = self.age_in_month
+        queryset = get_queryset_weight_for_age(gender, child_age)
+        # get standard data
+        weight = self.weight
+        child_age = self.age_in_month
+        sd = queryset.filter(age_months=child_age).first()
+        median = sd.median
+        weight_median_difference = weight - median
+        sd_difference = determine_sd_difference_weight_for_age(sd=sd)
+        # calculate z score
+        z_score = weight_median_difference / sd_difference
+        # determine weight for age z score
+        self.z_score_weight_for_age = z_score
+        # determine weight for age category
+        if (z_score < -3):
+            self.weight_for_age = "Berat badan sangat kurang"
+        elif (z_score >= -3) and (z_score < -2):    
+            self.weight_for_age = "Berat badan kurang"
+        elif (z_score >= -2) and (z_score <= 1):
+            self.weight_for_age = "Berat badan normal"
+        else:
+            self.weight_for_age = "Resiko berat badan lebih"
+
+        # Create the chart
+        age = np.array([])
+        min_3 = np.array([])
+        min_2 = np.array([])
+        min_1 = np.array([])
+        median = np.array([])
+        pos_1 = np.array([])
+        pos_2 = np.array([])
+        pos_3 = np.array([])
+
+        for row in queryset:
+            age = np.append(age, row.age_months)
+            min_3 = np.append(min_3, row.sd_minus_3)
+            min_2 = np.append(min_2, row.sd_minus_2)
+            min_1 = np.append(min_1, row.sd_minus_1)
+            median = np.append(median, row.median)
+            pos_1 = np.append(pos_1, row.sd_plus_1)
+            pos_2 = np.append(pos_2, row.sd_plus_2)
+            pos_3 = np.append(pos_3, row.sd_plus_3)
+
+        # mengatur ukuran grafik
+        plt.figure(figsize=(10, 5))
+
+        plt.plot(age.astype(int), min_3.astype(float), label='-3 SD')
+        plt.plot(age.astype(int), min_2.astype(float), label='-2 SD')
+        # plt.plot(age.astype(int), min_1.astype(float), label='-1 SD')
+        plt.plot(age.astype(int), median.astype(float), label='Median')
+        # plt.plot(age.astype(int), pos_1.astype(float), label='+1 SD')
+        plt.plot(age.astype(int), pos_2.astype(float), label='+2 SD')
+        plt.plot(age.astype(int), pos_3.astype(float), label='+3 SD')
+
+        # Menambah keterangan ke Grafik
+        plt.title(sd.title)
+        plt.ylabel(sd.ylabel)
+        plt.xlabel(sd.xlabel)   
+        plt.grid()
+        plt.legend()
+
+        if self.age_in_month < 24:
+            # get child measurements history
+            measurements = ChildMeasurement.objects.filter(
+                child=self.child,
+                age_in_month__lte=24
+            ).order_by('created_at')
+        else:
+            # get child measurements history
+            measurements = ChildMeasurement.objects.filter(
+                child=self.child,
+                age_in_month__gte=24
+            ).order_by('created_at')
+
+        measure_weight_for_age_history = []
+        measure_age_history = []
+
+        for measurement in measurements:
+            # untuk menghindari duplikat data pada grafik
+            if measurement.id == self.id: # bernilai true jika measurement sudah disimpan di database
+                measure_weight_for_age_history.append(self.weight)
+                measure_age_history.append(self.age_in_month)
+                continue
+            measure_weight_for_age_history.append(measurement.weight)
+            measure_age_history.append(measurement.age_in_month)
+        # menambah titik kordinat pertumbuhan ketika data belum disimpan di database
+        if not self.id:
+            measure_weight_for_age_history.append(self.weight)
+            measure_age_history.append(self.age_in_month)
+        
+        # Tambahkan titik koordinat pertumbuhan anak
+        plt.scatter(measure_age_history, measure_weight_for_age_history, color='red', label='Pertumbuhan Anak')
+        # Hubungkan titik koordinat dengan garis
+        plt.plot(measure_age_history, measure_weight_for_age_history, color='red', linestyle='dashed')
+
+        # # step ticks for x axis
+        # min_age = int(age.min())
+        # max_age = int(age.max()+1)
+        # plt.xticks(range(min_age, max_age))
+
+        # # step ticks for y axis
+        # min_weight = int(min_3.min())
+        # max_weight = int(pos_3.max()+1)
+        # plt.yticks(range(min_weight, max_weight))
+
+        if self.age_in_month < 24:
+            # Save the figure
+            figure = io.BytesIO()
+            plt.savefig(figure, format='png')
+            content_file = ImageFile(figure)
+
+            # delete old image
+            if self.child.growthchart.weight_for_age_chart_0_24:
+                self.child.growthchart.weight_for_age_chart_0_24.delete()
+            # save new image
+            self.child.growthchart.weight_for_age_chart_0_24.save(f"{self.child.id}_weight_for_age_chart_0_24.png", content_file)
+            plt.close()
+            figure.close()
+        else:
+            # Save the figure
+            figure = io.BytesIO()
+            plt.savefig(figure, format='png')
+            content_file = ImageFile(figure)
+
+            # delete old image
+            if self.child.growthchart.weight_for_age_chart_24_60:
+                self.child.growthchart.weight_for_age_chart_24_60.delete()
+            # save new image
+            self.child.growthchart.weight_for_age_chart_24_60.save(f"{self.child.id}_weight_for_age_chart_24_60.png", content_file)
+            plt.close()
+            figure.close()  
+
+        
