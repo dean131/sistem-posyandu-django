@@ -24,4 +24,6 @@ class ChildSerializer(serializers.ModelSerializer):
             return None
         child_measured_ids = self.context['child_measured_ids']
         for child_id in child_measured_ids:
-            return obj.id == child_id
+            if obj.id == child_id:
+                return True
+        return False
