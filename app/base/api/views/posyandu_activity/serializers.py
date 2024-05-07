@@ -14,6 +14,7 @@ class PosyanduActivitySerializer(serializers.ModelSerializer):
 
 class ChildSerializer(serializers.ModelSerializer):
     is_measured = serializers.SerializerMethodField()
+    parent_name = serializers.SerializerMethodField()
     
     class Meta:
         model = Child
@@ -27,3 +28,6 @@ class ChildSerializer(serializers.ModelSerializer):
             if obj.id == child_id:
                 return True
         return False
+    
+    def get_parent_name(self, obj):
+        return obj.parent.full_name

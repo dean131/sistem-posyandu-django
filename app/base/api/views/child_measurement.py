@@ -20,6 +20,23 @@ class ChildMeasurementViewSet(ModelViewSet):
         )
 
     def create(self, request, *args, **kwargs):
+        child_id = request.data.get('child')
+        posyandu_activity_id = request.data.get('posyandu_activity')
+
+        # Cek apakah child sudah diukur
+        posyandu_activity = ChildMeasurement.objects.filter(
+            child=child_id,
+            posyandu_activity=posyandu_activity_id
+        )
+
+        # jika sudah diukur, maka update data
+        if posyandu_activity.exists():
+            serializer = self.get_serializer(posyandu_activity.first(), data=request.data)
+            if serializer.is_valid():
+                self.perform_update(serializer)
+                return CustomResponse.ok("ChildMeasurement berhasil diubah")
+            return CustomResponse.serializers_erros(serializer.errors)
+
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             self.perform_create(serializer)

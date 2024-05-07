@@ -148,10 +148,6 @@ class Child(models.Model):
         return f"{years} tahun, {months} bulan, {int(days)} hari"
     
     @property
-    def parent_name(self):
-        return self.parent.full_name
-    
-    @property
     def curent_age_in_months(self):
         """
         Menghitung usia anak dalam bulan.
