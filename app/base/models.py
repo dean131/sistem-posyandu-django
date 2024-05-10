@@ -168,8 +168,9 @@ class Child(models.Model):
 
         return years * 12 + months
     
-    # @property
-    # def is_measured(self):
+    @property
+    def growthchart(self):
+        return self.growthchart_set.all()
 
 
 class ParentPosyandu(models.Model):
@@ -528,9 +529,9 @@ class ChildMeasurement(models.Model):
         plt.plot(age.astype(int), pos_3.astype(float), label='+3 SD')
         
         # Menambah keterangan ke Grafik
-        plt.title(sd.title)
-        plt.ylabel(sd.ylabel)
-        plt.xlabel(sd.xlabel)   
+        # plt.title(sd.title)
+        plt.ylabel("Panjang Badan (cm)")
+        plt.xlabel("Umur (bulan)")   
         plt.grid()
         plt.legend()
 
@@ -716,9 +717,10 @@ class ChildMeasurement(models.Model):
         plt.plot(age.astype(int), pos_3.astype(float), label='+3 SD')
 
         # Menambah keterangan ke Grafik
-        plt.title(sd.title)
-        plt.ylabel(sd.ylabel)
-        plt.xlabel(sd.xlabel)   
+        # title = "Berat BB/U (0-24)" if self.age_in_month < 24 else "Berat BB/U (24-60)"
+        # plt.title(title)
+        plt.ylabel("Berat Badan (Kg)")
+        plt.xlabel("Umur (bulan)")   
         plt.grid()
         plt.legend()
 
@@ -766,6 +768,7 @@ class ChildMeasurement(models.Model):
         # max_weight = int(pos_3.max()+1)
         # plt.yticks(range(min_weight, max_weight))
 
+        # if child age < 24 months save the chart to weight_for_age_chart_0_24
         if self.age_in_month < 24:
             # Save the figure
             figure = io.BytesIO()

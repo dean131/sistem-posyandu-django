@@ -1,19 +1,39 @@
+"""
+Child Views
+"""
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
+from rest_framework.decorators import action
 
-from base.api.serializers.child import ChildSerializer
+from base.api.views.child.serializers import ChildInfoSerializer, ChildSerializer
 
 from posyanduapp.utils.custom_response import CustomResponse
 
-from base.models import Child, PosyanduActivity
+from base.models import Child
 
 
 class ChildViewSet(ModelViewSet):
     serializer_class = ChildSerializer
     queryset = Child.objects.all()
 
+    def get_serializer_class(self):
+        if self.action == "info":
+            return ChildInfoSerializer
+        return super().get_serializer_class()
+
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
+
+        # Get child berdasarkan role user
+        if request.user.role == 'PARENT':
+            queryset = self.queryset.filter(parent=request.user)
+        else:
+            if request.user.role == 'CADRE':
+                posyandus = request.user.cadreassignment_set.all().values('posyandu')
+                print(posyandus)
+            elif request.user.role == 'MIDWIFE':
+                posyandus = request.user.midwifeassignment_set.all().values('posyandu')
+            queryset = queryset.filter(parent__parentposyandu__posyandu__in=posyandus)
         
         page = self.paginate_queryset(queryset)
         if page is not None:
@@ -57,4 +77,13 @@ class ChildViewSet(ModelViewSet):
         instance = self.get_object()
         self.perform_destroy(instance)
         return CustomResponse.ok("Child berhasil dihapus")
+    
+    @action(detail=True, methods=['get'])
+    def info(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        return CustomResponse.retrieve(
+            "Child berhasil ditemukan",
+            serializer.data
+        )
     
