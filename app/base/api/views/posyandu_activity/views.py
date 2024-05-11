@@ -66,6 +66,7 @@ class PosyanduActivityViewSet(ModelViewSet):
             posyandus = []
 
         today = timezone.now().date()
+        print(today)
         queryset = queryset.filter(date=today, posyandu__in=posyandus)
 
         page = self.paginate_queryset(queryset)
@@ -89,11 +90,15 @@ class PosyanduActivityViewSet(ModelViewSet):
         for parent_posyandu in parent_posyandus:
             children.extend(parent_posyandu.parent.child_set.all())
 
+        # Tambahan context untuk serializer
+        context = self.get_serializer_context()
+        context['child_measured_ids'] = child_measured_ids
+
         page = self.paginate_queryset(children)
         if page is not None:
-            serializer = ChildSerializer(page, many=True, context={'child_measured_ids': child_measured_ids})
+            serializer = ChildSerializer(page, many=True, context=context)
             return self.get_paginated_response(serializer.data)
 
-        serializer = ChildSerializer(children, many=True, context={'child_measured_ids': child_measured_ids})
+        serializer = ChildSerializer(children, many=True, context=context)
         return CustomResponse.list(serializer.data)
         

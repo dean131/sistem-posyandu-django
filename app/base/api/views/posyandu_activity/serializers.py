@@ -15,6 +15,7 @@ class PosyanduActivitySerializer(serializers.ModelSerializer):
 class ChildSerializer(serializers.ModelSerializer):
     is_measured = serializers.SerializerMethodField()
     parent_name = serializers.SerializerMethodField()
+    current_age = serializers.SerializerMethodField()
     
     class Meta:
         model = Child
@@ -31,3 +32,6 @@ class ChildSerializer(serializers.ModelSerializer):
     
     def get_parent_name(self, obj):
         return obj.parent.full_name
+    
+    def get_current_age(self, obj):
+        return obj.current_age
