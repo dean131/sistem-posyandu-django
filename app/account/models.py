@@ -14,11 +14,10 @@ class CustomUserManager(BaseUserManager):
     def create_user(self, whatsapp, full_name, password=None, **extra_fields):
         if not whatsapp:
             raise ValueError("Users must have an whatsapp number")
-        
+
         if password is None:
             # Random ASCII password
             password = self.generate_random_password()
-        
 
         user = self.model(
             whatsapp=whatsapp,
@@ -41,7 +40,7 @@ class CustomUserManager(BaseUserManager):
         user.is_admin = True
         user.save(using=self._db)
         return user
-    
+
     def generate_random_password(self):
         characters = string.ascii_letters + string.digits
         password = ''.join(random.choice(characters) for i in range(32))
@@ -62,13 +61,16 @@ class User(AbstractBaseUser):
     full_name = models.CharField(max_length=255)
     password = models.CharField(max_length=255, null=True, blank=True)
     whatsapp = models.CharField(max_length=15, unique=True)
-    email = models.EmailField(max_length=255, unique=True, null=True, blank=True)
-    profile_picture = models.ImageField(upload_to="profile_pictures/", null=True, blank=True)
+    email = models.EmailField(
+        max_length=255, unique=True, null=True, blank=True)
+    profile_picture = models.ImageField(
+        upload_to="profile_pictures/", null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    role = models.CharField(max_length=13, choices=Role.choices, default=base_role, null=True, blank=True)
+    role = models.CharField(
+        max_length=13, choices=Role.choices, default=base_role, null=True, blank=True)
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
     is_registered = models.BooleanField(default=False)
@@ -80,11 +82,11 @@ class User(AbstractBaseUser):
 
     def __str__(self):
         return self.full_name
-    
+
     def save(self, *args, **kwargs):
-        if not self.pk: # If object is new
-            self.role = self.base_role # Set default role
-            self.id = uuid4() # Generate UUID4
+        if not self.pk:  # If object is new
+            self.role = self.base_role  # Set default role
+            self.id = uuid4()  # Generate UUID4
         super().save(*args, **kwargs)
 
     def has_perm(self, perm, obj=None):
@@ -96,7 +98,7 @@ class User(AbstractBaseUser):
     @property
     def is_staff(self):
         return self.is_admin
-    
+
 
 class OTP(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -115,19 +117,19 @@ class OTP(models.Model):
     def validate_otp(self, otp_code):
         # Retrun True if otp_code is valid and not expired
         return self.otp == otp_code and self.expired_at > timezone.now()
-    
+
     def send_otp_wa(self):
         otp_code = self.generate_otp()
         # with httpx.Client() as client:
         #     client.post(
-        #         url='https://api.fonnte.com/send', 
+        #         url='https://api.fonnte.com/send',
         #         headers={'Authorization': settings.FONNTE_API_KEY},
         #         json={
-        #             'target': self.user.whatsapp, 
+        #             'target': self.user.whatsapp,
         #             'message': f'Kode OTP kamu: {otp_code}'
         #         }
         #     )
-    
+
 
 class Address(models.Model):
     province = models.CharField(max_length=100, null=True, blank=True)
@@ -161,29 +163,33 @@ class MidwifeManager(CustomUserManager):
 class CadreManager(CustomUserManager):
     def get_queryset(self, *args, **kwargs):
         return super().get_queryset(*args, **kwargs).filter(role=User.Role.CADRE)
-    
+
 
 class PuskesmasManager(CustomUserManager):
     def get_queryset(self, *args, **kwargs):
         return super().get_queryset(*args, **kwargs).filter(role=User.Role.PUSKESMAS)
 
 # Orang Tua
+
+
 class Parent(User):
     base_role = User.Role.PARENT
     objects = ParentManager()
 
     class Meta:
-        proxy = True 
+        proxy = True
 
     @property
     def profile(self):
         return self.parentprofile
-    
+
     @property
     def children(self):
         return self.child_set.all()
 
 # Bidan
+
+
 class Midwife(User):
     base_role = User.Role.MIDWIFE
     objects = MidwifeManager()
@@ -196,6 +202,8 @@ class Midwife(User):
         return self.midwifeprofile
 
 # Kader
+
+
 class Cadre(User):
     base_role = User.Role.CADRE
     objects = CadreManager()
@@ -208,6 +216,8 @@ class Cadre(User):
         return self.cadreprofile
 
 # Pushkesmas
+
+
 class Puskesmas(User):
     base_role = User.Role.PUSKESMAS
     objects = PuskesmasManager()
@@ -216,6 +226,8 @@ class Puskesmas(User):
         proxy = True
 
 # Profile Orang Tua
+
+
 class ParentProfile(models.Model):
     national_id_number = models.CharField(max_length=50, null=True, blank=True)
     family_card_number = models.CharField(max_length=30, null=True, blank=True)
@@ -224,20 +236,26 @@ class ParentProfile(models.Model):
 
     def __str__(self):
         return f"Profile of {self.user.full_name}"
-    
+
 # Profile Bidan
+
+
 class MidwifeProfile(models.Model):
     midwife_id_number = models.CharField(max_length=50, null=True, blank=True)
     # Foreign Keys
     user = models.OneToOneField(User, on_delete=models.CASCADE)
 
 # Profile Kader
+
+
 class CadreProfile(models.Model):
     national_id_number = models.CharField(max_length=50, null=True, blank=True)
     # Foreign Keys
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    
+
 # Profile Puskesmas
+
+
 class PuskesmasProfile(models.Model):
     website = models.URLField(null=True, blank=True)
     phone_number = models.CharField(max_length=15, null=True, blank=True)
