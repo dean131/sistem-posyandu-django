@@ -65,8 +65,6 @@ class PosyanduActivityViewSet(ModelViewSet):
                 posyandu for village in villages for posyandu in village.posyandu_set.all()]
         elif request.user.role == "PARENT":
             posyandus = request.user.parentposyandu_set.all().values('posyandu')
-        elif request.user.role == "PUSKESMAS":
-            posyandus = request.user.puskesmasassignment_set.all().values('posyandu')
         else:
             posyandus = []
 
