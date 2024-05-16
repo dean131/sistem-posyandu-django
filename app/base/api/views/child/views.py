@@ -30,11 +30,17 @@ class ChildViewSet(ModelViewSet):
         else:
             if request.user.role == 'CADRE':
                 posyandus = request.user.cadreassignment_set.all().values('posyandu')
-                print(posyandus)
             elif request.user.role == 'MIDWIFE':
-                posyandus = request.user.midwifeassignment_set.all().values('posyandu')
-            queryset = queryset.filter(parent__parentposyandu__posyandu__in=posyandus)
-        
+                midwifeassignments = request.user.midwifeassignment_set.all()
+                villages = [
+                    midwifeassignment.village for midwifeassignment in midwifeassignments
+                ]
+                posyandus = [
+                    posyandu for village in villages for posyandu in village.posyandu_set.all()]
+                print(posyandus)
+            queryset = queryset.filter(
+                parent__parentposyandu__posyandu__in=posyandus)
+
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
@@ -57,11 +63,12 @@ class ChildViewSet(ModelViewSet):
             self.perform_create(serializer)
             return CustomResponse.ok("Child berhasil ditambahkan")
         return CustomResponse.serializers_erros(serializer.errors)
-    
+
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer = self.get_serializer(
+            instance, data=request.data, partial=partial)
         if serializer.is_valid():
             self.perform_update(serializer)
 
@@ -69,15 +76,15 @@ class ChildViewSet(ModelViewSet):
                 # If 'prefetch_related' has been applied to a queryset, we need to
                 # forcibly invalidate the prefetch cache on the instance.
                 instance._prefetched_objects_cache = {}
-            
+
             return CustomResponse.ok("Child berhasil diubah")
         return CustomResponse.serializers_erros(serializer.errors)
-    
+
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
         self.perform_destroy(instance)
         return CustomResponse.ok("Child berhasil dihapus")
-    
+
     @action(detail=True, methods=['get'])
     def info(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -86,4 +93,3 @@ class ChildViewSet(ModelViewSet):
             "Child berhasil ditemukan",
             serializer.data
         )
-    

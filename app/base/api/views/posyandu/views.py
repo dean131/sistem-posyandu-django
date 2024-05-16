@@ -1,11 +1,14 @@
+"""
+Posyandu Views
+"""
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.decorators import action
 
-from base.api.serializers.posyandu import PosyanduSerializer
+from base.api.views.posyandu.serializers import ChildSerializer, PosyanduSerializer
 
 from posyanduapp.utils.custom_response import CustomResponse
 
-from base.models import Posyandu
+from base.models import Child, Posyandu
 
 
 class PosyanduViewSet(ModelViewSet):
@@ -66,4 +69,21 @@ class PosyanduViewSet(ModelViewSet):
             return self.get_paginated_response(serializer.data)
 
         serializer = self.get_serializer(queryset, many=True)
+        return CustomResponse.list(serializer.data)
+
+    @action(detail=True, methods=['get'])
+    def children(self, request, *args, **kwargs):
+        instance = self.get_object()
+
+        queryset = Child.objects.filter(
+            parent__parentposyandu__posyandu=instance)
+
+        context = self.get_serializer_context()
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = ChildSerializer(page, many=True, context=context)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = ChildSerializer(queryset, many=True, context=context)
         return CustomResponse.list(serializer.data)
