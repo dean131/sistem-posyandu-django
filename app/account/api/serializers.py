@@ -47,6 +47,12 @@ class CadreSerializer(serializers.ModelSerializer):
             'password': {'write_only': True}
         }
 
+class CadreProfileSerializer(CadreSerializer):
+    profile = serializers.SerializerMethodField()
+
+    def get_profile(self, obj):
+        return obj.profile
+
 
 class PuskesmasSerializer(serializers.ModelSerializer):
     class Meta:

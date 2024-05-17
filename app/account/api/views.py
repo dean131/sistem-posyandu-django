@@ -36,6 +36,7 @@ from posyanduapp.utils.custom_response import CustomResponse
 class UserViewSet(ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+
     # permission_classes = [IsAdminUser,]
 
     def get_permissions(self):
@@ -43,8 +44,8 @@ class UserViewSet(ModelViewSet):
             "login_password",
             "login_otp",
             "login_otp_validate",
-                "register_otp_validate"]:
-            return [AllowAny(),]
+            "register_otp_validate"]:
+            return [AllowAny(), ]
         return super().get_permissions()
 
     @action(detail=False, methods=["post"])
@@ -133,13 +134,12 @@ class UserViewSet(ModelViewSet):
 class CustomUserModelViewSet(ModelViewSet):
     def get_permissions(self):
         if self.action == "create":
-            return [AllowAny(),]
+            return [AllowAny(), ]
         return super().get_permissions()
 
     def create(self, request, *args, **kwargs):
         whatsapp = request.data.get("whatsapp")
-        user = self.queryset.filter(
-            whatsapp=whatsapp, is_registered=False).first()
+        user = self.queryset.filter(whatsapp=whatsapp, is_registered=False).first()
         if user is not None:
             # Jika user registrasi dengan nomor whatsapp yang sama
             # tapi belum menyelesaikan proses registrasi.

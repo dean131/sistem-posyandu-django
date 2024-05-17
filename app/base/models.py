@@ -435,7 +435,7 @@ class ChildMeasurement(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     # Foreign Keys
     child = models.ForeignKey(Child, on_delete=models.CASCADE)
-    posyandu_activity = models.ForeignKey(PosyanduActivity, on_delete=models.CASCADE)
+    posyandu_activity = models.ForeignKey(PosyanduActivity, on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
         return f"Pengukuran Anak {self.child.full_name}"

@@ -169,6 +169,7 @@ class PuskesmasManager(CustomUserManager):
     def get_queryset(self, *args, **kwargs):
         return super().get_queryset(*args, **kwargs).filter(role=User.Role.PUSKESMAS)
 
+
 # Orang Tua
 
 
@@ -186,6 +187,7 @@ class Parent(User):
     @property
     def children(self):
         return self.child_set.all()
+
 
 # Bidan
 
@@ -213,6 +215,7 @@ class Midwife(User):
     def villages(self):
         return [assignment.village for assignment in self.assignments]
 
+
 # Kader
 
 
@@ -239,6 +242,7 @@ class Cadre(User):
     def villages(self):
         return [assignment.posyandu.village for assignment in self.assignments]
 
+
 # Pushkesmas
 
 
@@ -248,6 +252,7 @@ class Puskesmas(User):
 
     class Meta:
         proxy = True
+
 
 # Profile Orang Tua
 
@@ -261,6 +266,7 @@ class ParentProfile(models.Model):
     def __str__(self):
         return f"Profile of {self.user.full_name}"
 
+
 # Profile Bidan
 
 
@@ -269,6 +275,7 @@ class MidwifeProfile(models.Model):
     # Foreign Keys
     user = models.OneToOneField(User, on_delete=models.CASCADE)
 
+
 # Profile Kader
 
 
@@ -276,6 +283,7 @@ class CadreProfile(models.Model):
     national_id_number = models.CharField(max_length=50, null=True, blank=True)
     # Foreign Keys
     user = models.OneToOneField(User, on_delete=models.CASCADE)
+
 
 # Profile Puskesmas
 

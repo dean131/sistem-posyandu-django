@@ -4,7 +4,8 @@ from django.conf import settings
 
 from .models import (
     Child,
-    GrowthChart
+    GrowthChart,
+    ChildMeasurement
 )
 
 
@@ -13,4 +14,11 @@ from .models import (
 def create_child_growchart(sender, instance, created, **kwargs):
     if created:
         GrowthChart.objects.create(child=instance)
+        ChildMeasurement.objects.create(
+            child=instance,
+            height=instance.birth_height,
+            weight=instance.birth_weight,
+        )
+
+
 
