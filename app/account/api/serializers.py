@@ -3,10 +3,13 @@
 from rest_framework import serializers
 
 from account.models import (
-    User, 
-    Parent, 
-    Midwife, 
-    Cadre, 
+    CadreProfile,
+    MidwifeProfile,
+    ParentProfile,
+    User,
+    Parent,
+    Midwife,
+    Cadre,
     Puskesmas,
     OTP,
 )
@@ -22,6 +25,8 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class ParentSerializer(serializers.ModelSerializer):
+    profile = serializers.SerializerMethodField()
+
     class Meta:
         model = Parent
         fields = '__all__'
@@ -29,8 +34,19 @@ class ParentSerializer(serializers.ModelSerializer):
             'password': {'write_only': True}
         }
 
+    def get_profile(self, obj):
+        return ParentProfileSerializer(obj.profile).data
+
+
+class ParentProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ParentProfile
+        fields = '__all__'
+
 
 class MidwifeSerializer(serializers.ModelSerializer):
+    profile = serializers.SerializerMethodField()
+
     class Meta:
         model = Midwife
         fields = '__all__'
@@ -38,8 +54,19 @@ class MidwifeSerializer(serializers.ModelSerializer):
             'password': {'write_only': True}
         }
 
+    def get_profile(self, obj):
+        return MidwifeProfileSerializer(obj.profile).data
+
+
+class MidwifeProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MidwifeProfile
+        fields = '__all__'
+
 
 class CadreSerializer(serializers.ModelSerializer):
+    profile = serializers.SerializerMethodField()
+
     class Meta:
         model = Cadre
         fields = '__all__'
@@ -47,11 +74,14 @@ class CadreSerializer(serializers.ModelSerializer):
             'password': {'write_only': True}
         }
 
-class CadreProfileSerializer(CadreSerializer):
-    profile = serializers.SerializerMethodField()
-
     def get_profile(self, obj):
-        return obj.profile
+        return CadreProfileSerializer(obj.profile).data
+
+
+class CadreProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CadreProfile
+        fields = '__all__'
 
 
 class PuskesmasSerializer(serializers.ModelSerializer):
@@ -68,7 +98,6 @@ class RegisterSerializer(serializers.ModelSerializer):
         otp, created = OTP.objects.get_or_create(user=user)
         otp.send_otp_wa()
 
-
     def create(self, validated_data):
         instance = self.Meta.model.objects.create_user(**validated_data)
         self.send_otp_wa(instance)
@@ -81,8 +110,8 @@ class ParentRegistrationSerializer(ParentSerializer, RegisterSerializer):
 
 class MidwifeRegistrationSerializer(MidwifeSerializer, RegisterSerializer):
     pass
-    
-    
+
+
 class CadreRegistrationSerializer(CadreSerializer, RegisterSerializer):
     pass
 

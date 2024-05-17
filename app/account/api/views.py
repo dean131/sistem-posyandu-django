@@ -7,6 +7,7 @@ from rest_framework.permissions import AllowAny, IsAdminUser
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from account.api.serializers import (
+    CadreProfileSerializer,
     UserSerializer,
 
     ParentSerializer,
@@ -40,11 +41,7 @@ class UserViewSet(ModelViewSet):
     # permission_classes = [IsAdminUser,]
 
     def get_permissions(self):
-        if self.action in [
-            "login_password",
-            "login_otp",
-            "login_otp_validate",
-            "register_otp_validate"]:
+        if self.action in ["login_password", "login_otp", "login_otp_validate", "register_otp_validate"]:
             return [AllowAny(), ]
         return super().get_permissions()
 
@@ -139,7 +136,8 @@ class CustomUserModelViewSet(ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         whatsapp = request.data.get("whatsapp")
-        user = self.queryset.filter(whatsapp=whatsapp, is_registered=False).first()
+        user = self.queryset.filter(
+            whatsapp=whatsapp, is_registered=False).first()
         if user is not None:
             # Jika user registrasi dengan nomor whatsapp yang sama
             # tapi belum menyelesaikan proses registrasi.
