@@ -11,6 +11,15 @@ class PosyanduSerializer(serializers.ModelSerializer):
 
 
 class ChildSerializer(serializers.ModelSerializer):
+    parent_name = serializers.SerializerMethodField()
+    current_age = serializers.SerializerMethodField()
+
     class Meta:
         model = Child
         fields = '__all__'
+
+    def get_parent_name(self, obj):
+        return obj.parent.full_name
+
+    def get_current_age(self, obj):
+        return obj.current_age

@@ -21,34 +21,6 @@ class ChildViewSet(ModelViewSet):
             return ChildInfoSerializer
         return super().get_serializer_class()
 
-    def list(self, request, *args, **kwargs):
-        queryset = self.filter_queryset(self.get_queryset())
-
-        # Get child berdasarkan role user
-        if request.user.role == 'PARENT':
-            queryset = self.queryset.filter(parent=request.user)
-        else:
-            if request.user.role == 'CADRE':
-                posyandus = request.user.cadreassignment_set.all().values('posyandu')
-            elif request.user.role == 'MIDWIFE':
-                midwifeassignments = request.user.midwifeassignment_set.all()
-                villages = [
-                    midwifeassignment.village for midwifeassignment in midwifeassignments
-                ]
-                posyandus = [
-                    posyandu for village in villages for posyandu in village.posyandu_set.all()]
-                print(posyandus)
-            queryset = queryset.filter(
-                parent__parentposyandu__posyandu__in=posyandus)
-
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
-
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
-
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
         serializer = self.get_serializer(instance)
@@ -93,3 +65,32 @@ class ChildViewSet(ModelViewSet):
             "Child berhasil ditemukan",
             serializer.data
         )
+
+    @action(detail=False, methods=['get'])
+    def by_user_role(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+
+        # Get child berdasarkan role user
+        if request.user.role == 'PARENT':
+            queryset = self.queryset.filter(parent=request.user)
+        else:
+            if request.user.role == 'CADRE':
+                posyandus = request.user.cadreassignment_set.all().values('posyandu')
+            elif request.user.role == 'MIDWIFE':
+                midwifeassignments = request.user.midwifeassignment_set.all()
+                villages = [
+                    midwifeassignment.village for midwifeassignment in midwifeassignments
+                ]
+                posyandus = [
+                    posyandu for village in villages for posyandu in village.posyandu_set.all()
+                ]
+            queryset = queryset.filter(
+                parent__parentposyandu__posyandu__in=posyandus)
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)

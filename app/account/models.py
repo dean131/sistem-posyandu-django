@@ -201,6 +201,18 @@ class Midwife(User):
     def profile(self):
         return self.midwifeprofile
 
+    @property
+    def assignments(self):
+        return self.midwifeassignment_set.all()
+
+    @property
+    def posyandus(self):
+        return [assignment.village.posyandu_set.all() for assignment in self.assignments]
+
+    @property
+    def villages(self):
+        return [assignment.village for assignment in self.assignments]
+
 # Kader
 
 
@@ -214,6 +226,18 @@ class Cadre(User):
     @property
     def profile(self):
         return self.cadreprofile
+
+    @property
+    def assignments(self):
+        return self.cadreassignment_set.all()
+
+    @property
+    def posyandus(self):
+        return [assignment.posyandu for assignment in self.assignments]
+
+    @property
+    def villages(self):
+        return [assignment.posyandu.village for assignment in self.assignments]
 
 # Pushkesmas
 

@@ -52,16 +52,20 @@ class PosyanduViewSet(ModelViewSet):
         return CustomResponse.ok("Posyandu berhasil dihapus")
 
     @action(detail=False, methods=['get'])
-    def by_midwife(self, request, *args, **kwargs):
+    def by_user_role(self, request, *args, **kwargs):
+        if request.user.role == "MIDWIFE":
+            midwifeassignments = request.user.midwifeassignment_set.all()
+            villages = [
+                midwifeassignment.village for midwifeassignment in midwifeassignments
+            ]
+            queryset = [
+                posyandu for village in villages for posyandu in village.posyandu_set.all()
+            ]
 
-        # Get posyandu berdasarkan role user (MIDWIFE)
-        midwifeassignments = request.user.midwifeassignment_set.all()
-        villages = [
-            midwifeassignment.village for midwifeassignment in midwifeassignments
-        ]
-        queryset = [
-            posyandu for village in villages for posyandu in village.posyandu_set.all()]
-        print(queryset)
+        elif request.user.role == "CADRE":
+            queryset = [
+                assignment.posyandu for assignment in request.user.cadreassignment_set.all()
+            ]
 
         page = self.paginate_queryset(queryset)
         if page is not None:
