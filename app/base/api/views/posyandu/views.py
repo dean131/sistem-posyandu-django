@@ -61,11 +61,16 @@ class PosyanduViewSet(ModelViewSet):
             queryset = [
                 posyandu for village in villages for posyandu in village.posyandu_set.all()
             ]
-
         elif request.user.role == "CADRE":
             queryset = [
                 assignment.posyandu for assignment in request.user.cadreassignment_set.all()
             ]
+        elif request.user.role == "PARENT":
+            queryset = [
+                parentposyandu.posyadu for parentposyandu in request.user.parentposyandu_set.all()
+            ]
+        else:
+            return CustomResponse.bad_request("Role user tidak valid")
 
         page = self.paginate_queryset(queryset)
         if page is not None:
