@@ -51,7 +51,8 @@ class OTPAdmin(admin.ModelAdmin):
     list_display = ["user", "otp"]
     class Meta:
         model = OTP
-        
+
+
 
 # Entities
 admin.site.register(User, UserAdmin)

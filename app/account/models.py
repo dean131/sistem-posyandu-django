@@ -13,7 +13,7 @@ from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
 class CustomUserManager(BaseUserManager):
     def create_user(self, whatsapp, full_name, password=None, **extra_fields):
         if not whatsapp:
-            raise ValueError("Users must have an whatsapp number")
+            raise ValueError("Pengguna harus memiliki nomor WhatsApp")
 
         if password is None:
             # Random ASCII password
@@ -61,16 +61,13 @@ class User(AbstractBaseUser):
     full_name = models.CharField(max_length=255)
     password = models.CharField(max_length=255, null=True, blank=True)
     whatsapp = models.CharField(max_length=15, unique=True)
-    email = models.EmailField(
-        max_length=255, unique=True, null=True, blank=True)
-    profile_picture = models.ImageField(
-        upload_to="profile_pictures/", null=True, blank=True)
+    email = models.EmailField(max_length=255, unique=True, null=True, blank=True)
+    profile_picture = models.ImageField(upload_to="profile_pictures/", null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    role = models.CharField(
-        max_length=13, choices=Role.choices, default=base_role, null=True, blank=True)
+    role = models.CharField(max_length=13, choices=Role.choices, default=base_role, null=True, blank=True)
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
     is_registered = models.BooleanField(default=False)
@@ -141,6 +138,9 @@ class Address(models.Model):
     rt = models.CharField(max_length=3, null=True, blank=True)
     # Foreign Keys
     user = models.OneToOneField(User, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"address dari {self.user.full_name}"
 
     def save(self, *args, **kwargs):
         for field_name in ["province", "city", "subdistrict", "village", "address", "rw", "rt"]:
@@ -258,7 +258,7 @@ class Puskesmas(User):
 
 
 class ParentProfile(models.Model):
-    national_id_number = models.CharField(max_length=50, null=True, blank=True)
+    national_id_number = models.CharField(max_length=30, null=True, blank=True)
     family_card_number = models.CharField(max_length=30, null=True, blank=True)
     # Foreign Keys
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -290,6 +290,5 @@ class CadreProfile(models.Model):
 
 class PuskesmasProfile(models.Model):
     website = models.URLField(null=True, blank=True)
-    phone_number = models.CharField(max_length=15, null=True, blank=True)
     # Foreign Keys
     user = models.OneToOneField(User, on_delete=models.CASCADE)

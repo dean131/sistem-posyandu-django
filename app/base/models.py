@@ -20,8 +20,7 @@ class Village(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     # Foreign Keys
-    puskesmas = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    puskesmas = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.name
@@ -47,6 +46,10 @@ class Posyandu(models.Model):
 
     def __str__(self):
         return self.name
+    
+    def save(self, *args, **kwargs):
+        self.name = self.name.upper()
+        super().save(*args, **kwargs)
 
 
 class MidwifeAssignment(models.Model):
@@ -114,10 +117,9 @@ class Child(models.Model):
     birth_order = models.PositiveIntegerField()
     birth_weight = models.FloatField()
     birth_height = models.FloatField()
-    kia_number = models.CharField(max_length=50, null=True, blank=True)
-    imd_number = models.CharField(max_length=50, null=True, blank=True)
-    picture = models.ImageField(
-        upload_to="child_pictures/", null=True, blank=True)
+    # kia_number = models.CharField(max_length=50, null=True, blank=True)
+    # imd_number = models.CharField(max_length=50, null=True, blank=True)
+    picture = models.ImageField(upload_to="child_pictures/", null=True, blank=True)
     # Time Fields
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -187,29 +189,21 @@ class GrowthChart(models.Model):
     Merepresentasikan data grafik pertumbuhan anak.
     """
     # WEIGHT FOR AGE 0-24
-    weight_for_age_0_24_chart = models.ImageField(
-        upload_to="growth_charts/", null=True, blank=True)
+    weight_for_age_0_24_chart = models.ImageField(upload_to="growth_charts/", null=True, blank=True)
     # WEIGHT FOR AGE 24-60
-    weight_for_age_24_60_chart = models.ImageField(
-        upload_to="growth_charts/", null=True, blank=True)
+    weight_for_age_24_60_chart = models.ImageField(upload_to="growth_charts/", null=True, blank=True)
     # LENGTH FOR AGE 0-24
-    legth_for_age_0_24_chart = models.ImageField(
-        upload_to="growth_charts/", null=True, blank=True)
+    length_for_age_chart = models.ImageField(upload_to="growth_charts/", null=True, blank=True)
     # HEIGHT FOR AGE 24-60
-    height_for_age_24_60_chart = models.ImageField(
-        upload_to="growth_charts/", null=True, blank=True)
+    height_for_age_chart = models.ImageField(upload_to="growth_charts/", null=True, blank=True)
     # WEIGHT FOR LENGTH 0-24
-    weight_for_length_chart = models.ImageField(
-        upload_to="growth_charts/", null=True, blank=True)
+    weight_for_length_chart = models.ImageField(upload_to="growth_charts/", null=True, blank=True)
     # WEIGHT FOR HEIGTH 24-60
-    weight_for_height_chart = models.ImageField(
-        upload_to="growth_charts/", null=True, blank=True)
+    weight_for_height_chart = models.ImageField(upload_to="growth_charts/", null=True, blank=True)
     # BMI FOR AGE 0-24
-    bmi_for_age_0_24_chart = models.ImageField(
-        upload_to="growth_charts/", null=True, blank=True)
+    bmi_for_age_0_24_chart = models.ImageField(upload_to="growth_charts/", null=True, blank=True)
     # BMI FOR AGE 24-60
-    bmi_for_age_24_60_chart = models.ImageField(
-        upload_to="growth_charts/", null=True, blank=True)
+    bmi_for_age_24_60_chart = models.ImageField(upload_to="growth_charts/", null=True, blank=True)
     # Time Fields
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -227,12 +221,6 @@ class AnthropometricStandard(models.Model):
     Attributes:
         index: merupakan umur atau tinggi badan dalam bulan atau cm.
     """
-
-    GENDER_CHOICES = [
-        ("M", "Male"),
-        ("F", "Female")
-    ]
-
     index = models.FloatField()
     sd_minus_3 = models.FloatField()
     sd_minus_2 = models.FloatField()
@@ -264,15 +252,13 @@ class ChildMeasurement(models.Model):
 
     weight = models.FloatField()
     height = models.FloatField()
-    # lingkar kepala
-    head_circumference = models.FloatField(null=True, blank=True)
+    head_circumference = models.FloatField(null=True)
+    # cara ukur
+    measurement_method = models.CharField(max_length=8, choices=MEASUREMENT_METHOD_CHOICES, null=True)
     # usia saat pengukuran dalam tahun, bulan, hari
     age = models.CharField(max_length=50, null=True, blank=True)
     # usia dalam bulan
     age_in_month = models.PositiveIntegerField(null=True, blank=True)
-    # cara ukur
-    measurement_method = models.CharField(
-        max_length=8, choices=MEASUREMENT_METHOD_CHOICES, null=True, blank=True)
     # lingkar lengan atas / lila
     arm_circumference = models.FloatField(null=True, blank=True)
     # bb/u
@@ -288,8 +274,10 @@ class ChildMeasurement(models.Model):
     # z score bb/tb
     z_score_weight_for_height = models.FloatField(null=True, blank=True)
     # naik berat badan
-    weight_gain = models.CharField(
-        max_length=1, choices=WEIGHT_GAIN_CHOICES, null=True, blank=True)
+    weight_gain = models.FloatField(null=True, blank=True)
+    # naik tinggi badan
+    height_gain = models.FloatField(null=True, blank=True)
+
     # pmt diterima (kg)
     pmt_received = models.FloatField(blank=True, null=True)
     # jumlah vitamin A
@@ -315,33 +303,57 @@ class ChildMeasurement(models.Model):
         match self.child.gender:
             case "M":
                 if self.age_in_month < 24:
-                    # self.calculate_male_weight_for_age_0_24()
+                    # WEIGHT FOR AGE
                     self.calculate_weight_for_age_with_param(
                         measurement_type="m_weight_for_age",
                         chart_attr="weight_for_age_0_24_chart",
                         title="Berat Badan Menurut Umur Laki-laki (0-24 Bulan)"
                     )
+                    # LENGTH FOR AGE
+                    self.calculate_length_or_height_for_age_with_param(
+                        measurement_type="m_length_for_age",
+                        chart_attr="length_for_age_chart",
+                        title="Tinggi Badan Menurut Umur Laki-laki (0-24 Bulan)"
+                    )
                 else:
-                    # self.calculate_male_weight_for_age_24_60()
+                    # WEIGHT FOR AGE
                     self.calculate_weight_for_age_with_param(
                         measurement_type="m_weight_for_age",
                         chart_attr="weight_for_age_24_60_chart",
                         title="Berat Badan Menurut Umur Laki-laki (24-60 Bulan)"
                     )
+                    # HEIGHT FOR AGE
+                    self.calculate_length_or_height_for_age_with_param(
+                        measurement_type="m_height_for_age",
+                        chart_attr="height_for_age_chart",
+                        title="Tinggi Badan Menurut Umur Laki-laki (24-60 Bulan)"
+                    )
             case "F":
                 if self.age_in_month < 24:
-                    # self.calculate_male_weight_for_age_0_24()
+                    # WEIGHT FOR AGE
                     self.calculate_weight_for_age_with_param(
                         measurement_type="f_weight_for_age",
                         chart_attr="weight_for_age_0_24_chart",
                         title="Berat Badan Menurut Umur Perempuan (0-24 Bulan)"
                     )
+                    # LENGTH FOR AGE
+                    self.calculate_length_or_height_for_age_with_param(
+                        measurement_type="f_length_for_age",
+                        chart_attr="length_for_age_chart",
+                        title="Tinggi Badan Menurut Umur Perempuan (0-24 Bulan)"
+                    )
                 else:
-                    # self.calculate_male_weight_for_age_24_60()
+                    # WEIGHT FOR AGE
                     self.calculate_weight_for_age_with_param(
                         measurement_type="f_weight_for_age",
                         chart_attr="weight_for_age_24_60_chart",
                         title="Berat Badan Menurut Umur Perempuan (24-60 Bulan)"
+                    )
+                    # HEIGHT FOR AGE
+                    self.calculate_length_or_height_for_age_with_param(
+                        measurement_type="f_height_for_age",
+                        chart_attr="height_for_age_chart",
+                        title="Tinggi Badan Menurut Umur Perempuan (24-60 Bulan)"
                     )
 
         # self.calculate_length_and_height_for_age()
@@ -465,6 +477,125 @@ class ChildMeasurement(models.Model):
         )
         plt.close()
         figure.close()
+
+    def calculate_length_or_height_for_age_with_param(self, measurement_type, chart_attr, title):
+        # Determine the queryset based on age limit and measurement type
+        if self.age_in_month < 24:
+            queryset = AnthropometricStandard.objects.filter(index__lt=24, measurement_type=measurement_type)
+        else:
+            queryset = AnthropometricStandard.objects.filter(index__gte=24, measurement_type=measurement_type)
+        print(f"QUERYSET: {queryset}")
+        # Determine standard deviation
+        SD = queryset.filter(index=self.age_in_month).first()
+        
+        print(f"SD HEIGHT FOR AGE: {SD}")
+        
+        # Calculate z-score
+        self.z_score_height_for_age = self.calculate_zscore(SD=SD)
+
+        self.height_for_age = (
+            "Sangat pendek" if self.z_score_height_for_age < -3 else
+            "Pendek" if - 3 <= self.z_score_height_for_age < -2 else
+            "Normal" if -2 <= self.z_score_height_for_age <= 3 else
+            "Tinggi"
+        )
+
+        # Create the chart data arrays
+        index = np.array([])
+        min_1 = np.array([])
+        min_2 = np.array([])
+        min_3 = np.array([])
+        median = np.array([])
+        pos_1 = np.array([])
+        pos_2 = np.array([])
+        pos_3 = np.array([])
+        
+        for row in queryset:
+            index = np.append(index, row.index)
+            min_3 = np.append(min_3, row.sd_minus_3)
+            min_2 = np.append(min_2, row.sd_minus_2)
+            min_1 = np.append(min_1, row.sd_minus_1)
+            median = np.append(median, row.median)
+            pos_1 = np.append(pos_1, row.sd_plus_1)
+            pos_2 = np.append(pos_2, row.sd_plus_2)
+            pos_3 = np.append(pos_3, row.sd_plus_3)
+        
+        # Set up the plot
+        plt.figure(figsize=(10, 5))
+        plt.plot(index.astype(float), min_3.astype(float), label='-3 SD')
+        plt.plot(index.astype(float), min_2.astype(float), label='-2 SD')
+        plt.plot(index.astype(float), min_1.astype(float), label='-1 SD')
+        plt.plot(index.astype(float), median.astype(float), label='Median')
+        plt.plot(index.astype(float), pos_1.astype(float), label='+1 SD')
+        plt.plot(index.astype(float), pos_2.astype(float), label='+2 SD')
+        plt.plot(index.astype(float), pos_3.astype(float), label='+3 SD')
+        plt.title(title)
+        plt.ylabel("Panjang Badan (cm)")
+        plt.xlabel("Umur (bulan)")
+        plt.grid()
+        plt.legend()
+        
+        # Get child measurements history
+        measurements = ChildMeasurement.objects.filter(
+            child=self.child,
+            age_in_month__lt=24
+        ).order_by('created_at') if self.age_in_month < 24 else ChildMeasurement.objects.filter(
+            child=self.child,
+            age_in_month__gte=24
+        ).order_by('created_at')
+        
+        measurements_history, measure_age_history = [], []
+        
+        for measurement in measurements:
+            if measurement.id == self.id:
+                measurements_history.append(self.height)
+                measure_age_history.append(self.age_in_month)
+                continue
+            measurements_history.append(measurement.height)
+            measure_age_history.append(measurement.age_in_month)
+        
+        if not self.id:
+            measurements_history.append(self.height)
+            measure_age_history.append(self.age_in_month)
+        
+        plt.scatter(measure_age_history, measurements_history, color='red', label='Pertumbuhan Anak')
+        plt.plot(measure_age_history, measurements_history, color='red', linestyle='dashed')
+        
+        # Save the figure
+        figure = io.BytesIO()
+        plt.savefig(figure, format='png')
+        content_file = ImageFile(figure)
+        
+        # Delete old image if exists
+        old_image = getattr(self.child.growthchart, chart_attr)
+        if old_image:
+            old_image.delete()
+        
+        # Save new image
+        getattr(self.child.growthchart, chart_attr).save(
+            f"{self.child.id}_{chart_attr}.png",
+            content_file
+        )
+        plt.close()
+        figure.close()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     def calculate_male_weight_for_age_0_24(self):
         # MENENTUKAN QUERYSET
