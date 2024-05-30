@@ -22,12 +22,15 @@ from base.models import (
     Child,
     Posyandu,
     MidwifeAssignment,
-    LengthForAgeBoys,
-    LengthForAgeGirls,
-    HeightForAgeBoys,
-    HeightForAgeGirls,
-    WeightForAgeBoys,
-    WeightForAgeGirls,
+
+    AnthropometricStandard
+
+    # LengthForAgeBoys,
+    # LengthForAgeGirls,
+    # HeightForAgeBoys,
+    # HeightForAgeGirls,
+    # WeightForAgeBoys,
+    # WeightForAgeGirls,
 )
 
 
@@ -38,27 +41,27 @@ class LoginView(View):
             # Redirect to previous page or home page
             return redirect(next_page if next_page != '/login/' else '/')
         return render(request, "adminapp/auth_login.html")
-    
+
     def post(self, request, *args, **kwargs):
         email = request.POST.get("email")
         password = request.POST.get("password")
-        
+
         user = Puskesmas.objects.filter(email=email).first()
         if user is not None and user.role == "PUSKESMAS":
             is_password_valid = user.check_password(password)
             if is_password_valid:
                 login(request, user)
                 return redirect("dashboard")
-        
+
         messages.error(request, "Email atau password salah")
         return redirect("login")
-    
+
 
 class LogoutView(View):
     def get(self, request, *args, **kwargs):
         logout(request)
         return redirect("login")
-    
+
 
 # @method_decorator(login_required(login_url='login'), name='dispatch')
 class DashboardView(View):
@@ -83,13 +86,13 @@ class DashboardView(View):
             "cadres": cadres,
         }
         return render(request, "adminapp/dashboard.html", context)
-    
+
 
 class PosyanduActivitiesView(View):
     def get(self, request, *args, **kwargs):
         village_id = request.GET.get("village_id", "")
         posyandu_id = request.GET.get("posyandu_id", "")
-        
+
         if village_id:
             village = Village.objects.filter(id=village_id).first()
             posyandu_activities = PosyanduActivity.objects.filter(
@@ -113,12 +116,12 @@ class PosyanduActivitiesView(View):
         }
         return render(request, "adminapp/posyandu_activities.html", context)
 
-    
+
 class VillageListView(View):
     def get(self, request, *args, **kwargs):
         query = request.GET.get("q", "")
         puskesmas = request.user
-        
+
         if query:
             villages = Village.objects.filter(
                 puskesmas=puskesmas,
@@ -133,15 +136,15 @@ class VillageListView(View):
             "villages": villages
         }
         return render(request, "adminapp/village_list.html", context)
-    
+
     def post(self, request, *args, **kwargs):
         action = request.POST.get("form-action")
         match action:
             case "add": self.add_village(request)
             case "edit": self.edit_village(request)
             case "delete": self.delete_village(request)
-        return redirect("village_list") 
-    
+        return redirect("village_list")
+
     def add_village(self, request):
         name = request.POST.get("village-name")
         Village.objects.create(
@@ -149,8 +152,8 @@ class VillageListView(View):
             name=name
         )
         messages.success(request, "Desa berhasil ditambahkan")
-        return redirect("village_list") 
-    
+        return redirect("village_list")
+
     def delete_village(self, request):
         village_id = request.POST.get("pk")
         village = Village.objects.filter(id=village_id).first()
@@ -160,7 +163,7 @@ class VillageListView(View):
         else:
             messages.error(request, "Desa tidak ditemukan")
         return redirect("village_list")
-    
+
     def edit_village(self, request):
         village_id = request.POST.get("pk")
         name = request.POST.get("village-name")
@@ -197,7 +200,7 @@ class VillageInfoView(View):
             "posyandus": posyandus,
             "midwives": midwives
         }
-        return render(request, "adminapp/village_info.html", context) 
+        return render(request, "adminapp/village_info.html", context)
 
 
 class PosyanduView(View):
@@ -215,18 +218,18 @@ class PosyanduView(View):
             ).order_by("-created_at")
 
         context = {
-            "posyandus": posyandus 
+            "posyandus": posyandus
         }
         return render(request, "adminapp/posyandu_page.html", context)
-    
+
     def post(self, request, *args, **kwargs):
         action = request.POST.get("form-action")
         match action:
             case "add": self.add_posyandu(request)
             case "edit": self.edit_posyandu(request)
             case "delete": self.delete_posyandu(request)
-        return redirect("posyandu") 
-    
+        return redirect("posyandu")
+
     def add_posyandu(self, request):
         name = request.POST.get("posyandu-name")
         address = request.POST.get("posyandu-address")
@@ -242,7 +245,7 @@ class PosyanduView(View):
         else:
             messages.error(request, "Desa tidak ditemukan")
         return redirect("posyandu")
-    
+
     def edit_posyandu(self, request):
         posyandu_id = request.POST.get("pk")
         name = request.POST.get("posyandu-name")
@@ -258,7 +261,7 @@ class PosyanduView(View):
             messages.success(request, "Posyandu berhasil diubah")
         else:
             messages.error(request, "Posyandu tidak ditemukan")
-    
+
     def delete_posyandu(self, request):
         posyandu_id = request.POST.get("pk")
         posyandu = Posyandu.objects.filter(id=posyandu_id).first()
@@ -267,7 +270,7 @@ class PosyanduView(View):
             messages.success(request, "Posyandu berhasil dihapus")
         else:
             messages.error(request, "Posyandu tidak ditemukan")
-    
+
 
 class MidwifeView(View):
     def get(self, request, *args, **kwargs):
@@ -294,7 +297,7 @@ class MidwifeInfoView(View):
             "midwife": midwife
         }
         return render(request, "adminapp/midwife_info.html", context)
-    
+
 
 class MidwifeAssignmentView(View):
     def post(self, request, *args, **kwargs):
@@ -304,7 +307,7 @@ class MidwifeAssignmentView(View):
             case "add": self.add_midwifeassignment(request)
             case "delete": self.delete_midwifeassignment(request)
         return redirect("midwife_info", pk=midwife_id)
-    
+
     def add_midwifeassignment(self, request):
         midwife_id = request.POST.get("midwife-id")
         village_id = request.POST.get("village-id")
@@ -316,7 +319,7 @@ class MidwifeAssignmentView(View):
         if is_exist:
             messages.success(request, "Bidan sudah ditambahkan")
             return
-        
+
         midwife = Midwife.objects.filter(id=midwife_id).first()
         village = Village.objects.filter(id=village_id).first()
         if midwife is not None and village is not None:
@@ -330,7 +333,8 @@ class MidwifeAssignmentView(View):
 
     def delete_midwifeassignment(self, request):
         midwifeassignment_id = request.POST.get("pk")
-        midwifeassignment = MidwifeAssignment.objects.filter(id=midwifeassignment_id).first()
+        midwifeassignment = MidwifeAssignment.objects.filter(
+            id=midwifeassignment_id).first()
         if midwifeassignment is not None:
             midwifeassignment.delete()
             messages.success(request, "Penugasan berhasil dihapus")
@@ -356,15 +360,15 @@ class ChildView(View):
             "children": children
         }
         return render(request, "adminapp/children.html", context)
-    
+
     def post(self, request, *args, **kwargs):
         action = request.POST.get("form-action")
         match action:
             case "add": self.add_child(request)
             case "edit": self.edit_child(request)
             case "delete": self.delete_child(request)
-        return redirect("children") 
-    
+        return redirect("children")
+
 
 class ParentView(View):
     def get(self, request, *args, **kwargs):
@@ -386,223 +390,293 @@ class ParentView(View):
         return render(request, "adminapp/parents.html", context)
 
 
-class LengthForAgeBoysView(View):
+class AnthropometricStandardView(View):
     def get(self, request, *args, **kwargs):
-        return render(request, "adminapp/length_for_age_boys.html")
-    
+        return render(request, "adminapp/anthropometric_standard.html")
+
     def post(self, request, *args, **kwargs):
-        excel_file = request.FILES.get("file")
-        if excel_file is not None:
-            excel_file = load_workbook(excel_file)
-            for row in excel_file.worksheets[0].iter_rows(values_only=True):
-                obj = LengthForAgeBoys.objects.filter(age_months=row[0])
+        excel_files = request.FILES.getlist("files")
+        # memastikan file tidak kosong
+        if not excel_files:
+            messages.error(request, "File Excel dibutuhkan")
+            return redirect("anthropometric_standard")
+
+        # cek measurement type apakah terdaftar
+        for excel_file in excel_files:
+            loaded_excel_file = load_workbook(excel_file)
+            for row in loaded_excel_file.worksheets[0].iter_rows(values_only=True, min_row=2):
+                if row[8] not in [
+                    "f_weight_for_age",
+                    "f_weight_for_length",
+                    "f_weight_for_height",
+                    "f_length_for_age",
+                    "f_height_for_age",
+                    "f_bmi_for_age_0_24",
+                    "f_bmi_for_age_24_60",
+                    "m_weight_for_age",
+                    "m_weight_for_length",
+                    "m_weight_for_height",
+                    "m_length_for_age",
+                    "m_height_for_age",
+                    "m_bmi_for_age_0_24",
+                    "m_bmi_for_age_24_60",
+                ]:
+                    messages.error(
+                        request, f"Measurement type {row[8]} tidak terdaftar")
+                    return redirect("anthropometric_standard")
+
+        for excel_file in excel_files:
+            loaded_excel_file = load_workbook(excel_file)
+            for row in loaded_excel_file.worksheets[0].iter_rows(values_only=True, min_row=2):
+                obj = AnthropometricStandard.objects.filter(
+                    index=row[0],
+                    measurement_type=row[8]
+                )
                 if obj.exists():
                     obj.update(
+                        index=row[0],
                         sd_minus_3=row[1],
                         sd_minus_2=row[2],
                         sd_minus_1=row[3],
                         median=row[4],
                         sd_plus_1=row[5],
                         sd_plus_2=row[6],
-                        sd_plus_3=row[7]
+                        sd_plus_3=row[7],
+                        measurement_type=row[8],
                     )
                 else:
-                    LengthForAgeBoys.objects.create(
-                        age_months=row[0],
+                    AnthropometricStandard.objects.create(
+                        index=row[0],
                         sd_minus_3=row[1],
                         sd_minus_2=row[2],
                         sd_minus_1=row[3],
                         median=row[4],
                         sd_plus_1=row[5],
                         sd_plus_2=row[6],
-                        sd_plus_3=row[7]
+                        sd_plus_3=row[7],
+                        measurement_type=row[8],
                     )
-            messages.success(request, "Data berhasil diupload")
-        else:
-            messages.error(request, "File tidak ditemukan")
-        return redirect("length_for_age_boys")
-    
-
-class LengthForAgeGirlsView(View):
-    def get(self, request, *args, **kwargs):
-        return render(request, "adminapp/length_for_age_girls.html")
-    
-    def post(self, request, *args, **kwargs):
-        excel_file = request.FILES.get("file")
-        if excel_file is not None:
-            excel_file = load_workbook(excel_file)
-            for row in excel_file.worksheets[0].iter_rows(values_only=True):
-                obj = LengthForAgeGirls.objects.filter(age_months=row[0])
-                if obj.exists():
-                    obj.update(
-                        sd_minus_3=row[1],
-                        sd_minus_2=row[2],
-                        sd_minus_1=row[3],
-                        median=row[4],
-                        sd_plus_1=row[5],
-                        sd_plus_2=row[6],
-                        sd_plus_3=row[7]
-                    )
-                else:
-                    LengthForAgeGirls.objects.create(
-                        age_months=row[0],
-                        sd_minus_3=row[1],
-                        sd_minus_2=row[2],
-                        sd_minus_1=row[3],
-                        median=row[4],
-                        sd_plus_1=row[5],
-                        sd_plus_2=row[6],
-                        sd_plus_3=row[7]
-                    )
-            messages.success(request, "Data berhasil diupload")
-        else:
-            messages.error(request, "File tidak ditemukan")
-        return redirect("length_for_age_girls")
-    
-
-class HeightForAgeBoysView(View):
-    def get(self, request, *args, **kwargs):
-        return render(request, "adminapp/height_for_age_boys.html")
-    
-    def post(self, request, *args, **kwargs):
-        excel_file = request.FILES.get("file")
-        if excel_file is not None:
-            excel_file = load_workbook(excel_file)
-            for row in excel_file.worksheets[0].iter_rows(values_only=True):
-                obj = HeightForAgeBoys.objects.filter(age_months=row[0])
-                if obj.exists():
-                    obj.update(
-                        sd_minus_3=row[1],
-                        sd_minus_2=row[2],
-                        sd_minus_1=row[3],
-                        median=row[4],
-                        sd_plus_1=row[5],
-                        sd_plus_2=row[6],
-                        sd_plus_3=row[7]
-                    )
-                else:
-                    HeightForAgeBoys.objects.create(
-                        age_months=row[0],
-                        sd_minus_3=row[1],
-                        sd_minus_2=row[2],
-                        sd_minus_1=row[3],
-                        median=row[4],
-                        sd_plus_1=row[5],
-                        sd_plus_2=row[6],
-                        sd_plus_3=row[7]
-                    )
-            messages.success(request, "Data berhasil diupload")
-        else:
-            messages.error(request, "File tidak ditemukan")
-        return redirect("height_for_age_boys")
-    
-
-class HeightForAgeGirlsView(View):
-    def get(self, request, *args, **kwargs):
-        return render(request, "adminapp/height_for_age_girls.html")
-    
-    def post(self, request, *args, **kwargs):
-        excel_file = request.FILES.get("file")
-        if excel_file is not None:
-            excel_file = load_workbook(excel_file)
-            for row in excel_file.worksheets[0].iter_rows(values_only=True):
-                obj = HeightForAgeGirls.objects.filter(age_months=row[0])
-                if obj.exists():
-                    obj.update(
-                        sd_minus_3=row[1],
-                        sd_minus_2=row[2],
-                        sd_minus_1=row[3],
-                        median=row[4],
-                        sd_plus_1=row[5],
-                        sd_plus_2=row[6],
-                        sd_plus_3=row[7]
-                    )
-                else:
-                    HeightForAgeGirls.objects.create(
-                        age_months=row[0],
-                        sd_minus_3=row[1],
-                        sd_minus_2=row[2],
-                        sd_minus_1=row[3],
-                        median=row[4],
-                        sd_plus_1=row[5],
-                        sd_plus_2=row[6],
-                        sd_plus_3=row[7]
-                    )
-            messages.success(request, "Data berhasil diupload")
-        else:
-            messages.error(request, "File tidak ditemukan")
-        return redirect("height_for_age_girls")
+        messages.success(request, "Data berhasil diupload")
+        return redirect("anthropometric_standard")
 
 
-class WeightForAgeBoysView(View):
-    def get(self, request, *args, **kwargs):
-        return render(request, "adminapp/weight_for_age_boys.html")
-    
-    def post(self, request, *args, **kwargs):
-        excel_file = request.FILES.get("file")
-        if excel_file is not None:
-            excel_file = load_workbook(excel_file)
-            for row in excel_file.worksheets[0].iter_rows(values_only=True):
-                obj = WeightForAgeBoys.objects.filter(age_months=row[0])
-                if obj.exists():
-                    obj.update(
-                        sd_minus_3=row[1],
-                        sd_minus_2=row[2],
-                        sd_minus_1=row[3],
-                        median=row[4],
-                        sd_plus_1=row[5],
-                        sd_plus_2=row[6],
-                        sd_plus_3=row[7]
-                    )
-                else:
-                    WeightForAgeBoys.objects.create(
-                        age_months=row[0],
-                        sd_minus_3=row[1],
-                        sd_minus_2=row[2],
-                        sd_minus_1=row[3],
-                        median=row[4],
-                        sd_plus_1=row[5],
-                        sd_plus_2=row[6],
-                        sd_plus_3=row[7]
-                    )
-            messages.success(request, "Data berhasil diupload")
-        else:
-            messages.error(request, "File tidak ditemukan")
-        return redirect("weight_for_age_boys")
-    
+# class LengthForAgeBoysView(View):
+#     def get(self, request, *args, **kwargs):
+#         return render(request, "adminapp/length_for_age_boys.html")
 
-class WeightForAgeGirlsView(View):
-    def get(self, request, *args, **kwargs):
-        return render(request, "adminapp/weight_for_age_girls.html")
-    
-    def post(self, request, *args, **kwargs):
-        excel_file = request.FILES.get("file")
-        if excel_file is not None:
-            excel_file = load_workbook(excel_file)
-            for row in excel_file.worksheets[0].iter_rows(values_only=True):
-                obj = WeightForAgeGirls.objects.filter(age_months=row[0])
-                if obj.exists():
-                    obj.update(
-                        sd_minus_3=row[1],
-                        sd_minus_2=row[2],
-                        sd_minus_1=row[3],
-                        median=row[4],
-                        sd_plus_1=row[5],
-                        sd_plus_2=row[6],
-                        sd_plus_3=row[7]
-                    )
-                else:
-                    WeightForAgeGirls.objects.create(
-                        age_months=row[0],
-                        sd_minus_3=row[1],
-                        sd_minus_2=row[2],
-                        sd_minus_1=row[3],
-                        median=row[4],
-                        sd_plus_1=row[5],
-                        sd_plus_2=row[6],
-                        sd_plus_3=row[7]
-                    )
-            messages.success(request, "Data berhasil diupload")
-        else:
-            messages.error(request, "File tidak ditemukan")
-        return redirect("weight_for_age_girls")
+#     def post(self, request, *args, **kwargs):
+#         excel_file = request.FILES.get("file")
+#         if excel_file is not None:
+#             excel_file = load_workbook(excel_file)
+#             for row in excel_file.worksheets[0].iter_rows(values_only=True):
+#                 obj = LengthForAgeBoys.objects.filter(age_months=row[0])
+#                 if obj.exists():
+#                     obj.update(
+#                         sd_minus_3=row[1],
+#                         sd_minus_2=row[2],
+#                         sd_minus_1=row[3],
+#                         median=row[4],
+#                         sd_plus_1=row[5],
+#                         sd_plus_2=row[6],
+#                         sd_plus_3=row[7]
+#                     )
+#                 else:
+#                     LengthForAgeBoys.objects.create(
+#                         age_months=row[0],
+#                         sd_minus_3=row[1],
+#                         sd_minus_2=row[2],
+#                         sd_minus_1=row[3],
+#                         median=row[4],
+#                         sd_plus_1=row[5],
+#                         sd_plus_2=row[6],
+#                         sd_plus_3=row[7]
+#                     )
+#             messages.success(request, "Data berhasil diupload")
+#         else:
+#             messages.error(request, "File tidak ditemukan")
+#         return redirect("length_for_age_boys")
+
+
+# class LengthForAgeGirlsView(View):
+#     def get(self, request, *args, **kwargs):
+#         return render(request, "adminapp/length_for_age_girls.html")
+
+#     def post(self, request, *args, **kwargs):
+#         excel_file = request.FILES.get("file")
+#         if excel_file is not None:
+#             excel_file = load_workbook(excel_file)
+#             for row in excel_file.worksheets[0].iter_rows(values_only=True):
+#                 obj = LengthForAgeGirls.objects.filter(age_months=row[0])
+#                 if obj.exists():
+#                     obj.update(
+#                         sd_minus_3=row[1],
+#                         sd_minus_2=row[2],
+#                         sd_minus_1=row[3],
+#                         median=row[4],
+#                         sd_plus_1=row[5],
+#                         sd_plus_2=row[6],
+#                         sd_plus_3=row[7]
+#                     )
+#                 else:
+#                     LengthForAgeGirls.objects.create(
+#                         age_months=row[0],
+#                         sd_minus_3=row[1],
+#                         sd_minus_2=row[2],
+#                         sd_minus_1=row[3],
+#                         median=row[4],
+#                         sd_plus_1=row[5],
+#                         sd_plus_2=row[6],
+#                         sd_plus_3=row[7]
+#                     )
+#             messages.success(request, "Data berhasil diupload")
+#         else:
+#             messages.error(request, "File tidak ditemukan")
+#         return redirect("length_for_age_girls")
+
+
+# class HeightForAgeBoysView(View):
+#     def get(self, request, *args, **kwargs):
+#         return render(request, "adminapp/height_for_age_boys.html")
+
+#     def post(self, request, *args, **kwargs):
+#         excel_file = request.FILES.get("file")
+#         if excel_file is not None:
+#             excel_file = load_workbook(excel_file)
+#             for row in excel_file.worksheets[0].iter_rows(values_only=True):
+#                 obj = HeightForAgeBoys.objects.filter(age_months=row[0])
+#                 if obj.exists():
+#                     obj.update(
+#                         sd_minus_3=row[1],
+#                         sd_minus_2=row[2],
+#                         sd_minus_1=row[3],
+#                         median=row[4],
+#                         sd_plus_1=row[5],
+#                         sd_plus_2=row[6],
+#                         sd_plus_3=row[7]
+#                     )
+#                 else:
+#                     HeightForAgeBoys.objects.create(
+#                         age_months=row[0],
+#                         sd_minus_3=row[1],
+#                         sd_minus_2=row[2],
+#                         sd_minus_1=row[3],
+#                         median=row[4],
+#                         sd_plus_1=row[5],
+#                         sd_plus_2=row[6],
+#                         sd_plus_3=row[7]
+#                     )
+#             messages.success(request, "Data berhasil diupload")
+#         else:
+#             messages.error(request, "File tidak ditemukan")
+#         return redirect("height_for_age_boys")
+
+
+# class HeightForAgeGirlsView(View):
+#     def get(self, request, *args, **kwargs):
+#         return render(request, "adminapp/height_for_age_girls.html")
+
+#     def post(self, request, *args, **kwargs):
+#         excel_file = request.FILES.get("file")
+#         if excel_file is not None:
+#             excel_file = load_workbook(excel_file)
+#             for row in excel_file.worksheets[0].iter_rows(values_only=True):
+#                 obj = HeightForAgeGirls.objects.filter(age_months=row[0])
+#                 if obj.exists():
+#                     obj.update(
+#                         sd_minus_3=row[1],
+#                         sd_minus_2=row[2],
+#                         sd_minus_1=row[3],
+#                         median=row[4],
+#                         sd_plus_1=row[5],
+#                         sd_plus_2=row[6],
+#                         sd_plus_3=row[7]
+#                     )
+#                 else:
+#                     HeightForAgeGirls.objects.create(
+#                         age_months=row[0],
+#                         sd_minus_3=row[1],
+#                         sd_minus_2=row[2],
+#                         sd_minus_1=row[3],
+#                         median=row[4],
+#                         sd_plus_1=row[5],
+#                         sd_plus_2=row[6],
+#                         sd_plus_3=row[7]
+#                     )
+#             messages.success(request, "Data berhasil diupload")
+#         else:
+#             messages.error(request, "File tidak ditemukan")
+#         return redirect("height_for_age_girls")
+
+
+# class WeightForAgeBoysView(View):
+#     def get(self, request, *args, **kwargs):
+#         return render(request, "adminapp/weight_for_age_boys.html")
+
+#     def post(self, request, *args, **kwargs):
+#         excel_file = request.FILES.get("file")
+#         if excel_file is not None:
+#             excel_file = load_workbook(excel_file)
+#             for row in excel_file.worksheets[0].iter_rows(values_only=True):
+#                 obj = WeightForAgeBoys.objects.filter(age_months=row[0])
+#                 if obj.exists():
+#                     obj.update(
+#                         sd_minus_3=row[1],
+#                         sd_minus_2=row[2],
+#                         sd_minus_1=row[3],
+#                         median=row[4],
+#                         sd_plus_1=row[5],
+#                         sd_plus_2=row[6],
+#                         sd_plus_3=row[7]
+#                     )
+#                 else:
+#                     WeightForAgeBoys.objects.create(
+#                         age_months=row[0],
+#                         sd_minus_3=row[1],
+#                         sd_minus_2=row[2],
+#                         sd_minus_1=row[3],
+#                         median=row[4],
+#                         sd_plus_1=row[5],
+#                         sd_plus_2=row[6],
+#                         sd_plus_3=row[7]
+#                     )
+#             messages.success(request, "Data berhasil diupload")
+#         else:
+#             messages.error(request, "File tidak ditemukan")
+#         return redirect("weight_for_age_boys")
+
+
+# class WeightForAgeGirlsView(View):
+#     def get(self, request, *args, **kwargs):
+#         return render(request, "adminapp/weight_for_age_girls.html")
+
+#     def post(self, request, *args, **kwargs):
+#         excel_file = request.FILES.get("file")
+#         if excel_file is not None:
+#             excel_file = load_workbook(excel_file)
+#             for row in excel_file.worksheets[0].iter_rows(values_only=True):
+#                 obj = WeightForAgeGirls.objects.filter(age_months=row[0])
+#                 if obj.exists():
+#                     obj.update(
+#                         sd_minus_3=row[1],
+#                         sd_minus_2=row[2],
+#                         sd_minus_1=row[3],
+#                         median=row[4],
+#                         sd_plus_1=row[5],
+#                         sd_plus_2=row[6],
+#                         sd_plus_3=row[7]
+#                     )
+#                 else:
+#                     WeightForAgeGirls.objects.create(
+#                         age_months=row[0],
+#                         sd_minus_3=row[1],
+#                         sd_minus_2=row[2],
+#                         sd_minus_1=row[3],
+#                         median=row[4],
+#                         sd_plus_1=row[5],
+#                         sd_plus_2=row[6],
+#                         sd_plus_3=row[7]
+#                     )
+#             messages.success(request, "Data berhasil diupload")
+#         else:
+#             messages.error(request, "File tidak ditemukan")
+#         return redirect("weight_for_age_girls")
