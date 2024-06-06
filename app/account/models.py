@@ -36,7 +36,6 @@ class CustomUserManager(BaseUserManager):
             full_name=full_name,
             password=password
         )
-        user.is_registered = True
         user.is_admin = True
         user.save(using=self._db)
         return user
@@ -64,13 +63,12 @@ class User(AbstractBaseUser):
     email = models.EmailField(max_length=255, unique=True, null=True, blank=True)
     profile_picture = models.ImageField(upload_to="profile_pictures/", null=True, blank=True)
 
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(null=True, blank=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     role = models.CharField(max_length=13, choices=Role.choices, default=base_role, null=True, blank=True)
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
-    is_registered = models.BooleanField(default=False)
 
     objects = CustomUserManager()
 

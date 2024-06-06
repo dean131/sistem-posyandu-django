@@ -1,4 +1,5 @@
 from django.contrib.auth import authenticate, login
+from django.utils import timezone
 
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.decorators import action
@@ -73,7 +74,7 @@ class UserViewSet(ModelViewSet):
         if user is None:
             return CustomResponse.bad_request("Pengguna tidak ditemukan")
 
-        if not user.is_registered:
+        if user.created_at is None:
             return CustomResponse.bad_request("Nomor whatsapp belum terdaftar")
 
         user.otp.send_otp_wa()
@@ -91,7 +92,7 @@ class UserViewSet(ModelViewSet):
         if user is None:
             return CustomResponse.bad_request("Akun tidak ditemukan")
 
-        if not user.is_registered:
+        if user.created_at is None:
             return CustomResponse.bad_request("Akun belum terdaftar")
 
         if not user.otp.validate_otp(otp_code):
@@ -114,13 +115,13 @@ class UserViewSet(ModelViewSet):
         if user is None:
             return CustomResponse.bad_request("Nomor Whatsapp yang Anda masukkan tidak salah")
 
-        if user.is_registered:
+        if user.created_at is not None:
             return CustomResponse.bad_request("Whatsapp sudah terdaftar")
 
         if not user.otp.validate_otp(otp_code):
             return CustomResponse.bad_request("OTP tidak valid atau sudah kadaluarsa")
 
-        user.is_registered = True
+        user.created_at = timezone.now().date()
         user.save()
 
         refresh = RefreshToken.for_user(user)
@@ -136,8 +137,7 @@ class CustomUserModelViewSet(ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         whatsapp = request.data.get("whatsapp")
-        user = self.queryset.filter(
-            whatsapp=whatsapp, is_registered=False).first()
+        user = self.queryset.filter(whatsapp=whatsapp, created_at__isnull=True).first()
         if user is not None:
             # Jika user registrasi dengan nomor whatsapp yang sama
             # tapi belum menyelesaikan proses registrasi.

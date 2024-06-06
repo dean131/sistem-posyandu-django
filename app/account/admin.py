@@ -18,31 +18,31 @@ from .models import (
 
 
 class UserAdmin(admin.ModelAdmin):
-    list_display = ["full_name", "id", "email", "role", "is_registered",]
+    list_display = ["full_name", "id", "email", "role"]
     class Meta:
         model = User
 
 
 class ParentAdmin(admin.ModelAdmin):
-    list_display = ["full_name", "id", "email", "role", "is_registered",]
+    list_display = ["full_name", "id", "email", "role"]
     class Meta:
         model = Parent
 
 
 class MidwifeAdmin(admin.ModelAdmin):
-    list_display = ["full_name", "id", "email", "role", "is_registered",]
+    list_display = ["full_name", "id", "email", "role"]
     class Meta:
         model = Midwife
 
 
 class CadreAdmin(admin.ModelAdmin):
-    list_display = ["full_name", "id", "email", "role", "is_registered",]
+    list_display = ["full_name", "id", "email", "role"]
     class Meta:
         model = Cadre
 
 
 class PuskesmasAdmin(admin.ModelAdmin):
-    list_display = ["full_name", "id", "email", "role", "is_registered",]
+    list_display = ["full_name", "id", "email", "role"]
     class Meta:
         model = Puskesmas
 
