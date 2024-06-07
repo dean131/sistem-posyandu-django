@@ -137,15 +137,17 @@ class CustomUserModelViewSet(ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         whatsapp = request.data.get("whatsapp")
-        user = self.queryset.filter(whatsapp=whatsapp, created_at__isnull=True).first()
+        user = User.objects.filter(
+            whatsapp=whatsapp, created_at__isnull=True).first()
         if user is not None:
             # Jika user registrasi dengan nomor whatsapp yang sama
             # tapi belum menyelesaikan proses registrasi.
             # Maka akan dikirimkan ulang kode OTP
-            user.full_name = request.data.get("full_name")
-            user.otp.send_otp_wa()
-            user.save()
-            return CustomResponse.ok("OTP telah dikirim ke nomor whatsapp Anda")
+            # user.full_name = request.data.get("full_name")
+            # user.otp.send_otp_wa()
+            # user.save()
+            # return CustomResponse.ok("OTP telah dikirim ke nomor whatsapp Anda")
+            user.delete()
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             self.perform_create(serializer)
