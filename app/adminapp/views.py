@@ -17,6 +17,7 @@ from account.models import (
 )
 
 from base.models import (
+    CadreAssignment,
     PosyanduActivity,
     Village,
     Child,
@@ -66,17 +67,25 @@ class LogoutView(View):
 # @method_decorator(login_required(login_url='login'), name='dispatch')
 class DashboardView(View):
     def get(self, request, *args, **kwargs):
+
+        villages = []
+        posyandus = []
+        for village in request.user.village_set.all():
+            villages.append(village)
+            for posyandu in village.posyandu_set.all():
+                posyandus.append(posyandu)
+
         children = Child.objects.filter(
-            parent__address__subdistrict=request.user.address.subdistrict
+            parent__parentposyandu__posyandu__in=posyandus
         ).count()
         parents = Parent.objects.filter(
-            address__subdistrict=request.user.address.subdistrict
+            parentposyandu__posyandu__in=posyandus
         ).count()
         midwives = Midwife.objects.filter(
-            address__subdistrict=request.user.address.subdistrict
+            midwifeassignment__village__in=villages
         ).count()
         cadres = Cadre.objects.filter(
-            address__subdistrict=request.user.address.subdistrict
+            cadreassignment__posyandu__in=posyandus
         ).count()
 
         context = {
@@ -342,18 +351,84 @@ class MidwifeAssignmentView(View):
             messages.error(request, "Penugasan tidak ditemukan")
 
 
-class ChildView(View):
+class CadreView(View):
     def get(self, request, *args, **kwargs):
         query = request.GET.get("q", "")
 
         if query:
+            cadres = Cadre.objects.filter(
+                full_name__icontains=query
+            ).order_by("-created_at")
+        else:
+            cadres = Cadre.objects.filter().order_by("-created_at")
+
+        context = {
+            "cadres": cadres
+        }
+        return render(request, "adminapp/cadres.html", context)
+
+
+class CadreAssignmentView(View):
+    def post(self, request, *args, **kwargs):
+        action = request.POST.get("form-action")
+        cadre_id = request.POST.get("cadre-id")
+        match action:
+            case "add": self.add_cadreassignment(request)
+            case "delete": self.delete_cadreassignment(request)
+        return redirect("cadre_info", pk=cadre_id)
+
+    def add_cadreassignment(self, request):
+        cadre_id = request.POST.get("cadre-id")
+        posyandu_id = request.POST.get("posyandu-id")
+
+        is_exist = CadreAssignment.objects.filter(
+            cadre__id=cadre_id,
+            posyandu__id=posyandu_id
+        ).exists()
+
+        if is_exist:
+            messages.success(request, "Kader sudah ditambahkan")
+            return
+
+        cadre = Cadre.objects.filter(id=cadre_id).first()
+        posyandu = Posyandu.objects.filter(id=posyandu_id).first()
+        if cadre is not None and posyandu is not None:
+            CadreAssignment.objects.create(
+                cadre=cadre,
+                posyandu=posyandu
+            )
+            messages.success(request, "Kader berhasil ditambahkan")
+        else:
+            messages.error(request, "Kader atau posyandu tidak ditemukan")
+
+    def delete_cadreassignment(self, request):
+        cadreassignment_id = request.POST.get("pk")
+        cadreassignment = CadreAssignment.objects.filter(
+            id=cadreassignment_id).first()
+        if cadreassignment is not None:
+            cadreassignment.delete()
+            messages.success(request, "Penugasan berhasil dihapus")
+        else:
+            messages.error(request, "Penugasan tidak ditemukan")
+
+
+class ChildView(View):
+    def get(self, request, *args, **kwargs):
+        query = request.GET.get("q", "")
+
+        posyandus = []
+        for village in request.user.village_set.all():
+            for posyandu in village.posyandu_set.all():
+                posyandus.append(posyandu)
+
+        if query:
             children = Child.objects.filter(
-                parent__address__subdistrict=request.user.address.subdistrict,
+                parent__parentposyandu__posyandu__in=posyandus,
                 full_name__icontains=query
             ).order_by("-created_at")
         else:
             children = Child.objects.filter(
-                parent__address__subdistrict=request.user.address.subdistrict
+                parent__parentposyandu__posyandu__in=posyandus
             ).order_by("-created_at")
 
         context = {

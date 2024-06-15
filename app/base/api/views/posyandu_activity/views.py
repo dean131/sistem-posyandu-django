@@ -85,7 +85,7 @@ class PosyanduActivityViewSet(ModelViewSet):
         else:
             return CustomResponse.bad_request("Role user tidak ditemukan")
 
-        queryset = queryset.filter(posyandu__in=posyandus)
+        queryset = queryset.filter(posyandu__in=posyandus).order_by('-date')
 
         page = self.paginate_queryset(queryset)
         if page is not None:
@@ -119,7 +119,8 @@ class PosyanduActivityViewSet(ModelViewSet):
         today = timezone.now().date()
         print(posyandus)
         print(today)
-        queryset = queryset.filter(date=today, posyandu__in=posyandus)
+        queryset = queryset.filter(
+            date=today, posyandu__in=posyandus).order_by('-date')
 
         page = self.paginate_queryset(queryset)
         if page is not None:
@@ -139,6 +140,8 @@ class PosyanduActivityViewSet(ModelViewSet):
         # get data anak yang sudah di ukur
         child_measured_ids = instance.childmeasurement_set.all().values_list('child',
                                                                              flat=True)
+
+        print(child_measured_ids)
 
         # Get data anak berdasarkan PosyanduActivity
         children = []

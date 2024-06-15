@@ -24,6 +24,8 @@ urlpatterns = [
     path("midwife_assignments/", views.MidwifeAssignmentView.as_view(),
          name="midwife_assignments"),
 
+    path("cadres/", views.CadreView.as_view(), name="cadres"),
+
     path("parents/", views.ParentView.as_view(), name="parents"),
 
     path("children/", views.ChildView.as_view(), name="children"),
