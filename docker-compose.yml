@@ -2,8 +2,9 @@ version: '3.8'
 
 services:
   web:
+    container_name: be-posyandu
     build: .
-    command: python manage.py runserver 0.0.0.0:8000
+    command: python app/manage.py runserver 0.0.0.0:8000
     volumes:
       - .:/app
     ports:
@@ -12,13 +13,14 @@ services:
       - db
 
   db:
+    container_name: db-posyandu
     image: postgres:13
     volumes:
       - postgres_data:/var/lib/postgresql/data
     environment:
       POSTGRES_DB: posyandu
       POSTGRES_USER: posyandu_user
-      POSTGRES_PASSWORD: posyandu_password
+      POSTGRES_PASSWORD: Admin123#
 
 volumes:
   postgres_data:

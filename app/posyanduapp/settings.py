@@ -86,10 +86,21 @@ WSGI_APPLICATION = 'posyanduapp.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.environ.get('POSTGRES_DB', 'posyandu'),
+        'USER': os.environ.get('POSTGRES_USER', 'posyandu_user'),
+        'PASSWORD': os.environ.get('POSTGRES_PASSWORD', 'posyandu_password'),
+        'HOST': 'db-posyandu',
+        'PORT': '5432',
     }
 }
 
@@ -134,7 +145,7 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
 ]
 
-MEDIA_ROOT  = os.path.join(BASE_DIR, 'media')
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = 'media/'
 
 # Default primary key field type
@@ -155,7 +166,7 @@ REST_FRAMEWORK = {
     # Pagination
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
     'PAGE_SIZE': 100,
-    
+
     # 'EXCEPTION_HANDLER': 'posyanduapp.utils.custom_exception_handler.custom_exception_handler',
 }
 

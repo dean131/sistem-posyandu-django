@@ -1,9 +1,16 @@
 # Use the official Python image from the Docker Hub
-FROM python:3.12-alpine
+FROM python:3.12-slim
 
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
+
+# Install dependencies required for building psycopg2
+RUN apt-get update && apt-get install -y \
+    libpq-dev \
+    build-essential \
+    gcc \
+    && apt-get clean
 
 # Set the working directory
 WORKDIR /app
@@ -21,4 +28,4 @@ COPY . /app/
 EXPOSE 8000
 
 # Run the Django development server
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+CMD ["python", "app/manage.py", "runserver", "0.0.0.0:8000"]
