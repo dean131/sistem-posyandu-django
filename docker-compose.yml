@@ -22,7 +22,7 @@ services:
     environment:
       POSTGRES_DB: posyandu
       POSTGRES_USER: posyandu_user
-      POSTGRES_PASSWORD: Admin123#
+      POSTGRES_PASSWORD: Admin123
 
 volumes:
   postgres_data:
