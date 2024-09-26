@@ -1,7 +1,5 @@
-version: '3.8'
-
 services:
-  web:
+  be-posyandu:
     container_name: be-posyandu
     build: .
     command: sh -c "python3 app/manage.py makemigrations account base && 
@@ -14,7 +12,7 @@ services:
     depends_on:
       - db
 
-  db:
+  db-posyandu:
     container_name: db-posyandu
     image: postgres:13
     volumes:
