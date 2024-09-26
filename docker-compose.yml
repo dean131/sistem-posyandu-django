@@ -10,7 +10,7 @@ services:
     ports:
       - "8000:8000"
     depends_on:
-      - db
+      - db-posyandu
 
   db-posyandu:
     container_name: db-posyandu
