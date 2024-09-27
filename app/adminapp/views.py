@@ -64,7 +64,7 @@ class LogoutView(View):
         return redirect("login")
 
 
-# @method_decorator(login_required(login_url='login'), name='dispatch')
+@method_decorator(login_required(login_url='login'), name='dispatch')
 class DashboardView(View):
     def get(self, request, *args, **kwargs):
 
