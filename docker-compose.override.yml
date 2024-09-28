@@ -1,0 +1,17 @@
+services:
+  be-posyandu:
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env.dev
+
+  db-posyandu:
+    volumes:
+      - postgres_posyandu_dev:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: posyandu_db_dev
+      POSTGRES_USER: posyandu_user_dev
+      POSTGRES_PASSWORD: Admin123
+
+volumes:
+  postgres_posyandu_dev:

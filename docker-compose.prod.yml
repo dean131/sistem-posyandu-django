@@ -1,0 +1,25 @@
+services:
+  be-posyandu:
+    env_file:
+      - .env.prod
+    expose:
+      - 8000
+    networks:
+      - nginx-proxy-manager_default
+
+  db-posyandu:
+    volumes:
+      - postgres_posyandu_prod:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: posyandu_db_prod
+      POSTGRES_USER: posyandu_user_prod
+      POSTGRES_PASSWORD: Admin123
+    networks:
+      - nginx-proxy-manager_default
+
+networks:
+  nginx-proxy-manager_default:
+    external: true
+
+volumes:
+  postgres_posyandu_prod:
