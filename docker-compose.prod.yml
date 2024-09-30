@@ -4,6 +4,8 @@ services:
       - .env.prod
     expose:
       - 8000
+    volumes:
+      - .:/app
     networks:
       - nginx-proxy-manager_default
 

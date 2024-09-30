@@ -476,36 +476,40 @@ class AnthropometricStandardView(View):
             messages.error(request, "File Excel dibutuhkan")
             return redirect("anthropometric_standard")
 
+        array_of_measurement_type = [
+            "f_weight_for_age",
+            "f_weight_for_length",
+            "f_weight_for_height",
+            "f_length_for_age",
+            "f_height_for_age",
+            "f_bmi_for_age_0_24",
+            "f_bmi_for_age_24_60",
+            "m_weight_for_age",
+            "m_weight_for_length",
+            "m_weight_for_height",
+            "m_length_for_age",
+            "m_height_for_age",
+            "m_bmi_for_age_0_24",
+            "m_bmi_for_age_24_60",
+        ]
+
         # cek measurement type apakah terdaftar
         for excel_file in excel_files:
-            loaded_excel_file = load_workbook(excel_file)
-            for row in loaded_excel_file.worksheets[0].iter_rows(values_only=True, min_row=2):
-                if row[8] not in [
-                    "f_weight_for_age",
-                    "f_weight_for_length",
-                    "f_weight_for_height",
-                    "f_length_for_age",
-                    "f_height_for_age",
-                    "f_bmi_for_age_0_24",
-                    "f_bmi_for_age_24_60",
-                    "m_weight_for_age",
-                    "m_weight_for_length",
-                    "m_weight_for_height",
-                    "m_length_for_age",
-                    "m_height_for_age",
-                    "m_bmi_for_age_0_24",
-                    "m_bmi_for_age_24_60",
-                ]:
-                    messages.error(
-                        request, f"Measurement type {row[8]} tidak terdaftar")
-                    return redirect("anthropometric_standard")
+            workbook = load_workbook(excel_file)
+            # cek menggunakan nama file
+            file_name = excel_file.name.split(".")[0]
+            # jika nama file tidak terdaftar maka akan muncul pesan error
+            if file_name not in array_of_measurement_type:
+                messages.error(
+                    request,
+                    f"Measurement type {file_name} tidak terdaftar"
+                )
+                return redirect("anthropometric_standard")
 
-        for excel_file in excel_files:
-            loaded_excel_file = load_workbook(excel_file)
-            for row in loaded_excel_file.worksheets[0].iter_rows(values_only=True, min_row=2):
+            for row in workbook.worksheets[0].iter_rows(values_only=True, min_row=2):
                 obj = AnthropometricStandard.objects.filter(
                     index=row[0],
-                    measurement_type=row[8]
+                    measurement_type=file_name
                 )
                 if obj.exists():
                     obj.update(
@@ -517,7 +521,7 @@ class AnthropometricStandardView(View):
                         sd_plus_1=row[5],
                         sd_plus_2=row[6],
                         sd_plus_3=row[7],
-                        measurement_type=row[8],
+                        measurement_type=file_name,
                     )
                 else:
                     AnthropometricStandard.objects.create(
@@ -529,7 +533,7 @@ class AnthropometricStandardView(View):
                         sd_plus_1=row[5],
                         sd_plus_2=row[6],
                         sd_plus_3=row[7],
-                        measurement_type=row[8],
+                        measurement_type=file_name,
                     )
         messages.success(request, "Data berhasil diupload")
         return redirect("anthropometric_standard")
