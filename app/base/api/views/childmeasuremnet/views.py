@@ -14,7 +14,7 @@ class ChildMeasurementViewSet(ModelViewSet):
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(
-            self.get_queryset()).order_by('-created_at')
+            self.get_queryset()).order_by('-age_in_month')
 
         page = self.paginate_queryset(queryset)
         if page is not None:

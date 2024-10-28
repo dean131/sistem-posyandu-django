@@ -313,70 +313,73 @@ class ChildMeasurement(models.Model):
     posyandu_activity = models.ForeignKey(
         PosyanduActivity, on_delete=models.CASCADE, null=True, blank=True)
 
+    class Meta:
+        ordering = ['-age_in_month']
+
     def __str__(self):
         return f"Pengukuran Anak {self.child.full_name}"
 
-    def save(self, *args, **kwargs):
-        if not self.id:
-            self.set_ages()  # set umur sebelum dilakukan perhitungan
-        match self.child.gender:
-            case "M":
-                if self.age_in_month < 24:
-                    # WEIGHT FOR AGE
-                    self.calculate_weight_for_age_with_param(
-                        measurement_type="m_weight_for_age",
-                        chart_attr="weight_for_age_0_24_chart",
-                        title="Berat Badan Menurut Umur Laki-laki (0-24 Bulan)"
-                    )
-                    # LENGTH FOR AGE
-                    self.calculate_length_or_height_for_age_with_param(
-                        measurement_type="m_length_for_age",
-                        chart_attr="length_for_age_chart",
-                        title="Tinggi Badan Menurut Umur Laki-laki (0-24 Bulan)"
-                    )
-                else:
-                    # WEIGHT FOR AGE
-                    self.calculate_weight_for_age_with_param(
-                        measurement_type="m_weight_for_age",
-                        chart_attr="weight_for_age_24_60_chart",
-                        title="Berat Badan Menurut Umur Laki-laki (24-60 Bulan)"
-                    )
-                    # HEIGHT FOR AGE
-                    self.calculate_length_or_height_for_age_with_param(
-                        measurement_type="m_height_for_age",
-                        chart_attr="height_for_age_chart",
-                        title="Tinggi Badan Menurut Umur Laki-laki (24-60 Bulan)"
-                    )
-            case "F":
-                if self.age_in_month < 24:
-                    # WEIGHT FOR AGE
-                    self.calculate_weight_for_age_with_param(
-                        measurement_type="f_weight_for_age",
-                        chart_attr="weight_for_age_0_24_chart",
-                        title="Berat Badan Menurut Umur Perempuan (0-24 Bulan)"
-                    )
-                    # LENGTH FOR AGE
-                    self.calculate_length_or_height_for_age_with_param(
-                        measurement_type="f_length_for_age",
-                        chart_attr="length_for_age_chart",
-                        title="Tinggi Badan Menurut Umur Perempuan (0-24 Bulan)"
-                    )
-                else:
-                    # WEIGHT FOR AGE
-                    self.calculate_weight_for_age_with_param(
-                        measurement_type="f_weight_for_age",
-                        chart_attr="weight_for_age_24_60_chart",
-                        title="Berat Badan Menurut Umur Perempuan (24-60 Bulan)"
-                    )
-                    # HEIGHT FOR AGE
-                    self.calculate_length_or_height_for_age_with_param(
-                        measurement_type="f_height_for_age",
-                        chart_attr="height_for_age_chart",
-                        title="Tinggi Badan Menurut Umur Perempuan (24-60 Bulan)"
-                    )
+    # def save(self, *args, **kwargs):
+    #     if not self.id:
+    #         self.set_ages()  # set umur sebelum dilakukan perhitungan
+    #     match self.child.gender:
+    #         case "M":
+    #             if self.age_in_month < 24:
+    #                 # WEIGHT FOR AGE
+    #                 self.calculate_weight_for_age_with_param(
+    #                     measurement_type="m_weight_for_age",
+    #                     chart_attr="weight_for_age_0_24_chart",
+    #                     title="Berat Badan Menurut Umur Laki-laki (0-24 Bulan)"
+    #                 )
+    #                 # LENGTH FOR AGE
+    #                 self.calculate_length_or_height_for_age_with_param(
+    #                     measurement_type="m_length_for_age",
+    #                     chart_attr="length_for_age_chart",
+    #                     title="Tinggi Badan Menurut Umur Laki-laki (0-24 Bulan)"
+    #                 )
+    #             else:
+    #                 # WEIGHT FOR AGE
+    #                 self.calculate_weight_for_age_with_param(
+    #                     measurement_type="m_weight_for_age",
+    #                     chart_attr="weight_for_age_24_60_chart",
+    #                     title="Berat Badan Menurut Umur Laki-laki (24-60 Bulan)"
+    #                 )
+    #                 # HEIGHT FOR AGE
+    #                 self.calculate_length_or_height_for_age_with_param(
+    #                     measurement_type="m_height_for_age",
+    #                     chart_attr="height_for_age_chart",
+    #                     title="Tinggi Badan Menurut Umur Laki-laki (24-60 Bulan)"
+    #                 )
+    #         case "F":
+    #             if self.age_in_month < 24:
+    #                 # WEIGHT FOR AGE
+    #                 self.calculate_weight_for_age_with_param(
+    #                     measurement_type="f_weight_for_age",
+    #                     chart_attr="weight_for_age_0_24_chart",
+    #                     title="Berat Badan Menurut Umur Perempuan (0-24 Bulan)"
+    #                 )
+    #                 # LENGTH FOR AGE
+    #                 self.calculate_length_or_height_for_age_with_param(
+    #                     measurement_type="f_length_for_age",
+    #                     chart_attr="length_for_age_chart",
+    #                     title="Tinggi Badan Menurut Umur Perempuan (0-24 Bulan)"
+    #                 )
+    #             else:
+    #                 # WEIGHT FOR AGE
+    #                 self.calculate_weight_for_age_with_param(
+    #                     measurement_type="f_weight_for_age",
+    #                     chart_attr="weight_for_age_24_60_chart",
+    #                     title="Berat Badan Menurut Umur Perempuan (24-60 Bulan)"
+    #                 )
+    #                 # HEIGHT FOR AGE
+    #                 self.calculate_length_or_height_for_age_with_param(
+    #                     measurement_type="f_height_for_age",
+    #                     chart_attr="height_for_age_chart",
+    #                     title="Tinggi Badan Menurut Umur Perempuan (24-60 Bulan)"
+    #                 )
 
-        # self.calculate_length_and_height_for_age()
-        super().save(*args, **kwargs)
+    #     # self.calculate_length_and_height_for_age()
+    #     super().save(*args, **kwargs)
 
     def set_ages(self):
         self.age = self.child.current_age
@@ -451,7 +454,7 @@ class ChildMeasurement(models.Model):
         plt.plot(index.astype(float), pos_2.astype(float), label='+2 SD')
         plt.plot(index.astype(float), pos_3.astype(float), label='+3 SD')
         plt.title(title)
-        plt.ylabel("Panjang Badan (cm)")
+        plt.ylabel("Berat Badan (kg)")
         plt.xlabel("Umur (bulan)")
         plt.grid()
         plt.legend()
