@@ -7,7 +7,7 @@ services:
     volumes:
       - .:/app
     networks:
-      - nginx-proxy-manager_default
+      - npm-networks
 
   db-posyandu:
     volumes:
@@ -17,10 +17,10 @@ services:
       POSTGRES_USER: posyandu_user_prod
       POSTGRES_PASSWORD: Admin123
     networks:
-      - nginx-proxy-manager_default
+      - npm-networks
 
 networks:
-  nginx-proxy-manager_default:
+  npm-networks:
     external: true
 
 volumes:
