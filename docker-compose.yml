@@ -1,7 +1,6 @@
 services:
   be-posyandu:
     container_name: be-posyandu
-    build: .
     command: sh -c "python3 app/manage.py makemigrations account base && 
                     python3 app/manage.py migrate --no-input && 
                     python3 app/manage.py runserver 0.0.0.0:8000"
