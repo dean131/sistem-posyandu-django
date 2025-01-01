@@ -7,41 +7,50 @@ from base.models import (
     Child,
     Posyandu,
     MidwifeAssignment,
-    PosyanduActivity,
     ParentPosyandu,
-    ChildMeasurement,
     GrowthChart,
     CadreAssignment,
-
     AnthropometricStandard,
-
     # LengthForAgeBoys,
     # LengthForAgeGirls,
     # HeightForAgeBoys,
     # HeightForAgeGirls,
 )
+from posyandu_activity.models import PosyanduActivity
+from child_measurement.models import ChildMeasurement
 
 
 class ChildAdmin(admin.ModelAdmin):
-    list_display = ('full_name', 'gender', 'current_age',
-                    'curent_age_in_months')
+    list_display = ("full_name", "gender", "current_age", "curent_age_in_months")
 
 
 class PosyanduAdmin(admin.ModelAdmin):
-    list_display = ('name', 'id', 'village', 'address')
+    list_display = ("name", "id", "village", "address")
 
 
 class ChildMeasurementAdmin(admin.ModelAdmin):
-    list_display = ("child", "age", "age_in_month", "weight", "height", "height_for_age",
-                    "z_score_height_for_age", "weight_for_age", "z_score_weight_for_age")
+    list_display = (
+        "child",
+        "age",
+        "age_in_month",
+        "weight",
+        "height",
+        "height_for_age",
+        "z_score_height_for_age",
+        "weight_for_age",
+        "z_score_weight_for_age",
+    )
 
 
 class PosyanduActivityAdmin(admin.ModelAdmin):
-    list_display = ('id', '__str__')
+    list_display = ("id", "__str__")
 
 
 class AnthropometricStandardAdmin(admin.ModelAdmin):
-    search_fields = ("index", "measurement_type",)
+    search_fields = (
+        "index",
+        "measurement_type",
+    )
 
 
 admin.site.register(Village)

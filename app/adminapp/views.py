@@ -18,14 +18,11 @@ from account.models import (
 
 from base.models import (
     CadreAssignment,
-    PosyanduActivity,
     Village,
     Child,
     Posyandu,
     MidwifeAssignment,
-
-    AnthropometricStandard
-
+    AnthropometricStandard,
     # LengthForAgeBoys,
     # LengthForAgeGirls,
     # HeightForAgeBoys,
@@ -33,14 +30,15 @@ from base.models import (
     # WeightForAgeBoys,
     # WeightForAgeGirls,
 )
+from posyandu_activity.models import PosyanduActivity
 
 
 class LoginView(View):
     def get(self, request, *args, **kwargs):
-        next_page = request.GET.get('next', '/')
+        next_page = request.GET.get("next", "/")
         if request.user.is_authenticated:
             # Redirect to previous page or home page
-            return redirect(next_page if next_page != '/login/' else '/')
+            return redirect(next_page if next_page != "/login/" else "/")
         return render(request, "adminapp/auth_login.html")
 
     def post(self, request, *args, **kwargs):
@@ -64,7 +62,7 @@ class LogoutView(View):
         return redirect("login")
 
 
-@method_decorator(login_required(login_url='login'), name='dispatch')
+@method_decorator(login_required(login_url="login"), name="dispatch")
 class DashboardView(View):
     def get(self, request, *args, **kwargs):
 
@@ -78,15 +76,11 @@ class DashboardView(View):
         children = Child.objects.filter(
             parent__parentposyandu__posyandu__in=posyandus
         ).count()
-        parents = Parent.objects.filter(
-            parentposyandu__posyandu__in=posyandus
-        ).count()
+        parents = Parent.objects.filter(parentposyandu__posyandu__in=posyandus).count()
         midwives = Midwife.objects.filter(
             midwifeassignment__village__in=villages
         ).count()
-        cadres = Cadre.objects.filter(
-            cadreassignment__posyandu__in=posyandus
-        ).count()
+        cadres = Cadre.objects.filter(cadreassignment__posyandu__in=posyandus).count()
 
         context = {
             "children": children,
@@ -106,7 +100,7 @@ class PosyanduActivitiesView(View):
             village = Village.objects.filter(id=village_id).first()
             posyandu_activities = PosyanduActivity.objects.filter(
                 posyandu__village__puskesmas=request.user,
-                posyandu__village__name=village
+                posyandu__village__name=village,
             ).order_by("-created_at")
 
         if posyandu_id:
@@ -120,9 +114,7 @@ class PosyanduActivitiesView(View):
                 posyandu__village__puskesmas=request.user
             ).order_by("-created_at")
 
-        context = {
-            "posyandu_activities": posyandu_activities
-        }
+        context = {"posyandu_activities": posyandu_activities}
         return render(request, "adminapp/posyandu_activities.html", context)
 
 
@@ -133,33 +125,30 @@ class VillageListView(View):
 
         if query:
             villages = Village.objects.filter(
-                puskesmas=puskesmas,
-                name__icontains=query
+                puskesmas=puskesmas, name__icontains=query
             ).order_by("-created_at")
         else:
-            villages = Village.objects.filter(
-                puskesmas=puskesmas
-            ).order_by("-created_at")
+            villages = Village.objects.filter(puskesmas=puskesmas).order_by(
+                "-created_at"
+            )
 
-        context = {
-            "villages": villages
-        }
+        context = {"villages": villages}
         return render(request, "adminapp/village_list.html", context)
 
     def post(self, request, *args, **kwargs):
         action = request.POST.get("form-action")
         match action:
-            case "add": self.add_village(request)
-            case "edit": self.edit_village(request)
-            case "delete": self.delete_village(request)
+            case "add":
+                self.add_village(request)
+            case "edit":
+                self.edit_village(request)
+            case "delete":
+                self.delete_village(request)
         return redirect("village_list")
 
     def add_village(self, request):
         name = request.POST.get("village-name")
-        Village.objects.create(
-            puskesmas=request.user,
-            name=name
-        )
+        Village.objects.create(puskesmas=request.user, name=name)
         messages.success(request, "Desa berhasil ditambahkan")
         return redirect("village_list")
 
@@ -190,24 +179,16 @@ class VillageInfoView(View):
     def get(self, request, *args, **kwargs):
         pk = kwargs.get("pk")
         village = Village.objects.filter(id=pk).first()
-        children = Child.objects.filter(
-            parent__address__village=village.name
-        )
-        parents = Parent.objects.filter(
-            address__village=village.name
-        )
-        posyandus = Posyandu.objects.filter(
-            village=village
-        )
-        midwives = Midwife.objects.filter(
-            midwifeassignment__village=village
-        )
+        children = Child.objects.filter(parent__address__village=village.name)
+        parents = Parent.objects.filter(address__village=village.name)
+        posyandus = Posyandu.objects.filter(village=village)
+        midwives = Midwife.objects.filter(midwifeassignment__village=village)
         context = {
             "village": village,
             "children": children,
             "parents": parents,
             "posyandus": posyandus,
-            "midwives": midwives
+            "midwives": midwives,
         }
         return render(request, "adminapp/village_info.html", context)
 
@@ -218,25 +199,25 @@ class PosyanduView(View):
 
         if query:
             posyandus = Posyandu.objects.filter(
-                village__puskesmas=request.user,
-                name__icontains=query
+                village__puskesmas=request.user, name__icontains=query
             ).order_by("-created_at")
         else:
             posyandus = Posyandu.objects.filter(
                 village__puskesmas=request.user
             ).order_by("-created_at")
 
-        context = {
-            "posyandus": posyandus
-        }
+        context = {"posyandus": posyandus}
         return render(request, "adminapp/posyandu_page.html", context)
 
     def post(self, request, *args, **kwargs):
         action = request.POST.get("form-action")
         match action:
-            case "add": self.add_posyandu(request)
-            case "edit": self.edit_posyandu(request)
-            case "delete": self.delete_posyandu(request)
+            case "add":
+                self.add_posyandu(request)
+            case "edit":
+                self.edit_posyandu(request)
+            case "delete":
+                self.delete_posyandu(request)
         return redirect("posyandu")
 
     def add_posyandu(self, request):
@@ -245,11 +226,7 @@ class PosyanduView(View):
         village_id = request.POST.get("village-id")
         village = Village.objects.filter(id=village_id).first()
         if village is not None:
-            Posyandu.objects.create(
-                name=name,
-                address=address,
-                village=village
-            )
+            Posyandu.objects.create(name=name, address=address, village=village)
             messages.success(request, "Posyandu berhasil ditambahkan")
         else:
             messages.error(request, "Desa tidak ditemukan")
@@ -286,15 +263,13 @@ class MidwifeView(View):
         query = request.GET.get("q", "")
 
         if query:
-            midwives = Midwife.objects.filter(
-                full_name__icontains=query
-            ).order_by("-created_at")
+            midwives = Midwife.objects.filter(full_name__icontains=query).order_by(
+                "-created_at"
+            )
         else:
             midwives = Midwife.objects.filter().order_by("-created_at")
 
-        context = {
-            "midwives": midwives
-        }
+        context = {"midwives": midwives}
         return render(request, "adminapp/midwife.html", context)
 
 
@@ -302,9 +277,7 @@ class MidwifeInfoView(View):
     def get(self, request, *args, **kwargs):
         pk = kwargs.get("pk")
         midwife = Midwife.objects.filter(id=pk).first()
-        context = {
-            "midwife": midwife
-        }
+        context = {"midwife": midwife}
         return render(request, "adminapp/midwife_info.html", context)
 
 
@@ -313,8 +286,10 @@ class MidwifeAssignmentView(View):
         action = request.POST.get("form-action")
         midwife_id = request.POST.get("midwife-id")
         match action:
-            case "add": self.add_midwifeassignment(request)
-            case "delete": self.delete_midwifeassignment(request)
+            case "add":
+                self.add_midwifeassignment(request)
+            case "delete":
+                self.delete_midwifeassignment(request)
         return redirect("midwife_info", pk=midwife_id)
 
     def add_midwifeassignment(self, request):
@@ -322,8 +297,7 @@ class MidwifeAssignmentView(View):
         village_id = request.POST.get("village-id")
 
         is_exist = MidwifeAssignment.objects.filter(
-            midwife__id=midwife_id,
-            village__id=village_id
+            midwife__id=midwife_id, village__id=village_id
         ).exists()
         if is_exist:
             messages.success(request, "Bidan sudah ditambahkan")
@@ -332,10 +306,7 @@ class MidwifeAssignmentView(View):
         midwife = Midwife.objects.filter(id=midwife_id).first()
         village = Village.objects.filter(id=village_id).first()
         if midwife is not None and village is not None:
-            MidwifeAssignment.objects.create(
-                midwife=midwife,
-                village=village
-            )
+            MidwifeAssignment.objects.create(midwife=midwife, village=village)
             messages.success(request, "Bidan berhasil ditambahkan")
         else:
             messages.error(request, "Bidan atau desa tidak ditemukan")
@@ -343,7 +314,8 @@ class MidwifeAssignmentView(View):
     def delete_midwifeassignment(self, request):
         midwifeassignment_id = request.POST.get("pk")
         midwifeassignment = MidwifeAssignment.objects.filter(
-            id=midwifeassignment_id).first()
+            id=midwifeassignment_id
+        ).first()
         if midwifeassignment is not None:
             midwifeassignment.delete()
             messages.success(request, "Penugasan berhasil dihapus")
@@ -356,15 +328,13 @@ class CadreView(View):
         query = request.GET.get("q", "")
 
         if query:
-            cadres = Cadre.objects.filter(
-                full_name__icontains=query
-            ).order_by("-created_at")
+            cadres = Cadre.objects.filter(full_name__icontains=query).order_by(
+                "-created_at"
+            )
         else:
             cadres = Cadre.objects.filter().order_by("-created_at")
 
-        context = {
-            "cadres": cadres
-        }
+        context = {"cadres": cadres}
         return render(request, "adminapp/cadres.html", context)
 
 
@@ -373,8 +343,10 @@ class CadreAssignmentView(View):
         action = request.POST.get("form-action")
         cadre_id = request.POST.get("cadre-id")
         match action:
-            case "add": self.add_cadreassignment(request)
-            case "delete": self.delete_cadreassignment(request)
+            case "add":
+                self.add_cadreassignment(request)
+            case "delete":
+                self.delete_cadreassignment(request)
         return redirect("cadre_info", pk=cadre_id)
 
     def add_cadreassignment(self, request):
@@ -382,8 +354,7 @@ class CadreAssignmentView(View):
         posyandu_id = request.POST.get("posyandu-id")
 
         is_exist = CadreAssignment.objects.filter(
-            cadre__id=cadre_id,
-            posyandu__id=posyandu_id
+            cadre__id=cadre_id, posyandu__id=posyandu_id
         ).exists()
 
         if is_exist:
@@ -393,18 +364,14 @@ class CadreAssignmentView(View):
         cadre = Cadre.objects.filter(id=cadre_id).first()
         posyandu = Posyandu.objects.filter(id=posyandu_id).first()
         if cadre is not None and posyandu is not None:
-            CadreAssignment.objects.create(
-                cadre=cadre,
-                posyandu=posyandu
-            )
+            CadreAssignment.objects.create(cadre=cadre, posyandu=posyandu)
             messages.success(request, "Kader berhasil ditambahkan")
         else:
             messages.error(request, "Kader atau posyandu tidak ditemukan")
 
     def delete_cadreassignment(self, request):
         cadreassignment_id = request.POST.get("pk")
-        cadreassignment = CadreAssignment.objects.filter(
-            id=cadreassignment_id).first()
+        cadreassignment = CadreAssignment.objects.filter(id=cadreassignment_id).first()
         if cadreassignment is not None:
             cadreassignment.delete()
             messages.success(request, "Penugasan berhasil dihapus")
@@ -424,24 +391,25 @@ class ChildView(View):
         if query:
             children = Child.objects.filter(
                 parent__parentposyandu__posyandu__in=posyandus,
-                full_name__icontains=query
+                full_name__icontains=query,
             ).order_by("-created_at")
         else:
             children = Child.objects.filter(
                 parent__parentposyandu__posyandu__in=posyandus
             ).order_by("-created_at")
 
-        context = {
-            "children": children
-        }
+        context = {"children": children}
         return render(request, "adminapp/children.html", context)
 
     def post(self, request, *args, **kwargs):
         action = request.POST.get("form-action")
         match action:
-            case "add": self.add_child(request)
-            case "edit": self.edit_child(request)
-            case "delete": self.delete_child(request)
+            case "add":
+                self.add_child(request)
+            case "edit":
+                self.edit_child(request)
+            case "delete":
+                self.delete_child(request)
         return redirect("children")
 
 
@@ -452,16 +420,14 @@ class ParentView(View):
         if query:
             parents = Parent.objects.filter(
                 address__subdistrict=request.user.address.subdistrict,
-                full_name__icontains=query
+                full_name__icontains=query,
             ).order_by("-created_at")
         else:
             parents = Parent.objects.filter(
                 address__subdistrict=request.user.address.subdistrict
             ).order_by("-created_at")
 
-        context = {
-            "parents": parents
-        }
+        context = {"parents": parents}
         return render(request, "adminapp/parents.html", context)
 
 
@@ -500,16 +466,12 @@ class AnthropometricStandardView(View):
             file_name = excel_file.name.split(".")[0]
             # jika nama file tidak terdaftar maka akan muncul pesan error
             if file_name not in array_of_measurement_type:
-                messages.error(
-                    request,
-                    f"Measurement type {file_name} tidak terdaftar"
-                )
+                messages.error(request, f"Measurement type {file_name} tidak terdaftar")
                 return redirect("anthropometric_standard")
 
             for row in workbook.worksheets[0].iter_rows(values_only=True, min_row=2):
                 obj = AnthropometricStandard.objects.filter(
-                    index=row[0],
-                    measurement_type=file_name
+                    index=row[0], measurement_type=file_name
                 )
                 if obj.exists():
                     obj.update(

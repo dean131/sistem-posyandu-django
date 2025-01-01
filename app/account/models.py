@@ -23,7 +23,7 @@ class CustomUserManager(BaseUserManager):
             whatsapp=whatsapp,
             full_name=full_name,
             password=password,
-            email=extra_fields.get("email", None)
+            email=extra_fields.get("email", None),
         )
 
         user.set_password(password)
@@ -32,9 +32,7 @@ class CustomUserManager(BaseUserManager):
 
     def create_superuser(self, whatsapp, full_name, password=None, **extra_fields):
         user = self.create_user(
-            whatsapp=whatsapp,
-            full_name=full_name,
-            password=password
+            whatsapp=whatsapp, full_name=full_name, password=password
         )
         user.is_admin = True
         user.save(using=self._db)
@@ -42,7 +40,7 @@ class CustomUserManager(BaseUserManager):
 
     def generate_random_password(self):
         characters = string.ascii_letters + string.digits
-        password = ''.join(random.choice(characters) for i in range(32))
+        password = "".join(random.choice(characters) for i in range(32))
         return password
 
 
@@ -61,12 +59,17 @@ class User(AbstractBaseUser):
     password = models.CharField(max_length=255, null=True, blank=True)
     whatsapp = models.CharField(max_length=15, unique=True)
     email = models.EmailField(max_length=255, unique=True, null=True, blank=True)
-    profile_picture = models.ImageField(upload_to="profile_pictures/", null=True, blank=True)
+    profile_picture = models.ImageField(
+        upload_to="profile_pictures/", null=True, blank=True
+    )
 
-    created_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    role = models.CharField(max_length=13, choices=Role.choices, default=base_role, null=True, blank=True)
+    role = models.CharField(
+        max_length=13, choices=Role.choices, default=base_role, null=True, blank=True
+    )
+    validated = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
 
@@ -134,6 +137,7 @@ class Address(models.Model):
     address = models.CharField(max_length=255, null=True, blank=True)
     rw = models.CharField(max_length=3, null=True, blank=True)
     rt = models.CharField(max_length=3, null=True, blank=True)
+    detail = models.TextField(null=True, blank=True)
     # Foreign Keys
     user = models.OneToOneField(User, on_delete=models.CASCADE)
 
@@ -141,7 +145,15 @@ class Address(models.Model):
         return f"address dari {self.user.full_name}"
 
     def save(self, *args, **kwargs):
-        for field_name in ["province", "city", "subdistrict", "village", "address", "rw", "rt"]:
+        for field_name in [
+            "province",
+            "city",
+            "subdistrict",
+            "village",
+            "address",
+            "rw",
+            "rt",
+        ]:
             val = getattr(self, field_name, False)
             if val:
                 setattr(self, field_name, val.upper())
@@ -207,7 +219,9 @@ class Midwife(User):
 
     @property
     def posyandus(self):
-        return [assignment.village.posyandu_set.all() for assignment in self.assignments]
+        return [
+            assignment.village.posyandu_set.all() for assignment in self.assignments
+        ]
 
     @property
     def villages(self):

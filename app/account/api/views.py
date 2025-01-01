@@ -10,16 +10,12 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from account.api.serializers import (
     CadreProfileSerializer,
     UserSerializer,
-
     ParentSerializer,
     ParentRegistrationSerializer,
-
     MidwifeSerializer,
     MidwifeRegistrationSerializer,
-
     CadreSerializer,
     CadreRegistrationSerializer,
-
     PuskesmasSerializer,
     PuskesmasRegistrationSerializer,
 )
@@ -32,7 +28,7 @@ from account.models import (
     Puskesmas,
 )
 
-from posyanduapp.utils.custom_response import CustomResponse
+from posyanduapp.utils.custom_responses.custom_response import CustomResponse
 
 
 class UserViewSet(ModelViewSet):
@@ -42,8 +38,15 @@ class UserViewSet(ModelViewSet):
     # permission_classes = [IsAdminUser,]
 
     def get_permissions(self):
-        if self.action in ["login_password", "login_otp", "login_otp_validate", "register_otp_validate"]:
-            return [AllowAny(), ]
+        if self.action in [
+            "login_password",
+            "login_otp",
+            "login_otp_validate",
+            "register_otp_validate",
+        ]:
+            return [
+                AllowAny(),
+            ]
         return super().get_permissions()
 
     @action(detail=False, methods=["post"])
@@ -52,7 +55,9 @@ class UserViewSet(ModelViewSet):
         password = request.data.get("password")
 
         if not whatsapp or not password:
-            return CustomResponse.bad_request("Silahkan masukkan nomor whatsapp dan password")
+            return CustomResponse.bad_request(
+                "Silahkan masukkan nomor whatsapp dan password"
+            )
 
         user = authenticate(request, whatsapp=whatsapp, password=password)
         if user is not None:
@@ -61,7 +66,7 @@ class UserViewSet(ModelViewSet):
             refresh["role"] = user.role
             return CustomResponse.jwt(refresh)
         else:
-            return CustomResponse.bad_request("Kredential tidak valid")
+            return CustomResponse.bad_request("Kredensial tidak valid")
 
     @action(detail=False, methods=["post"])
     def login_otp(self, request):
@@ -86,22 +91,23 @@ class UserViewSet(ModelViewSet):
         otp_code = request.data.get("otp_code")
 
         if not whatsapp or not otp_code:
-            return CustomResponse.bad_request("Silahkan masukkan nomor whatsapp dan kode OTP")
+            return CustomResponse.bad_request(
+                "Silahkan masukkan nomor whatsapp dan kode OTP"
+            )
 
         user = User.objects.filter(whatsapp=whatsapp).first()
         if user is None:
             return CustomResponse.bad_request("Akun tidak ditemukan")
 
-        if user.created_at is None:
+        if user.validated is False:
             return CustomResponse.bad_request("Akun belum terdaftar")
 
         if not user.otp.validate_otp(otp_code):
             return CustomResponse.bad_request("OTP tidak valid atau sudah kadaluarsa")
 
-        refresh = RefreshToken.for_user(user)
-        refresh["role"] = user.role
-        refresh["user"] = UserSerializer(user).data
-        return CustomResponse.jwt(refresh)
+        jwt_token = RefreshToken.for_user(user)
+        jwt_token["role"] = user.role
+        return CustomResponse.jwt(jwt_token)
 
     @action(detail=False, methods=["post"])
     def register_otp_validate(self, request):
@@ -109,19 +115,23 @@ class UserViewSet(ModelViewSet):
         otp_code = request.data.get("otp_code")
 
         if not whatsapp or not otp_code:
-            return CustomResponse.bad_request("Silahkan masukkan nomor whatsapp dan kode OTP")
+            return CustomResponse.bad_request(
+                "Silahkan masukkan nomor whatsapp dan kode OTP"
+            )
 
         user = User.objects.filter(whatsapp=whatsapp).first()
         if user is None:
-            return CustomResponse.bad_request("Nomor Whatsapp yang Anda masukkan tidak salah")
+            return CustomResponse.bad_request(
+                "Nomor Whatsapp yang Anda masukkan tidak salah"
+            )
 
-        if user.created_at is not None:
+        if user.validated:
             return CustomResponse.bad_request("Whatsapp sudah terdaftar")
 
         if not user.otp.validate_otp(otp_code):
             return CustomResponse.bad_request("OTP tidak valid atau sudah kadaluarsa")
 
-        user.created_at = timezone.now().date()
+        user.validated = True
         user.save()
 
         refresh = RefreshToken.for_user(user)
@@ -132,13 +142,14 @@ class UserViewSet(ModelViewSet):
 class CustomUserModelViewSet(ModelViewSet):
     def get_permissions(self):
         if self.action == "create":
-            return [AllowAny(), ]
+            return [
+                AllowAny(),
+            ]
         return super().get_permissions()
 
     def create(self, request, *args, **kwargs):
         whatsapp = request.data.get("whatsapp")
-        user = User.objects.filter(
-            whatsapp=whatsapp, created_at__isnull=True).first()
+        user = User.objects.filter(whatsapp=whatsapp, created_at__isnull=True).first()
         if user is not None:
             # Jika user registrasi dengan nomor whatsapp yang sama
             # tapi belum menyelesaikan proses registrasi.

@@ -7,18 +7,19 @@ from django.conf import settings
 from .models import (
     Child,
     GrowthChart,
-    ChildMeasurement
 )
 
+from child_measurement.models import ChildMeasurement
 
-# Membuat GrowthChart setiap kali Child baru dibuat
-@receiver(post_save, sender=Child)
-def create_child_growchart(sender, instance, created, **kwargs):
-    if created:
-        GrowthChart.objects.create(child=instance)
-        instance.birth_date = datetime.now().date()
-        ChildMeasurement.objects.create(
-            child=instance,
-            height=instance.birth_height,
-            weight=instance.birth_weight,
-        )
+
+# # Membuat GrowthChart setiap kali Child baru dibuat
+# @receiver(post_save, sender=Child)
+# def create_child_growchart(sender, instance, created, **kwargs):
+#     if created:
+#         GrowthChart.objects.create(child=instance)
+#         instance.birth_date = datetime.now().date()
+#         ChildMeasurement.objects.create(
+#             child=instance,
+#             height=instance.birth_height,
+#             weight=instance.birth_weight,
+#         )
