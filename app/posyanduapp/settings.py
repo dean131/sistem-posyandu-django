@@ -54,7 +54,7 @@ INSTALLED_APPS = [
     "village.apps.VillageConfig",
     "child.apps.ChildConfig",
     "child_measurement.apps.ChildMeasurementConfig",
-    "base.apps.BaseConfig",
+    # "base.apps.BaseConfig",
     "adminapp.apps.AdminappConfig",
 ]
 

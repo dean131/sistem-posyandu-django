@@ -1,8 +1,8 @@
 from rest_framework.viewsets import ModelViewSet
 
-from base.api.serializers.village import VillageSerializer
+from .serializers import VillageSerializer
 
-from base.models import Village
+from village.models import Village
 
 from posyanduapp.utils.custom_responses.custom_response import CustomResponse
 

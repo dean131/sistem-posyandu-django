@@ -12,6 +12,75 @@ matplotlib.use("Agg")
 # Create your models here.
 
 
+class GrowthChart(models.Model):
+    """
+    Merepresentasikan data grafik pertumbuhan anak.
+    """
+
+    # WEIGHT FOR AGE 0-24
+    weight_for_age_0_24_chart = models.ImageField(
+        upload_to="growth_charts/", null=True, blank=True
+    )
+    # WEIGHT FOR AGE 24-60
+    weight_for_age_24_60_chart = models.ImageField(
+        upload_to="growth_charts/", null=True, blank=True
+    )
+    # LENGTH FOR AGE 0-24
+    length_for_age_chart = models.ImageField(
+        upload_to="growth_charts/", null=True, blank=True
+    )
+    # HEIGHT FOR AGE 24-60
+    height_for_age_chart = models.ImageField(
+        upload_to="growth_charts/", null=True, blank=True
+    )
+    # WEIGHT FOR LENGTH 0-24
+    weight_for_length_chart = models.ImageField(
+        upload_to="growth_charts/", null=True, blank=True
+    )
+    # WEIGHT FOR HEIGTH 24-60
+    weight_for_height_chart = models.ImageField(
+        upload_to="growth_charts/", null=True, blank=True
+    )
+    # BMI FOR AGE 0-24
+    bmi_for_age_0_24_chart = models.ImageField(
+        upload_to="growth_charts/", null=True, blank=True
+    )
+    # BMI FOR AGE 24-60
+    bmi_for_age_24_60_chart = models.ImageField(
+        upload_to="growth_charts/", null=True, blank=True
+    )
+    # Time Fields
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    # Foreign Keys
+    child = models.OneToOneField(Child, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"Grafik Pertumbuhan {self.child.full_name}"
+
+
+class AnthropometricStandard(models.Model):
+    """
+    Merepresentasikan data standar antropometri.
+
+    Attributes:
+        index: merupakan umur atau tinggi badan dalam bulan atau cm.
+    """
+
+    index = models.FloatField()
+    sd_minus_3 = models.FloatField()
+    sd_minus_2 = models.FloatField()
+    sd_minus_1 = models.FloatField()
+    median = models.FloatField()
+    sd_plus_1 = models.FloatField()
+    sd_plus_2 = models.FloatField()
+    sd_plus_3 = models.FloatField()
+    measurement_type = models.CharField(max_length=30)
+
+    def __str__(self):
+        return f"{self.measurement_type}-{self.index}"
+
+
 class ChildMeasurement(models.Model):
     """
     Merepresentasikan pengukuran seorang Anak.

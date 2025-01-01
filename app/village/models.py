@@ -2,6 +2,8 @@ from django.db import models
 
 from django.conf import settings
 
+from account.models import Midwife
+
 
 class Village(models.Model):
     """
@@ -14,6 +16,7 @@ class Village(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     # Foreign Keys
     puskesmas = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    midwifes = models.ManyToManyField(Midwife, related_name="villages")
 
     def __str__(self):
         return self.name

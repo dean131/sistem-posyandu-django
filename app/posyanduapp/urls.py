@@ -30,7 +30,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("", include("adminapp.urls")),
     path("api/", include("account.api.urls")),
-    path("api/", include("base.api.urls")),
+    # path("api/", include("base.api.urls")),
     path("api/", include("posyandu.api.urls")),
     path("api/", include("posyandu_activity.api.urls")),
     path("api/", include("village.api.urls")),

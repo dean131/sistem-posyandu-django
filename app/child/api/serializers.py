@@ -4,8 +4,8 @@ Child Serializrs
 
 from rest_framework import serializers
 
-from base.models import Child, GrowthChart
-from child_measurement.models import ChildMeasurement
+from child.models import Child
+from child_measurement.models import ChildMeasurement, GrowthChart
 
 
 class ChildSerializer(serializers.ModelSerializer):

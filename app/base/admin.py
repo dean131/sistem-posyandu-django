@@ -3,7 +3,7 @@ from django.utils.translation import gettext_lazy as _
 
 
 from base.models import (
-    Village,
+    # Village,
     Child,
     Posyandu,
     MidwifeAssignment,
@@ -53,7 +53,7 @@ class AnthropometricStandardAdmin(admin.ModelAdmin):
     )
 
 
-admin.site.register(Village)
+# admin.site.register(Village)
 admin.site.register(Child, ChildAdmin)
 admin.site.register(Posyandu, PosyanduAdmin)
 admin.site.register(MidwifeAssignment)

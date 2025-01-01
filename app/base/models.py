@@ -1,8 +1,8 @@
-from django.conf import settings
-from django.db import models
-from account.models import Cadre, Midwife, Parent
-from posyandu.models import Posyandu, Village
-from child.models import Child
+# from django.conf import settings
+# from django.db import models
+# from account.models import Cadre, Midwife, Parent
+# from posyandu.models import Posyandu, Village
+# from child.models import Child
 
 
 # class Village(models.Model):
@@ -47,36 +47,36 @@ from child.models import Child
 #         super().save(*args, **kwargs)
 
 
-class MidwifeAssignment(models.Model):
-    """
-    Merepresentasikan penugasan seorang Bidan di sebuah Desa.
-    """
+# class MidwifeAssignment(models.Model):
+#     """
+#     Merepresentasikan penugasan seorang Bidan di sebuah Desa.
+#     """
 
-    # Time Fields
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    # Foreign Keys
-    midwife = models.ForeignKey(Midwife, on_delete=models.CASCADE)
-    village = models.ForeignKey(Village, on_delete=models.CASCADE)
+#     # Time Fields
+#     created_at = models.DateTimeField(auto_now_add=True)
+#     updated_at = models.DateTimeField(auto_now=True)
+#     # Foreign Keys
+#     midwife = models.ForeignKey(Midwife, on_delete=models.CASCADE)
+#     village = models.ForeignKey(Village, on_delete=models.CASCADE)
 
-    def __str__(self):
-        return f"{self.midwife.full_name} di {self.village.name}"
+#     def __str__(self):
+#         return f"{self.midwife.full_name} di {self.village.name}"
 
 
-class CadreAssignment(models.Model):
-    """
-    Merepresentasikan penugasan seorang Kader di sebuah Posyandu.
-    """
+# class CadreAssignment(models.Model):
+#     """
+#     Merepresentasikan penugasan seorang Kader di sebuah Posyandu.
+#     """
 
-    # Time Fields
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    # Foreign Keys
-    cadre = models.ForeignKey(Cadre, on_delete=models.CASCADE)
-    posyandu = models.ForeignKey(Posyandu, on_delete=models.CASCADE)
+#     # Time Fields
+#     created_at = models.DateTimeField(auto_now_add=True)
+#     updated_at = models.DateTimeField(auto_now=True)
+#     # Foreign Keys
+#     cadre = models.ForeignKey(Cadre, on_delete=models.CASCADE)
+#     posyandu = models.ForeignKey(Posyandu, on_delete=models.CASCADE)
 
-    def __str__(self):
-        return f"{self.cadre.full_name} di {self.posyandu.name}"
+#     def __str__(self):
+#         return f"{self.cadre.full_name} di {self.posyandu.name}"
 
 
 # class PosyanduActivity(models.Model):
@@ -170,85 +170,85 @@ class CadreAssignment(models.Model):
 #     #     return self.growthchart_set.all()
 
 
-class ParentPosyandu(models.Model):
-    """
-    Merepresentasikan seorang Orang Tua yang terdaftar di Posyandu.
-    """
+# class ParentPosyandu(models.Model):
+#     """
+#     Merepresentasikan seorang Orang Tua yang terdaftar di Posyandu.
+#     """
 
-    parent = models.ForeignKey(Parent, on_delete=models.CASCADE)
-    posyandu = models.ForeignKey(Posyandu, on_delete=models.CASCADE)
+#     parent = models.ForeignKey(Parent, on_delete=models.CASCADE)
+#     posyandu = models.ForeignKey(Posyandu, on_delete=models.CASCADE)
 
-    def __str__(self):
-        return f"{self.parent.full_name} di {self.posyandu.name}"
-
-
-class GrowthChart(models.Model):
-    """
-    Merepresentasikan data grafik pertumbuhan anak.
-    """
-
-    # WEIGHT FOR AGE 0-24
-    weight_for_age_0_24_chart = models.ImageField(
-        upload_to="growth_charts/", null=True, blank=True
-    )
-    # WEIGHT FOR AGE 24-60
-    weight_for_age_24_60_chart = models.ImageField(
-        upload_to="growth_charts/", null=True, blank=True
-    )
-    # LENGTH FOR AGE 0-24
-    length_for_age_chart = models.ImageField(
-        upload_to="growth_charts/", null=True, blank=True
-    )
-    # HEIGHT FOR AGE 24-60
-    height_for_age_chart = models.ImageField(
-        upload_to="growth_charts/", null=True, blank=True
-    )
-    # WEIGHT FOR LENGTH 0-24
-    weight_for_length_chart = models.ImageField(
-        upload_to="growth_charts/", null=True, blank=True
-    )
-    # WEIGHT FOR HEIGTH 24-60
-    weight_for_height_chart = models.ImageField(
-        upload_to="growth_charts/", null=True, blank=True
-    )
-    # BMI FOR AGE 0-24
-    bmi_for_age_0_24_chart = models.ImageField(
-        upload_to="growth_charts/", null=True, blank=True
-    )
-    # BMI FOR AGE 24-60
-    bmi_for_age_24_60_chart = models.ImageField(
-        upload_to="growth_charts/", null=True, blank=True
-    )
-    # Time Fields
-    created_at = models.DateTimeField(auto_now_add=True, null=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    # Foreign Keys
-    child = models.OneToOneField(Child, on_delete=models.CASCADE)
-
-    def __str__(self):
-        return f"Grafik Pertumbuhan {self.child.full_name}"
+#     def __str__(self):
+#         return f"{self.parent.full_name} di {self.posyandu.name}"
 
 
-class AnthropometricStandard(models.Model):
-    """
-    Merepresentasikan data standar antropometri.
+# class GrowthChart(models.Model):
+#     """
+#     Merepresentasikan data grafik pertumbuhan anak.
+#     """
 
-    Attributes:
-        index: merupakan umur atau tinggi badan dalam bulan atau cm.
-    """
+#     # WEIGHT FOR AGE 0-24
+#     weight_for_age_0_24_chart = models.ImageField(
+#         upload_to="growth_charts/", null=True, blank=True
+#     )
+#     # WEIGHT FOR AGE 24-60
+#     weight_for_age_24_60_chart = models.ImageField(
+#         upload_to="growth_charts/", null=True, blank=True
+#     )
+#     # LENGTH FOR AGE 0-24
+#     length_for_age_chart = models.ImageField(
+#         upload_to="growth_charts/", null=True, blank=True
+#     )
+#     # HEIGHT FOR AGE 24-60
+#     height_for_age_chart = models.ImageField(
+#         upload_to="growth_charts/", null=True, blank=True
+#     )
+#     # WEIGHT FOR LENGTH 0-24
+#     weight_for_length_chart = models.ImageField(
+#         upload_to="growth_charts/", null=True, blank=True
+#     )
+#     # WEIGHT FOR HEIGTH 24-60
+#     weight_for_height_chart = models.ImageField(
+#         upload_to="growth_charts/", null=True, blank=True
+#     )
+#     # BMI FOR AGE 0-24
+#     bmi_for_age_0_24_chart = models.ImageField(
+#         upload_to="growth_charts/", null=True, blank=True
+#     )
+#     # BMI FOR AGE 24-60
+#     bmi_for_age_24_60_chart = models.ImageField(
+#         upload_to="growth_charts/", null=True, blank=True
+#     )
+#     # Time Fields
+#     created_at = models.DateTimeField(auto_now_add=True, null=True)
+#     updated_at = models.DateTimeField(auto_now=True)
+#     # Foreign Keys
+#     child = models.OneToOneField(Child, on_delete=models.CASCADE)
 
-    index = models.FloatField()
-    sd_minus_3 = models.FloatField()
-    sd_minus_2 = models.FloatField()
-    sd_minus_1 = models.FloatField()
-    median = models.FloatField()
-    sd_plus_1 = models.FloatField()
-    sd_plus_2 = models.FloatField()
-    sd_plus_3 = models.FloatField()
-    measurement_type = models.CharField(max_length=30)
+#     def __str__(self):
+#         return f"Grafik Pertumbuhan {self.child.full_name}"
 
-    def __str__(self):
-        return f"{self.measurement_type}-{self.index}"
+
+# class AnthropometricStandard(models.Model):
+#     """
+#     Merepresentasikan data standar antropometri.
+
+#     Attributes:
+#         index: merupakan umur atau tinggi badan dalam bulan atau cm.
+#     """
+
+#     index = models.FloatField()
+#     sd_minus_3 = models.FloatField()
+#     sd_minus_2 = models.FloatField()
+#     sd_minus_1 = models.FloatField()
+#     median = models.FloatField()
+#     sd_plus_1 = models.FloatField()
+#     sd_plus_2 = models.FloatField()
+#     sd_plus_3 = models.FloatField()
+#     measurement_type = models.CharField(max_length=30)
+
+#     def __str__(self):
+#         return f"{self.measurement_type}-{self.index}"
 
 
 # class ChildMeasurement(models.Model):

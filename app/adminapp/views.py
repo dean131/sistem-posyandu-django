@@ -16,21 +16,12 @@ from account.models import (
     Cadre,
 )
 
-from base.models import (
-    CadreAssignment,
-    Village,
-    Child,
-    Posyandu,
-    MidwifeAssignment,
-    AnthropometricStandard,
-    # LengthForAgeBoys,
-    # LengthForAgeGirls,
-    # HeightForAgeBoys,
-    # HeightForAgeGirls,
-    # WeightForAgeBoys,
-    # WeightForAgeGirls,
-)
+
+from village.models import Village
+from child.models import Child
+from posyandu.models import Posyandu
 from posyandu_activity.models import PosyanduActivity
+from child_measurement.models import AnthropometricStandard
 
 
 class LoginView(View):

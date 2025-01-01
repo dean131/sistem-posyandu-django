@@ -62,16 +62,14 @@ class User(AbstractBaseUser):
     profile_picture = models.ImageField(
         upload_to="profile_pictures/", null=True, blank=True
     )
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
     role = models.CharField(
         max_length=13, choices=Role.choices, default=base_role, null=True, blank=True
     )
     validated = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     objects = CustomUserManager()
 
@@ -181,8 +179,6 @@ class PuskesmasManager(CustomUserManager):
 
 
 # Orang Tua
-
-
 class Parent(User):
     base_role = User.Role.PARENT
     objects = ParentManager()
@@ -194,14 +190,8 @@ class Parent(User):
     def profile(self):
         return self.parentprofile
 
-    @property
-    def children(self):
-        return self.child_set.all()
-
 
 # Bidan
-
-
 class Midwife(User):
     base_role = User.Role.MIDWIFE
     objects = MidwifeManager()
@@ -213,24 +203,8 @@ class Midwife(User):
     def profile(self):
         return self.midwifeprofile
 
-    @property
-    def assignments(self):
-        return self.midwifeassignment_set.all()
-
-    @property
-    def posyandus(self):
-        return [
-            assignment.village.posyandu_set.all() for assignment in self.assignments
-        ]
-
-    @property
-    def villages(self):
-        return [assignment.village for assignment in self.assignments]
-
 
 # Kader
-
-
 class Cadre(User):
     base_role = User.Role.CADRE
     objects = CadreManager()
@@ -242,22 +216,8 @@ class Cadre(User):
     def profile(self):
         return self.cadreprofile
 
-    @property
-    def assignments(self):
-        return self.cadreassignment_set.all()
 
-    @property
-    def posyandus(self):
-        return [assignment.posyandu for assignment in self.assignments]
-
-    @property
-    def villages(self):
-        return [assignment.posyandu.village for assignment in self.assignments]
-
-
-# Pushkesmas
-
-
+# Puskesmas
 class Puskesmas(User):
     base_role = User.Role.PUSKESMAS
     objects = PuskesmasManager()
@@ -267,8 +227,6 @@ class Puskesmas(User):
 
 
 # Profile Orang Tua
-
-
 class ParentProfile(models.Model):
     national_id_number = models.CharField(max_length=30, null=True, blank=True)
     family_card_number = models.CharField(max_length=30, null=True, blank=True)
@@ -280,8 +238,6 @@ class ParentProfile(models.Model):
 
 
 # Profile Bidan
-
-
 class MidwifeProfile(models.Model):
     midwife_id_number = models.CharField(max_length=50, null=True, blank=True)
     # Foreign Keys
@@ -289,8 +245,6 @@ class MidwifeProfile(models.Model):
 
 
 # Profile Kader
-
-
 class CadreProfile(models.Model):
     national_id_number = models.CharField(max_length=50, null=True, blank=True)
     # Foreign Keys
@@ -298,8 +252,6 @@ class CadreProfile(models.Model):
 
 
 # Profile Puskesmas
-
-
 class PuskesmasProfile(models.Model):
     website = models.URLField(null=True, blank=True)
     # Foreign Keys

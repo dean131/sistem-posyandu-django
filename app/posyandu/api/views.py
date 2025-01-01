@@ -9,7 +9,8 @@ from posyandu.api.serializers import ChildSerializer, PosyanduSerializer
 
 from posyanduapp.utils.custom_responses.custom_response import CustomResponse
 
-from base.models import Child, Posyandu
+from posyandu.models import Posyandu
+from child.models import Child
 
 
 class PosyanduViewSet(ModelViewSet):

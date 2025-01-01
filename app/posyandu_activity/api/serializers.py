@@ -4,7 +4,7 @@ PosyanduActivity Serializer
 
 from rest_framework import serializers
 
-from base.models import Child
+from child.models import Child
 from posyandu_activity.models import PosyanduActivity
 
 
