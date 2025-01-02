@@ -49,6 +49,16 @@ class UserViewSet(ModelViewSet):
             ]
         return super().get_permissions()
 
+    @action(detail=False, methods=["get"])
+    def current(self, request):
+        user = request.user
+        if user is None:
+            return CustomResponse.unauthorized("Anda belum login")
+        serializer = self.get_serializer(user)
+        return CustomResponse.retrieve(
+            message="Data pengguna berhasil ditemukan", data=serializer.data
+        )
+
     @action(detail=False, methods=["post"])
     def login_password(self, request):
         whatsapp = request.data.get("whatsapp")

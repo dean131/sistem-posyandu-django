@@ -11,6 +11,19 @@ from posyanduapp.utils.custom_responses.custom_response import CustomResponse
 
 from posyandu.models import Posyandu
 from child.models import Child
+from village.models import Village
+
+
+class PosyanduViewSet(ModelViewSet):
+    serializer_class = PosyanduSerializer
+    queryset = Posyandu.objects.all()
+
+
+from rest_framework.viewsets import ModelViewSet
+from rest_framework.response import Response
+from rest_framework.decorators import action
+from posyandu.models import Posyandu, Village
+from .serializers import PosyanduSerializer
 
 
 class PosyanduViewSet(ModelViewSet):
@@ -18,7 +31,21 @@ class PosyanduViewSet(ModelViewSet):
     queryset = Posyandu.objects.all()
 
     def list(self, request, *args, **kwargs):
-        queryset = self.filter_queryset(self.get_queryset())
+        """
+        List Posyandu data filtered by the user's role and relationships.
+        """
+        user = request.user
+
+        # Filter Posyandu based on the user's role
+        if user.role == "CADRE":
+            queryset = Posyandu.objects.filter(cadres=user)
+        elif user.role == "MIDWIFE":
+            villages = Village.objects.filter(midwifes=user)
+            queryset = Posyandu.objects.filter(village__in=villages)
+        elif user.role == "PARENT":
+            queryset = Posyandu.objects.filter(parents=user)
+        else:
+            queryset = Posyandu.objects.none()
 
         page = self.paginate_queryset(queryset)
         if page is not None:
@@ -26,7 +53,7 @@ class PosyanduViewSet(ModelViewSet):
             return self.get_paginated_response(serializer.data)
 
         serializer = self.get_serializer(queryset, many=True)
-        return CustomResponse.list(serializer.data)
+        return Response(serializer.data)
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -59,39 +86,6 @@ class PosyanduViewSet(ModelViewSet):
         instance = self.get_object()
         self.perform_destroy(instance)
         return CustomResponse.ok("Posyandu berhasil dihapus")
-
-    @action(detail=False, methods=["get"])
-    def by_user_role(self, request, *args, **kwargs):
-        if request.user.role == "MIDWIFE":
-            midwifeassignments = request.user.midwifeassignment_set.all()
-            villages = [
-                midwifeassignment.village for midwifeassignment in midwifeassignments
-            ]
-            queryset = [
-                posyandu
-                for village in villages
-                for posyandu in village.posyandu_set.all()
-            ]
-        elif request.user.role == "CADRE":
-            queryset = [
-                assignment.posyandu
-                for assignment in request.user.cadreassignment_set.all()
-            ]
-        elif request.user.role == "PARENT":
-            queryset = [
-                parentposyandu.posyadu
-                for parentposyandu in request.user.parentposyandu_set.all()
-            ]
-        else:
-            return CustomResponse.bad_request("Role user tidak valid")
-
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
-
-        serializer = self.get_serializer(queryset, many=True)
-        return CustomResponse.list(serializer.data)
 
     @action(detail=True, methods=["get"])
     def children(self, request, *args, **kwargs):

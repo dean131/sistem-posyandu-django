@@ -54,8 +54,6 @@ INSTALLED_APPS = [
     "village.apps.VillageConfig",
     "child.apps.ChildConfig",
     "child_measurement.apps.ChildMeasurementConfig",
-    # "base.apps.BaseConfig",
-    "adminapp.apps.AdminappConfig",
 ]
 
 MIDDLEWARE = [
@@ -179,8 +177,8 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=10000),
-    "REFRESH_TOKEN_LIFETIME": timedelta(minutes=100000),
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
     "ROTATE_REFRESH_TOKENS": False,
     "BLACKLIST_AFTER_ROTATION": False,
     "UPDATE_LAST_LOGIN": False,

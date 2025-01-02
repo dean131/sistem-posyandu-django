@@ -22,9 +22,8 @@ class CustomResponse:
             {
                 "status": "success",
                 "message": _(message),
-                "results": data,
+                "data": data,
             },
-            data=data,
             status=status.HTTP_200_OK,
         )
 
@@ -74,6 +73,15 @@ class CustomResponse:
                 "message": _(message),
             },
             status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    def unauthorized(message):
+        return Response(
+            {
+                "status": "error",
+                "message": _(message),
+            },
+            status=status.HTTP_401_UNAUTHORIZED,
         )
 
     def not_found(message):

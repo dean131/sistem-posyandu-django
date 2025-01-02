@@ -7,6 +7,8 @@ from .serializers import (
     ChildSerializer,
     PosyanduActivitySerializer,
 )
+from village.models import Village
+from posyandu.models import Posyandu
 
 from posyanduapp.utils.custom_responses.custom_response import CustomResponse
 
@@ -17,12 +19,44 @@ class PosyanduActivityViewSet(ModelViewSet):
     serializer_class = PosyanduActivitySerializer
     queryset = PosyanduActivity.objects.all()
 
+    def get_queryset(self):
+        user = self.request.user
+
+        # Filter activities based on the user's role
+        if user.role == "CADRE":
+            # Cadre is related to Posyandu via the cadres field
+            posyandus = Posyandu.objects.filter(cadres=user)
+        elif user.role == "MIDWIFE":
+            # Midwife is related to villages, which are related to Posyandu
+            villages = Village.objects.filter(midwifes=user)
+            posyandus = Posyandu.objects.filter(village__in=villages)
+        elif user.role == "PARENT":
+            # Parent is related to Posyandu via the parents field
+            posyandus = Posyandu.objects.filter(parents=user)
+        else:
+            # For other roles, return no activities
+            posyandus = Posyandu.objects.none()
+
+        # Return activities related to the filtered Posyandu(s)
+        return PosyanduActivity.objects.filter(posyandu__in=posyandus)
+
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
         serializer = self.get_serializer(instance)
         return CustomResponse.retrieve(
             "PosyanduActivity berhasil ditemukan", serializer.data
         )
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        page = self.paginate_queryset(queryset)
+
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
 
     def create(self, request, *args, **kwargs):
         # Cek apakah posyandu activity sudah ada
@@ -61,71 +95,15 @@ class PosyanduActivityViewSet(ModelViewSet):
         return CustomResponse.ok("PosyanduActivity berhasil dihapus")
 
     @action(detail=False, methods=["get"])
-    def by_user_role(self, request, *args, **kwargs):
-        """
-        Mengembalikan list posyandu activity berdasarkan role user
-        """
-        queryset = self.filter_queryset(self.get_queryset())
-
-        # Get posyandu berdasarkan role user
-        if request.user.role == "CADRE":
-            posyandus = [
-                assignment.posyandu
-                for assignment in request.user.cadreassignment_set.all()
-            ]
-        elif request.user.role == "MIDWIFE":
-            midwifeassignments = request.user.midwifeassignment_set.all()
-            villages = [assignment.village for assignment in midwifeassignments]
-            posyandus = [
-                posyandu
-                for village in villages
-                for posyandu in village.posyandu_set.all()
-            ]
-        elif request.user.role == "PARENT":
-            posyandus = [
-                parentposyandu.posyadu
-                for parentposyandu in request.user.parentposyandu_set.all()
-            ]
-        else:
-            return CustomResponse.bad_request("Role user tidak ditemukan")
-
-        queryset = queryset.filter(posyandu__in=posyandus).order_by("-date")
-
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
-
-        serializer = self.get_serializer(queryset, many=True)
-        return CustomResponse.list(serializer.data)
-
-    @action(detail=False, methods=["get"])
     def active(self, request, *args, **kwargs):
         """
-        Mengembalikan data posyandu activity yang aktif pada hari ini
+        Returns active Posyandu activities for today based on the user's role.
         """
         queryset = self.filter_queryset(self.get_queryset())
 
-        # Get posyandu berdasarkan role user
-        if request.user.role == "CADRE":
-            posyandus = request.user.cadreassignment_set.all().values("posyandu")
-        elif request.user.role == "MIDWIFE":
-            midwifeassignments = request.user.midwifeassignment_set.all()
-            villages = [assignment.village for assignment in midwifeassignments]
-            posyandus = [
-                posyandu
-                for village in villages
-                for posyandu in village.posyandu_set.all()
-            ]
-        elif request.user.role == "PARENT":
-            posyandus = request.user.parentposyandu_set.all().values("posyandu")
-        else:
-            posyandus = []
-
+        # Filter activities happening today in the retrieved Posyandu(s)
         today = timezone.now().date()
-        print(posyandus)
-        print(today)
-        queryset = queryset.filter(date=today, posyandu__in=posyandus).order_by("-date")
+        queryset = queryset.filter(date=today).order_by("-date")
 
         page = self.paginate_queryset(queryset)
         if page is not None:
