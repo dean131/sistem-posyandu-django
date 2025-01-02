@@ -1,0 +1,22 @@
+{% extends 'base.html' %} {% block content %}
+<div class="card card-custom gutter-b">
+    <div class="card-header">
+        <h3 class="card-title">Konfirmasi Hapus</h3>
+    </div>
+    <div class="card-body">
+        <p>
+            Apakah Anda yakin ingin menghapus posyandu
+            <strong>{{ object.name }}</strong>?
+        </p>
+    </div>
+    <div class="card-footer">
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">Hapus</button>
+            <a href="{% url 'posyandu_list' %}" class="btn btn-secondary"
+                >Batal</a
+            >
+        </form>
+    </div>
+</div>
+{% endblock %}

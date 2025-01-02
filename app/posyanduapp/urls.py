@@ -28,9 +28,14 @@ from rest_framework_simplejwt.views import (
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("", include("adminapp.urls")),
+    # path("", include("adminapp.urls")),
+    path("", include("account.urls")),
+    path("", include("village.urls")),
+    path("", include("posyandu.urls")),
+    path("", include("posyandu_activity.urls")),
+    path("", include("child.urls")),
+    path("", include("child_measurement.urls")),
     path("api/", include("account.api.urls")),
-    # path("api/", include("base.api.urls")),
     path("api/", include("posyandu.api.urls")),
     path("api/", include("posyandu_activity.api.urls")),
     path("api/", include("village.api.urls")),

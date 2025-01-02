@@ -2,7 +2,7 @@ from django.db import models
 
 from django.conf import settings
 
-from account.models import Midwife
+from account.models import Midwife, Puskesmas
 
 
 class Village(models.Model):
@@ -15,7 +15,7 @@ class Village(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     # Foreign Keys
-    puskesmas = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    puskesmas = models.ForeignKey(Puskesmas, on_delete=models.CASCADE)
     midwifes = models.ManyToManyField(Midwife, related_name="villages")
 
     def __str__(self):

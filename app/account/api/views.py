@@ -149,7 +149,7 @@ class CustomUserModelViewSet(ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         whatsapp = request.data.get("whatsapp")
-        user = User.objects.filter(whatsapp=whatsapp, created_at__isnull=True).first()
+        user = User.objects.filter(whatsapp=whatsapp, validated=False).first()
         if user is not None:
             # Jika user registrasi dengan nomor whatsapp yang sama
             # tapi belum menyelesaikan proses registrasi.

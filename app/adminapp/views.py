@@ -5,6 +5,7 @@ from django.views import View
 from django.shortcuts import redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
+from django.db.models import Prefetch
 
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
@@ -56,28 +57,42 @@ class LogoutView(View):
 @method_decorator(login_required(login_url="login"), name="dispatch")
 class DashboardView(View):
     def get(self, request, *args, **kwargs):
+        # Use related objects efficiently to minimize query counts
+        user_villages = request.user.village_set.prefetch_related(
+            Prefetch(
+                "posyandu_set",
+                queryset=Posyandu.objects.only("id"),
+            )
+        )
 
-        villages = []
-        posyandus = []
-        for village in request.user.village_set.all():
-            villages.append(village)
-            for posyandu in village.posyandu_set.all():
-                posyandus.append(posyandu)
+        # Use aggregation to count related data more efficiently
+        posyandu_ids = Posyandu.objects.filter(village__in=user_villages).values_list(
+            "id", flat=True
+        )
+        village_ids = user_villages.values_list("id", flat=True)
 
-        children = Child.objects.filter(
-            parent__parentposyandu__posyandu__in=posyandus
-        ).count()
-        parents = Parent.objects.filter(parentposyandu__posyandu__in=posyandus).count()
-        midwives = Midwife.objects.filter(
-            midwifeassignment__village__in=villages
-        ).count()
-        cadres = Cadre.objects.filter(cadreassignment__posyandu__in=posyandus).count()
+        # Aggregate counts with fewer queries
+        children_count = (
+            Child.objects.filter(parent__posyandus__id__in=posyandu_ids)
+            .distinct()
+            .count()
+        )
+        parents_count = (
+            Parent.objects.filter(posyandus__id__in=posyandu_ids).distinct().count()
+        )
+        midwives_count = (
+            Midwife.objects.filter(villages__id__in=village_ids).distinct().count()
+        )
+        cadres_count = (
+            Cadre.objects.filter(posyandus__id__in=posyandu_ids).distinct().count()
+        )
 
+        # Pass data to the context
         context = {
-            "children": children,
-            "parents": parents,
-            "midwives": midwives,
-            "cadres": cadres,
+            "children": children_count,
+            "parents": parents_count,
+            "midwives": midwives_count,
+            "cadres": cadres_count,
         }
         return render(request, "adminapp/dashboard.html", context)
 
@@ -109,22 +124,32 @@ class PosyanduActivitiesView(View):
         return render(request, "adminapp/posyandu_activities.html", context)
 
 
-class VillageListView(View):
-    def get(self, request, *args, **kwargs):
-        query = request.GET.get("q", "")
-        puskesmas = request.user
+from django.views.generic.list import ListView
+from django.db.models import Q
 
+
+class VillageListView(ListView):
+    model = Village
+    template_name = "adminapp/village_list.html"
+    context_object_name = "villages"
+    paginate_by = 1  # Add pagination to improve usability
+
+    def get_queryset(self):
+        query = self.request.GET.get("q", "").strip()
+        puskesmas = self.request.user
+
+        # Filter villages by the user's Puskesmas and optional search query
+        queryset = Village.objects.filter(puskesmas=puskesmas).order_by("-created_at")
         if query:
-            villages = Village.objects.filter(
-                puskesmas=puskesmas, name__icontains=query
-            ).order_by("-created_at")
-        else:
-            villages = Village.objects.filter(puskesmas=puskesmas).order_by(
-                "-created_at"
-            )
+            queryset = queryset.filter(name__icontains=query)
 
-        context = {"villages": villages}
-        return render(request, "adminapp/village_list.html", context)
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        # Add the search query back to the context for template use
+        context = super().get_context_data(**kwargs)
+        context["query"] = self.request.GET.get("q", "").strip()
+        return context
 
     def post(self, request, *args, **kwargs):
         action = request.POST.get("form-action")
@@ -370,38 +395,38 @@ class CadreAssignmentView(View):
             messages.error(request, "Penugasan tidak ditemukan")
 
 
-class ChildView(View):
-    def get(self, request, *args, **kwargs):
-        query = request.GET.get("q", "")
+# class ChildView(View):
+#     def get(self, request, *args, **kwargs):
+#         query = request.GET.get("q", "")
 
-        posyandus = []
-        for village in request.user.village_set.all():
-            for posyandu in village.posyandu_set.all():
-                posyandus.append(posyandu)
+#         posyandus = []
+#         for village in request.user.village_set.all():
+#             for posyandu in village.posyandu_set.all():
+#                 posyandus.append(posyandu)
 
-        if query:
-            children = Child.objects.filter(
-                parent__parentposyandu__posyandu__in=posyandus,
-                full_name__icontains=query,
-            ).order_by("-created_at")
-        else:
-            children = Child.objects.filter(
-                parent__parentposyandu__posyandu__in=posyandus
-            ).order_by("-created_at")
+#         if query:
+#             children = Child.objects.filter(
+#                 parent__parentposyandu__posyandu__in=posyandus,
+#                 full_name__icontains=query,
+#             ).order_by("-created_at")
+#         else:
+#             children = Child.objects.filter(
+#                 parent__parentposyandu__posyandu__in=posyandus
+#             ).order_by("-created_at")
 
-        context = {"children": children}
-        return render(request, "adminapp/children.html", context)
+#         context = {"children": children}
+#         return render(request, "adminapp/children.html", context)
 
-    def post(self, request, *args, **kwargs):
-        action = request.POST.get("form-action")
-        match action:
-            case "add":
-                self.add_child(request)
-            case "edit":
-                self.edit_child(request)
-            case "delete":
-                self.delete_child(request)
-        return redirect("children")
+#     def post(self, request, *args, **kwargs):
+#         action = request.POST.get("form-action")
+#         match action:
+#             case "add":
+#                 self.add_child(request)
+#             case "edit":
+#                 self.edit_child(request)
+#             case "delete":
+#                 self.delete_child(request)
+#         return redirect("children")
 
 
 class ParentView(View):

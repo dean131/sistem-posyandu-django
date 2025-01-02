@@ -1,7 +1,7 @@
 from django.db import models
 
 from village.models import Village
-from account.models import Parent
+from account.models import Cadre, Parent
 
 
 # Create your models here.
@@ -18,10 +18,12 @@ class Posyandu(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     # Foreign Keys
     village = models.ForeignKey(Village, on_delete=models.CASCADE)
-    parents = models.ManyToManyField(Parent, related_name="posyandus")
+    parents = models.ManyToManyField(Parent, related_name="parent_posyandus")
+    cadres = models.ManyToManyField(Cadre, related_name="cadre_posyandus")
 
     def __str__(self):
         return self.name
 
     def save(self, *args, **kwargs):
         self.name = self.name.upper()
+        super(Posyandu, self).save(*args, **kwargs)
