@@ -89,16 +89,21 @@ class PosyanduViewSet(ModelViewSet):
 
     @action(detail=True, methods=["get"])
     def children(self, request, *args, **kwargs):
+        # Get the instance of the current Posyandu
         instance = self.get_object()
 
-        queryset = Child.objects.filter(parent__parentposyandu__posyandu=instance)
+        # Filter children based on the relationship between Parent and Posyandu
+        queryset = Child.objects.filter(parent__parent_posyandus=instance)
 
+        # Prepare serializer context
         context = self.get_serializer_context()
 
+        # Paginate the queryset if pagination is enabled
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = ChildSerializer(page, many=True, context=context)
             return self.get_paginated_response(serializer.data)
 
+        # Serialize the queryset without pagination
         serializer = ChildSerializer(queryset, many=True, context=context)
-        return CustomResponse.list(serializer.data)
+        return Response(serializer.data)

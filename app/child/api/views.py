@@ -2,11 +2,16 @@
 Child Views
 """
 
-from rest_framework.response import Response
+from multiprocessing import context
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.decorators import action
 
-from child.api.serializers import ChildInfoSerializer, ChildSerializer
+from child.api.serializers import (
+    ChildInfoSerializer,
+    ChildSerializer,
+    GrowthChartSerializer,
+    ChildMeasurementSerializer,
+)
 
 from posyanduapp.utils.custom_responses.custom_response import CustomResponse
 
@@ -60,33 +65,25 @@ class ChildViewSet(ModelViewSet):
         serializer = self.get_serializer(instance)
         return CustomResponse.retrieve("Child berhasil ditemukan", serializer.data)
 
-    @action(detail=False, methods=["get"])
-    def by_user_role(self, request, *args, **kwargs):
-        queryset = self.filter_queryset(self.get_queryset())
+    @action(detail=True, methods=["get"])
+    def growth_chart(self, request, *args, **kwargs):
+        instance = self.get_object()
+        context = self.get_serializer_context()
+        serializer = GrowthChartSerializer(instance.growthchart, context=context)
+        return CustomResponse.retrieve(
+            "Growth Chart berhasil ditemukan", serializer.data
+        )
 
-        # Get child berdasarkan role user
-        if request.user.role == "PARENT":
-            queryset = self.queryset.filter(parent=request.user)
-        else:
-            if request.user.role == "CADRE":
-                posyandus = request.user.cadreassignment_set.all().values("posyandu")
-            elif request.user.role == "MIDWIFE":
-                midwifeassignments = request.user.midwifeassignment_set.all()
-                villages = [
-                    midwifeassignment.village
-                    for midwifeassignment in midwifeassignments
-                ]
-                posyandus = [
-                    posyandu
-                    for village in villages
-                    for posyandu in village.posyandu_set.all()
-                ]
-            queryset = queryset.filter(parent__parentposyandu__posyandu__in=posyandus)
+    # @action(detail=False, methods=["get"])
+    # def by_user_role(self, request, *args, **kwargs):
+    #     queryset = self.filter_queryset(self.get_queryset())
 
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
+    #     # Get child based on role user
 
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
+    #     page = self.paginate_queryset(queryset)
+    #     if page is not None:
+    #         serializer = self.get_serializer(page, many=True)
+    #         return self.get_paginated_response(serializer.data)
+
+    #     serializer = self.get_serializer(queryset, many=True)
+    #     return CustomResponse.list(serializer.data)

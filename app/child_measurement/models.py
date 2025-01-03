@@ -95,7 +95,7 @@ class ChildMeasurement(models.Model):
 
     weight = models.FloatField()
     height = models.FloatField()
-    head_circumference = models.FloatField(null=True)
+    head_circumference = models.FloatField(null=True, blank=True)
     # cara ukur
     measurement_method = models.CharField(
         max_length=8, choices=MEASUREMENT_METHOD_CHOICES, null=True

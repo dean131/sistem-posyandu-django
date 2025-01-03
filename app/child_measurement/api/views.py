@@ -1,16 +1,25 @@
+from venv import create
+from django.views import View
 from rest_framework.viewsets import ModelViewSet
 
-from .serializers import ChildMeasurementSerializer
+from child_measurement.api.serializers import (
+    ListChildMeasurementSerializer,
+    CreateChildMeasurementSerializer,
+)
 
 from posyanduapp.utils.custom_responses.custom_response import CustomResponse
 
-from child_measurement.models import ChildMeasurement
+from child_measurement.models import ChildMeasurement, GrowthChart
 
 
 class ChildMeasurementViewSet(ModelViewSet):
-    serializer_class = ChildMeasurementSerializer
     queryset = ChildMeasurement.objects.all()
     filterset_fields = ["child", "posyandu_activity"]
+
+    def get_serializer_class(self):
+        if self.action == "create":
+            return CreateChildMeasurementSerializer
+        return ListChildMeasurementSerializer
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset()).order_by("-age_in_month")
@@ -48,6 +57,8 @@ class ChildMeasurementViewSet(ModelViewSet):
                 self.perform_update(serializer)
                 return CustomResponse.ok("ChildMeasurement berhasil diubah")
             return CustomResponse.serializers_erros(serializer.errors)
+
+        print(request.data)
 
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():

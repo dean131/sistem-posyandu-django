@@ -27,6 +27,8 @@ from account.models import (
     Cadre,
     Puskesmas,
 )
+from child.api.serializers import ChildSerializer
+from child.models import Child
 
 from posyanduapp.utils.custom_responses.custom_response import CustomResponse
 
@@ -58,25 +60,6 @@ class UserViewSet(ModelViewSet):
         return CustomResponse.retrieve(
             message="Data pengguna berhasil ditemukan", data=serializer.data
         )
-
-    @action(detail=False, methods=["post"])
-    def login_password(self, request):
-        whatsapp = request.data.get("whatsapp")
-        password = request.data.get("password")
-
-        if not whatsapp or not password:
-            return CustomResponse.bad_request(
-                "Silahkan masukkan nomor whatsapp dan password"
-            )
-
-        user = authenticate(request, whatsapp=whatsapp, password=password)
-        if user is not None:
-            login(request, user)
-            refresh = RefreshToken.for_user(user)
-            refresh["role"] = user.role
-            return CustomResponse.jwt(refresh)
-        else:
-            return CustomResponse.bad_request("Kredensial tidak valid")
 
     @action(detail=False, methods=["post"])
     def login_otp(self, request):
@@ -184,6 +167,30 @@ class ParentViewSet(CustomUserModelViewSet):
         if self.action == "create":
             return ParentRegistrationSerializer
         return super().get_serializer_class()
+
+    @action(detail=True, methods=["get"])
+    def children(self, request, pk=None):
+        """
+        Retrieve all children associated with a specific parent.
+        """
+        # Retrieve the parent instance
+        parent = self.get_object()
+
+        # Filter children by the parent
+        children = Child.objects.filter(parent=parent)
+
+        # Prepare the serializer context
+        context = self.get_serializer_context()
+
+        # Paginate the children queryset if applicable
+        page = self.paginate_queryset(children)
+        if page is not None:
+            serializer = ChildSerializer(page, many=True, context=context)
+            return self.get_paginated_response(serializer.data)
+
+        # Serialize and return the children data
+        serializer = ChildSerializer(children, many=True)
+        return CustomResponse.list(serializer.data)
 
 
 class MidwifeViewSet(CustomUserModelViewSet):
