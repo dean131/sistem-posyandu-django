@@ -67,9 +67,18 @@
                                 "pk",
                                 data
                             );
-                        return `<a href="${detailUrl}" class="btn btn-primary btn-sm" title="Lihat Detail">
-                                    <i class="fas fa-info-circle"></i> Lihat Detail
-                                </a>`;
+                        const exportUrl =
+                            "{% url 'export_child_measurements' 'pk' %}".replace(
+                                "pk",
+                                data
+                            );
+                        return `
+                            <a href="${detailUrl}" class="btn btn-primary btn-sm" title="Lihat Detail">
+                                <i class="fas fa-info-circle"></i> Lihat Detail
+                            </a>
+                            <a href="${exportUrl}" class="btn btn-success btn-sm" title="Export Excel">
+                                <i class="fas fa-file-excel"></i> Export Excel
+                            </a>`;
                     },
                 },
             ],

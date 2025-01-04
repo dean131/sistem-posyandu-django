@@ -12,4 +12,9 @@ urlpatterns = [
         views.PosyanduActivityDetailView.as_view(),
         name="posyandu_activity_detail",
     ),
+    path(
+        "activities/<str:pk>/export_measurements/",
+        views.export_child_measurements_to_excel,
+        name="export_child_measurements",
+    ),
 ]

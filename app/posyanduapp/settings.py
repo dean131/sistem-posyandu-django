@@ -212,7 +212,7 @@ SIMPLE_JWT = {
 }
 
 
-FONNTE_API_KEY = os.environ.get("FONNTE_API_KEY", "iCijKRQKHrpbGKfUhZ+1")
+FONNTE_API_KEY = os.environ.get("FONNTE_API_KEY", "pRUNzLrJaY2YCbWWGN4k")
 
 # Ubah tag message error menjadi danger
 MESSAGE_TAGS = {

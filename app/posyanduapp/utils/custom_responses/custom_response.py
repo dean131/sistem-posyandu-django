@@ -104,6 +104,8 @@ class CustomResponse:
 
     def serializers_erros(errors):
         errors = errors.items()
+        for key, val in errors:
+            print(key, val)
         return Response(
             {
                 "status": "error",

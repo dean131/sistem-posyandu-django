@@ -2,6 +2,7 @@
 Child Serializrs
 """
 
+from matplotlib.pyplot import cla
 from rest_framework import serializers
 
 from child.models import Child
@@ -42,6 +43,18 @@ class ChildInfoSerializer(ChildSerializer):
         return ChildMeasurementSerializer(
             obj.childmeasurement_set.all(), many=True, context=self.context
         ).data
+
+
+class CreateChildSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Child
+        fields = "__all__"
+
+
+class UpdateChildSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Child
+        exclude = ("parent",)
 
 
 # EXTERNAL

@@ -36,7 +36,7 @@ class PosyanduListView(TemplateView):
                     "address": posyandu.address,
                     "village": posyandu.village.name,
                     "parents": ", ".join(
-                        [parent.name for parent in posyandu.parents.all()]
+                        [parent.full_name for parent in posyandu.parents.all()]
                     ),
                 }
                 for posyandu in queryset
@@ -58,9 +58,7 @@ class PosyanduCreateView(CreateView):
     model = Posyandu
     fields = ["name", "address", "village"]  # Include relevant fields
     template_name = "posyandu/posyandu_create_form.html"  # Path to the form template
-    success_url = reverse_lazy(
-        "posyandu_list"
-    )  # Redirect to the list page after success
+    success_url = reverse_lazy("posyandu_list")
 
     def form_valid(self, form):
         messages.success(self.request, "Posyandu berhasil ditambahkan.")
@@ -74,7 +72,6 @@ class PosyanduCreateView(CreateView):
         form = super().get_form(form_class)
         for field in form.fields.values():
             field.widget.attrs.update({"class": "form-control"})
-        # form.fields["parents"].widget.attrs.update({"class": "form-select"})
         return form
 
 
@@ -96,7 +93,6 @@ class PosyanduUpdateView(UpdateView):
         form = super().get_form(form_class)
         for field in form.fields.values():
             field.widget.attrs.update({"class": "form-control"})
-        # form.fields["parents"].widget.attrs.update({"class": "form-select"})
         return form
 
 

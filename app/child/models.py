@@ -73,6 +73,6 @@ class Child(models.Model):
 
         return years * 12 + months
 
-    # @property
-    # def growthchart(self):
-    #     return self.growthchart_set.all()
+    @property
+    def growthchart(self):
+        return self.growthchart_set.all()

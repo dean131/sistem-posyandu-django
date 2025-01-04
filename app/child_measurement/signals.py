@@ -1,14 +1,17 @@
-from datetime import datetime
-
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.conf import settings
 
-from .models import (
-    Child,
-    GrowthChart,
-    ChildMeasurement,
-)
+# from child_measurement.models import Child, GrowthChart
+
+
+# @receiver(post_save, sender=Child)
+# def create_growth_chart(sender, instance, created, **kwargs):
+#     """
+#     Signal to create an empty GrowthChart when a new Child is created.
+#     """
+#     if created:
+#         GrowthChart.objects.get_or_create(child=instance)
 
 
 # # Membuat GrowthChart setiap kali Child baru dibuat
