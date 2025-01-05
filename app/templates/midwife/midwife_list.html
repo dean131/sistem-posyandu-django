@@ -1,0 +1,79 @@
+{% extends 'base.html' %} {% load static %} {% block css_page %}
+<!--begin::Page Vendors Styles(used by this page)-->
+<link
+    href="{% static 'assets/plugins/custom/datatables/datatables.bundle.css' %}"
+    rel="stylesheet"
+    type="text/css"
+/>
+<!--end::Page Vendors Styles-->
+{% endblock %} {% block subheader %}
+<div class="subheader py-2 py-lg-4 subheader-solid" id="kt_subheader">
+    <div
+        class="container-fluid d-flex align-items-center justify-content-between flex-wrap flex-sm-nowrap"
+    >
+        <div class="d-flex align-items-center flex-wrap mr-2">
+            <h5 class="text-dark font-weight-bold mt-2 mb-2 mr-5">
+                Daftar Bidan
+            </h5>
+        </div>
+    </div>
+</div>
+{% endblock %} {% block content %}
+<div class="card card-custom gutter-b">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table id="midwifeTable" class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nama</th>
+                        <th>WhatsApp</th>
+                        <th>Desa</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}{% block js_page %}
+<!--begin::Page Vendors(used by this page)-->
+<script src="{% static 'assets/plugins/custom/datatables/datatables.bundle.js' %}"></script>
+<!--end::Page Vendors-->
+<!--begin::Page Scripts(used by this page)-->
+<script src="{% static 'assets/js/pages/crud/datatables/basic/basic.js' %}"></script>
+<!--end::Page Scripts-->
+<script>
+    $(document).ready(function () {
+        $("#midwifeTable").DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: {
+                url: "{% url 'midwife_list' %}",
+                type: "GET",
+            },
+            columns: [
+                { data: "id", visible: false },
+                { data: "full_name" },
+                { data: "whatsapp" },
+                { data: "villages" },
+                {
+                    data: "id",
+                    orderable: false,
+                    searchable: false,
+                    render: function (data) {
+                        const assignUrl =
+                            "{% url 'assign_village_to_midwife' 'pk' %}".replace(
+                                "pk",
+                                data
+                            );
+                        return `<a href="${assignUrl}" class="btn btn-outline-primary btn-sm" title="Atur Desa">
+                                    <i class="fas fa-map-marker-alt"></i> Atur Desa
+                                </a>`;
+                    },
+                },
+            ],
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,17 @@
+{% extends "base.html" %} {% block content %}
+<div class="card card-custom gutter-b">
+    <div class="card-header">
+        <h3 class="card-title">Tambah Data Desa</h3>
+    </div>
+    <form method="post">
+        {% csrf_token %}
+        <div class="card-body">{{ form.as_p }}</div>
+        <div class="card-footer">
+            <button type="submit" class="btn btn-success">Simpan</button>
+            <a href="{% url 'village_list' %}" class="btn btn-secondary"
+                >Batal</a
+            >
+        </div>
+    </form>
+</div>
+{% endblock %}
