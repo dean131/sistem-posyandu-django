@@ -14,7 +14,7 @@ services:
 
   db-posyandu:
     volumes:
-      - postgres_posyandu_dev:/var/lib/postgresql/data
+      - postgres_posyandu:/var/lib/postgresql/data
     environment:
       POSTGRES_DB: posyandu_db_prod
       POSTGRES_USER: posyandu_user_prod
