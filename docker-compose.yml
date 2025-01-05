@@ -1,7 +1,8 @@
 services:
   be-posyandu:
     container_name: be-posyandu
-    command: sh -c "python3 app/manage.py makemigrations account base && 
+    restart: always
+    command: sh -c "python3 app/manage.py makemigrations && 
                     python3 app/manage.py migrate --no-input && 
                     python3 app/manage.py runserver 0.0.0.0:8000"
     depends_on:
@@ -10,3 +11,4 @@ services:
   db-posyandu:
     container_name: db-posyandu
     image: postgres:13
+    restart: always

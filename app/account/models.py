@@ -65,7 +65,6 @@ class User(AbstractBaseUser):
     role = models.CharField(
         max_length=13, choices=Role.choices, default=base_role, null=True, blank=True
     )
-    validated = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
