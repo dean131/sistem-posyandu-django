@@ -1,0 +1,90 @@
+{% extends 'base.html' %} {% block subheader %}
+<div class="subheader py-2 py-lg-4 subheader-solid" id="kt_subheader">
+    <div
+        class="container-fluid d-flex align-items-center justify-content-between flex-wrap flex-sm-nowrap"
+    >
+        <!--begin::Info-->
+        <div class="d-flex align-items-center flex-wrap mr-2">
+            <!--begin::Page Title-->
+            <h5 class="text-dark font-weight-bold mt-2 mb-2 mr-5">
+                Upload Data Standard Antropometri
+            </h5>
+            <!--end::Page Title-->
+        </div>
+        <!--end::Info-->
+    </div>
+</div>
+{% endblock %} {% block content %}
+<div class="card">
+    <div class="card-body">
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="gender" class="form-label">Jenis Kelamin</label>
+                <select
+                    id="gender"
+                    class="form-control"
+                    aria-label="Default select"
+                    name="gender"
+                    required
+                >
+                    <option selected value="">Pilih Jenis Kelamin</option>
+                    <option value="M">Laki-laki</option>
+                    <option value="F">Perempuan</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="measurement_type">Jenis Pengukuran</label>
+                <select
+                    class="form-control"
+                    id="measurement_type"
+                    name="measurement_type"
+                    required
+                >
+                    <option selected value="">Pilih Jenis Pengukuran</option>
+                    <option value="length_for_age">
+                        Panjang Badan Menurut Umur (PB/U)
+                    </option>
+                    <option value="height_for_age">
+                        Tinggi Badan Menurut Umur (TB/U)
+                    </option>
+                    <option value="weight_for_age">
+                        Berat Badan Menurut Umur (BB/U)
+                    </option>
+                    <option value="weight_for_length">
+                        Berat Badan Menurut Panjang Badan (BB/PB)
+                    </option>
+                    <option value="weight_for_height">
+                        Berat Badan Menurut Tinggi Badan (BB/TB)
+                    </option>
+                    <option value="bmi_for_age_0_24">
+                        BMI Menurut Umur (BMI/U) 0-24 Bulan
+                    </option>
+                    <option value="bmi_for_age_24_60">
+                        BMI Menurut Umur (BMI/U) 24-60 Bulan
+                    </option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label>File Browser</label>
+                <div></div>
+                <div class="custom-file">
+                    <input
+                        type="file"
+                        class="custom-file-input"
+                        id="customFile"
+                        name="excel_file"
+                        required
+                    />
+                    <label class="custom-file-label" for="customFile">
+                        Choose file
+                    </label>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

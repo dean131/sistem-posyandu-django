@@ -23,7 +23,7 @@ class CustomUserManager(BaseUserManager):
             whatsapp=whatsapp,
             full_name=full_name,
             password=password,
-            email=extra_fields.get("email", None)
+            email=extra_fields.get("email", None),
         )
 
         user.set_password(password)
@@ -32,9 +32,7 @@ class CustomUserManager(BaseUserManager):
 
     def create_superuser(self, whatsapp, full_name, password=None, **extra_fields):
         user = self.create_user(
-            whatsapp=whatsapp,
-            full_name=full_name,
-            password=password
+            whatsapp=whatsapp, full_name=full_name, password=password
         )
         user.is_admin = True
         user.save(using=self._db)
@@ -42,7 +40,7 @@ class CustomUserManager(BaseUserManager):
 
     def generate_random_password(self):
         characters = string.ascii_letters + string.digits
-        password = ''.join(random.choice(characters) for i in range(32))
+        password = "".join(random.choice(characters) for i in range(32))
         return password
 
 
@@ -61,14 +59,16 @@ class User(AbstractBaseUser):
     password = models.CharField(max_length=255, null=True, blank=True)
     whatsapp = models.CharField(max_length=15, unique=True)
     email = models.EmailField(max_length=255, unique=True, null=True, blank=True)
-    profile_picture = models.ImageField(upload_to="profile_pictures/", null=True, blank=True)
-
-    created_at = models.DateTimeField(null=True, blank=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    role = models.CharField(max_length=13, choices=Role.choices, default=base_role, null=True, blank=True)
+    profile_picture = models.ImageField(
+        upload_to="profile_pictures/", null=True, blank=True
+    )
+    role = models.CharField(
+        max_length=13, choices=Role.choices, default=base_role, null=True, blank=True
+    )
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     objects = CustomUserManager()
 
@@ -94,6 +94,19 @@ class User(AbstractBaseUser):
     def is_staff(self):
         return self.is_admin
 
+    def send_otp_wa(self):
+        otp, created = OTP.objects.get_or_create(user=self)
+        otp_code = otp.generate_otp()
+        # with httpx.Client() as client:
+        #     client.post(
+        #         url="https://api.fonnte.com/send",
+        #         headers={"Authorization": settings.FONNTE_API_KEY},
+        #         json={
+        #             "target": self.whatsapp,
+        #             "message": f"Kode OTP kamu: {otp_code}",
+        #         },
+        #     )
+
 
 class OTP(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -113,18 +126,6 @@ class OTP(models.Model):
         # Retrun True if otp_code is valid and not expired
         return self.otp == otp_code and self.expired_at > timezone.now()
 
-    def send_otp_wa(self):
-        otp_code = self.generate_otp()
-        # with httpx.Client() as client:
-        #     client.post(
-        #         url='https://api.fonnte.com/send',
-        #         headers={'Authorization': settings.FONNTE_API_KEY},
-        #         json={
-        #             'target': self.user.whatsapp,
-        #             'message': f'Kode OTP kamu: {otp_code}'
-        #         }
-        #     )
-
 
 class Address(models.Model):
     province = models.CharField(max_length=100, null=True, blank=True)
@@ -134,6 +135,7 @@ class Address(models.Model):
     address = models.CharField(max_length=255, null=True, blank=True)
     rw = models.CharField(max_length=3, null=True, blank=True)
     rt = models.CharField(max_length=3, null=True, blank=True)
+    detail = models.TextField(null=True, blank=True)
     # Foreign Keys
     user = models.OneToOneField(User, on_delete=models.CASCADE)
 
@@ -141,7 +143,15 @@ class Address(models.Model):
         return f"address dari {self.user.full_name}"
 
     def save(self, *args, **kwargs):
-        for field_name in ["province", "city", "subdistrict", "village", "address", "rw", "rt"]:
+        for field_name in [
+            "province",
+            "city",
+            "subdistrict",
+            "village",
+            "address",
+            "rw",
+            "rt",
+        ]:
             val = getattr(self, field_name, False)
             if val:
                 setattr(self, field_name, val.upper())
@@ -169,8 +179,6 @@ class PuskesmasManager(CustomUserManager):
 
 
 # Orang Tua
-
-
 class Parent(User):
     base_role = User.Role.PARENT
     objects = ParentManager()
@@ -182,14 +190,8 @@ class Parent(User):
     def profile(self):
         return self.parentprofile
 
-    @property
-    def children(self):
-        return self.child_set.all()
-
 
 # Bidan
-
-
 class Midwife(User):
     base_role = User.Role.MIDWIFE
     objects = MidwifeManager()
@@ -201,22 +203,8 @@ class Midwife(User):
     def profile(self):
         return self.midwifeprofile
 
-    @property
-    def assignments(self):
-        return self.midwifeassignment_set.all()
-
-    @property
-    def posyandus(self):
-        return [assignment.village.posyandu_set.all() for assignment in self.assignments]
-
-    @property
-    def villages(self):
-        return [assignment.village for assignment in self.assignments]
-
 
 # Kader
-
-
 class Cadre(User):
     base_role = User.Role.CADRE
     objects = CadreManager()
@@ -228,22 +216,8 @@ class Cadre(User):
     def profile(self):
         return self.cadreprofile
 
-    @property
-    def assignments(self):
-        return self.cadreassignment_set.all()
 
-    @property
-    def posyandus(self):
-        return [assignment.posyandu for assignment in self.assignments]
-
-    @property
-    def villages(self):
-        return [assignment.posyandu.village for assignment in self.assignments]
-
-
-# Pushkesmas
-
-
+# Puskesmas
 class Puskesmas(User):
     base_role = User.Role.PUSKESMAS
     objects = PuskesmasManager()
@@ -253,8 +227,6 @@ class Puskesmas(User):
 
 
 # Profile Orang Tua
-
-
 class ParentProfile(models.Model):
     national_id_number = models.CharField(max_length=30, null=True, blank=True)
     family_card_number = models.CharField(max_length=30, null=True, blank=True)
@@ -266,8 +238,6 @@ class ParentProfile(models.Model):
 
 
 # Profile Bidan
-
-
 class MidwifeProfile(models.Model):
     midwife_id_number = models.CharField(max_length=50, null=True, blank=True)
     # Foreign Keys
@@ -275,8 +245,6 @@ class MidwifeProfile(models.Model):
 
 
 # Profile Kader
-
-
 class CadreProfile(models.Model):
     national_id_number = models.CharField(max_length=50, null=True, blank=True)
     # Foreign Keys
@@ -284,8 +252,6 @@ class CadreProfile(models.Model):
 
 
 # Profile Puskesmas
-
-
 class PuskesmasProfile(models.Model):
     website = models.URLField(null=True, blank=True)
     # Foreign Keys

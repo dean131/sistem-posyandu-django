@@ -1,0 +1,74 @@
+{% extends 'base.html' %} {% load static %} {% block subheader %}
+<div class="subheader py-2 py-lg-4 subheader-solid" id="kt_subheader">
+    <div
+        class="container-fluid d-flex align-items-center justify-content-between flex-wrap flex-sm-nowrap"
+    >
+        <!--begin::Info-->
+        <div class="d-flex align-items-center flex-wrap mr-2">
+            <!--begin::Page Title-->
+            <h5 class="text-dark font-weight-bold mt-2 mb-2 mr-5">
+                Detail Data Anak
+            </h5>
+            <!--end::Page Title-->
+        </div>
+        <!--end::Info-->
+    </div>
+</div>
+{% endblock %} {% block content %}
+<div class="card card-custom gutter-b">
+    <div class="card-body">
+        <table class="table table-bordered">
+            <tr>
+                <th>ID</th>
+                <td>{{ child.id }}</td>
+            </tr>
+            <tr>
+                <th>Nama Lengkap</th>
+                <td>{{ child.full_name }}</td>
+            </tr>
+            <tr>
+                <th>Jenis Kelamin</th>
+                <td>{{ child.get_gender_display }}</td>
+            </tr>
+            <tr>
+                <th>Tanggal Lahir</th>
+                <td>{{ child.birth_date|date:"d-m-Y" }}</td>
+            </tr>
+            <tr>
+                <th>Urutan Lahir</th>
+                <td>{{ child.birth_order }}</td>
+            </tr>
+            <tr>
+                <th>Berat Lahir (kg)</th>
+                <td>{{ child.birth_weight }}</td>
+            </tr>
+            <tr>
+                <th>Tinggi Lahir (cm)</th>
+                <td>{{ child.birth_height }}</td>
+            </tr>
+            <tr>
+                <th>Orang Tua</th>
+                <td>{{ child.parent.full_name }}</td>
+            </tr>
+            <tr>
+                <th>Foto</th>
+                <td>
+                    {% if child.picture %}
+                    <img
+                        src="{{ child.picture.url }}"
+                        alt="{{ child.full_name }}"
+                        class="img-thumbnail"
+                        width="200"
+                    />
+                    {% else %}
+                    <p>Tidak ada foto tersedia</p>
+                    {% endif %}
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div class="card-footer">
+        <a href="{% url 'child_list' %}" class="btn btn-primary">Kembali</a>
+    </div>
+</div>
+{% endblock %}

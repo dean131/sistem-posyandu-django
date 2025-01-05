@@ -1,0 +1,37 @@
+{% extends 'base.html' %} {% load static %} {% block subheader %}
+<div class="subheader py-2 py-lg-4 subheader-solid" id="kt_subheader">
+    <div
+        class="container-fluid d-flex align-items-center justify-content-between flex-wrap flex-sm-nowrap"
+    >
+        <div class="d-flex align-items-center flex-wrap mr-2">
+            <h5 class="text-dark font-weight-bold mt-2 mb-2 mr-5">
+                Tambah Posyandu
+            </h5>
+        </div>
+    </div>
+</div>
+{% endblock %} {% block content %}
+<div class="card card-custom gutter-b">
+    <div class="card-header border-0 py-5">
+        <h3 class="card-title align-items-start flex-column">
+            <span class="card-label font-weight-bolder text-dark">
+                Form Tambah Posyandu
+            </span>
+        </h3>
+    </div>
+    <form method="post">
+        {% csrf_token %}
+        <div class="card-body">{{ form.as_p }}</div>
+        <div class="card-footer">
+            <button type="submit" class="btn btn-success font-weight-bold">
+                <i class="fas fa-save"></i>
+                Simpan
+            </button>
+            <a href="{% url 'posyandu_list' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i>
+                Kembali
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}

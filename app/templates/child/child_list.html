@@ -1,0 +1,98 @@
+{% extends 'base.html' %} {% load static %} {% block css_page %}
+<link
+    href="{% static 'assets/plugins/custom/datatables/datatables.bundle.css' %}"
+    rel="stylesheet"
+    type="text/css"
+/>
+{% endblock %} {% block subheader %}
+<div class="subheader py-2 py-lg-4 subheader-solid" id="kt_subheader">
+    <div
+        class="container-fluid d-flex align-items-center justify-content-between flex-wrap flex-sm-nowrap"
+    >
+        <!--begin::Info-->
+        <div class="d-flex align-items-center flex-wrap mr-2">
+            <!--begin::Page Title-->
+            <h5 class="text-dark font-weight-bold mt-2 mb-2 mr-5">
+                List Data Anak
+            </h5>
+            <!--end::Page Title-->
+        </div>
+        <!--end::Info-->
+    </div>
+</div>
+{% endblock %} {% block content %}
+<div class="card card-custom gutter-b">
+    <div class="card-header border-0 py-5">
+        <div class="card-toolbar"></div>
+    </div>
+    <div class="card-body pt-0 pb-3">
+        <div class="table-responsive">
+            <table
+                id="childTable"
+                class="table table-striped table-bordered table-hover"
+            >
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nama Lengkap</th>
+                        <th>Jenis Kelamin</th>
+                        <th>Tanggal Lahir</th>
+                        <th>Orang Tua</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %} {% block js_page %}
+<script src="{% static 'assets/plugins/custom/datatables/datatables.bundle.js' %}"></script>
+<script>
+    $(document).ready(function () {
+        $("#childTable").DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: {
+                url: "{% url 'child_list' %}",
+                type: "GET",
+            },
+            columns: [
+                { data: "id", visible: false },
+                { data: "full_name", title: "Nama Lengkap" },
+                { data: "gender", title: "Jenis Kelamin" },
+                { data: "birth_date", title: "Tanggal Lahir" },
+                { data: "parent_name", title: "Orang Tua" },
+                {
+                    data: "id",
+                    title: "Aksi",
+                    orderable: false,
+                    searchable: false,
+                    render: function (data) {
+                        const detailUrl =
+                            "{% url 'child_detail' 'pk' %}".replace("pk", data);
+
+                        return `<a href="${detailUrl}" class="btn btn-primary btn-sm" title="Lihat Detail">
+                                    <i class="fas fa-info-circle"></i> Lihat Detail
+                                </a>`;
+                    },
+                },
+            ],
+            order: [[1, "asc"]],
+            language: {
+                search: "Cari Anak:",
+                lengthMenu: "Tampilkan _MENU_ anak",
+                info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ anak",
+                paginate: {
+                    first: "Pertama",
+                    last: "Terakhir",
+                    next: "Berikutnya",
+                    previous: "Sebelumnya",
+                },
+                emptyTable: "Tidak ada data tersedia",
+                infoEmpty: "Menampilkan 0 sampai 0 dari 0 data",
+            },
+        });
+    });
+</script>
+{% endblock %}

@@ -14,6 +14,7 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+
 from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
@@ -26,15 +27,22 @@ from rest_framework_simplejwt.views import (
 
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-
-    path('', include('adminapp.urls')),
-
-    path('api/', include('account.api.urls')),
-    path('api/', include('base.api.urls')),
-
+    path("admin/", admin.site.urls),
+    # path("", include("adminapp.urls")),
+    path("", include("account.urls")),
+    path("", include("village.urls")),
+    path("", include("posyandu.urls")),
+    path("", include("posyandu_activity.urls")),
+    path("", include("child.urls")),
+    path("", include("child_measurement.urls")),
+    path("api/", include("account.api.urls")),
+    path("api/", include("posyandu.api.urls")),
+    path("api/", include("posyandu_activity.api.urls")),
+    path("api/", include("village.api.urls")),
+    path("api/", include("child.api.urls")),
+    path("api/", include("child_measurement.api.urls")),
     # path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path("api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
 ]
 
 if settings.DEBUG:
