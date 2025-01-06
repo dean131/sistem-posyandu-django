@@ -1,16 +1,19 @@
 from pyexpat.errors import messages
+from django.urls import reverse_lazy
 from django.views import View
+from django.views.generic.edit import CreateView, UpdateView
 from django.http import JsonResponse
 from django.shortcuts import redirect, render, get_object_or_404
+from django.utils.decorators import method_decorator
+from django.contrib.auth import login, logout
+from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.views.generic import TemplateView
-from account.models import Midwife, Cadre, Parent, Puskesmas
+from account.models import Midwife, Cadre, Parent, Puskesmas, User
 from village.models import Village
 from posyandu.models import Posyandu
-from django.utils.decorators import method_decorator
-from django.contrib.auth.decorators import login_required
 from child.models import Child
-from django.contrib.auth import login, logout
+from account.forms import AssignVillageToMidwifeForm, AssignPosyanduToCadreForm
 
 
 class LoginView(View):
@@ -105,30 +108,28 @@ class MidwifeListView(View):
         return render(request, self.template_name)
 
 
-from django.contrib import messages
+class AssignVillageToMidwifeView(UpdateView):
+    model = Midwife
+    form_class = AssignVillageToMidwifeForm
+    template_name = "midwife/assign_village.html"
+    success_url = reverse_lazy("midwife_list")
 
+    def get_initial(self):
+        initial = super().get_initial()
+        midwife = self.get_object()
+        initial["villages"] = midwife.villages.all()
+        return initial
 
-class AssignVillageToMidwifeView(View):
-    def get(self, request, pk):
-        midwife = get_object_or_404(Midwife, pk=pk)
-        villages = Village.objects.all()
-        return render(
-            request,
-            "midwife/assign_village.html",
-            {"midwife": midwife, "villages": villages},
-        )
+    def form_valid(self, form):
+        messages.success(self.request, "Desa berhasil diperbarui untuk bidan ini.")
+        return super().form_valid(form)
 
-    def post(self, request, pk):
-        midwife = get_object_or_404(Midwife, pk=pk)
-        try:
-            village_ids = request.POST.getlist("villages")
-            midwife.villages.set(village_ids)
-            messages.success(
-                request, f"Desa berhasil diperbarui untuk bidan {midwife.full_name}."
-            )
-        except Exception as e:
-            messages.error(request, f"Terjadi kesalahan: {str(e)}")
-        return redirect("midwife_list")
+    def form_invalid(self, form):
+        messages.error(self.request, "Terjadi kesalahan saat memperbarui desa.")
+        return super().form_invalid(form)
+
+    def get_queryset(self):
+        return Midwife.objects.all()
 
 
 class CadreListView(TemplateView):
@@ -187,19 +188,45 @@ class CadreListView(TemplateView):
         return super().get(request, *args, **kwargs)
 
 
-class AssignPosyanduToCadreView(View):
-    def get(self, request, pk, *args, **kwargs):
-        cadre = get_object_or_404(Cadre, pk=pk)
-        posyandus = Posyandu.objects.all()
-        return render(
-            request,
-            "cadre/assign_posyandu.html",
-            {"cadre": cadre, "posyandus": posyandus},
-        )
+# class AssignPosyanduToCadreView(View):
+#     def get(self, request, pk, *args, **kwargs):
+#         cadre = get_object_or_404(Cadre, pk=pk)
+#         posyandus = Posyandu.objects.all()
+#         return render(
+#             request,
+#             "cadre/assign_posyandu.html",
+#             {"cadre": cadre, "posyandus": posyandus},
+#         )
 
-    def post(self, request, pk, *args, **kwargs):
-        cadre = get_object_or_404(Cadre, pk=pk)
-        posyandu_ids = request.POST.getlist("posyandus")
-        cadre.cadre_posyandus.set(posyandu_ids)
-        messages.success(request, "Posyandu berhasil diperbarui untuk kader ini.")
-        return redirect("cadre_list")
+#     def post(self, request, pk, *args, **kwargs):
+#         cadre = get_object_or_404(Cadre, pk=pk)
+#         posyandu_ids = request.POST.getlist("posyandus")
+#         cadre.cadre_posyandus.set(posyandu_ids)
+#         messages.success(request, "Posyandu berhasil diperbarui untuk kader ini.")
+#         return redirect("cadre_list")
+
+
+class AssignPosyanduToCadreView(UpdateView):
+    model = Cadre
+    form_class = AssignPosyanduToCadreForm
+    template_name = "cadre/assign_posyandu.html"
+    success_url = reverse_lazy("cadre_list")
+
+    def get_initial(self):
+        # Get initial data for the form
+        initial = super().get_initial()
+        cadre = self.get_object()
+        initial["cadre_posyandus"] = cadre.cadre_posyandus.all()
+        return initial
+
+    def form_valid(self, form):
+        messages.success(self.request, "Posyandu berhasil diperbarui untuk kader ini.")
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        messages.error(self.request, "Terjadi kesalahan saat memperbarui posyandu.")
+        return super().form_invalid(form)
+
+    def get_queryset(self):
+        # Return all Cadre objects
+        return Cadre.objects.all()
