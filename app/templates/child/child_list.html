@@ -72,8 +72,9 @@
                         const detailUrl =
                             "{% url 'child_detail' 'pk' %}".replace("pk", data);
 
-                        return `<a href="${detailUrl}" class="btn btn-primary btn-sm" title="Lihat Detail">
-                                    <i class="fas fa-info-circle"></i> Lihat Detail
+                        return `<a href="${detailUrl}" class="btn btn-outline-primary btn-sm" title="Lihat Detail">
+                                    <i class="fas fa-info-circle"></i> 
+                                    Lihat Detail
                                 </a>`;
                     },
                 },
