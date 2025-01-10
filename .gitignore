@@ -1,6 +1,7 @@
 __pycache__
 *.py[cod]
-.vscode/
-/app/static/mediafiles/
 .venv
+.env
 .vscode
+.python-version
+/app/static/mediafiles/*
