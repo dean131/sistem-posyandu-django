@@ -23,14 +23,14 @@
         {% csrf_token %}
         <div class="card-body">{{ form.as_p }}</div>
         <div class="card-footer">
+            <a href="{% url 'posyandu_list' %}" class="btn btn-secondary mr-2">
+                <i class="fas fa-arrow-left"></i>
+                Kembali
+            </a>
             <button type="submit" class="btn btn-success font-weight-bold">
                 <i class="fas fa-save"></i>
                 Simpan
             </button>
-            <a href="{% url 'posyandu_list' %}" class="btn btn-secondary">
-                <i class="fas fa-arrow-left"></i>
-                Kembali
-            </a>
         </div>
     </form>
 </div>

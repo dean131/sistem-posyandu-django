@@ -17,11 +17,7 @@ class PosyanduListView(TemplateView):
             length = int(request.GET.get("length", 10))
             search_value = request.GET.get("search[value]", "").strip()
 
-            queryset = (
-                Posyandu.objects.select_related("village")
-                .prefetch_related("parents")
-                .all()
-            )
+            queryset = Posyandu.objects.select_related("village").all()
 
             if search_value:
                 queryset = queryset.filter(name__icontains=search_value)
@@ -35,9 +31,6 @@ class PosyanduListView(TemplateView):
                     "name": posyandu.name,
                     "address": posyandu.address,
                     "village": posyandu.village.name,
-                    "parents": ", ".join(
-                        [parent.full_name for parent in posyandu.parents.all()]
-                    ),
                 }
                 for posyandu in queryset
             ]
@@ -71,7 +64,9 @@ class PosyanduCreateView(CreateView):
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
         for field in form.fields.values():
-            field.widget.attrs.update({"class": "form-control"})
+            field.widget.attrs.update(
+                {"class": "form-control selectpicker", "data-live-search": "true"}
+            )
         return form
 
 
@@ -92,7 +87,9 @@ class PosyanduUpdateView(UpdateView):
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
         for field in form.fields.values():
-            field.widget.attrs.update({"class": "form-control"})
+            field.widget.attrs.update(
+                {"class": "form-control selectpicker", "data-live-search": "true"}
+            )
         return form
 
 
