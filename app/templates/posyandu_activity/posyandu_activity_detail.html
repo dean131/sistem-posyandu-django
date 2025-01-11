@@ -9,8 +9,15 @@
     <div
         class="container-fluid d-flex align-items-center justify-content-between flex-wrap flex-sm-nowrap"
     >
-        <div class="d-flex align-items-center flex-wrap mr-2">
-            <h5 class="text-dark font-weight-bold mt-2 mb-2 mr-5">
+        <div class="d-flex align-items-center flex-wrap">
+            <a
+                href="{% url 'posyandu_activity_list' %}"
+                class="text-dark font-weight-bold mr-3 d-flex align-items-center"
+            >
+                <i class="la la-arrow-left mr-1"></i>
+            </a>
+
+            <h5 class="text-dark font-weight-bold mt-2 mb-2">
                 Detail Kegiatan Posyandu
             </h5>
         </div>

@@ -10,8 +10,14 @@
             {% csrf_token %}
             {{ form.as_p }}
             <div class="d-flex justify-content-start">
-                <a href="{% url 'cadre_list' %}" class="btn btn-secondary mr-2">Kembali</a>
-                <button type="submit" class="btn btn-primary">Simpan</button>
+                <a href="{% url 'cadre_list' %}" class="btn btn-secondary mr-2">
+                    <i class="fas fa-times-circle"></i>
+                    Kembali
+                </a>
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-save"></i>
+                    Simpan
+                </button>
             </div>
         </form>
     </div>

@@ -12,10 +12,14 @@
             </p>
         </div>
         <div class="card-footer">
-            <button type="submit" class="btn btn-danger">Hapus</button>
-            <a href="{% url 'village_list' %}" class="btn btn-secondary"
-                >Batal</a
-            >
+            <a href="{% url 'village_list' %}" class="btn btn-secondary mr-2">
+                <i class="fas fa-times-circle"></i>
+                Batal
+            </a>
+            <button type="submit" class="btn btn-danger">
+                <i class="fas fa-trash-alt"></i>
+                Hapus
+            </button>
         </div>
     </form>
 </div>
