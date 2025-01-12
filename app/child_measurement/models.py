@@ -184,6 +184,10 @@ class ChildMeasurement(models.Model):
         ylabel,
         xlabel,
     ):
+        # print(measure_type)
+        # for standard in anthopometric_standards:
+        #     print(standard)
+
         # Create the chart
         index = np.array([])
         min_1 = np.array([])
@@ -232,14 +236,14 @@ class ChildMeasurement(models.Model):
                 measurement.id == self.id
             ):  # bernilai true jika measurement sudah disimpan di database
                 list_of_measure.append(getattr(self, measure_type))
-                list_of_age.append(self.age_in_month)
+                list_of_age.append(getattr(self, "age_in_month"))
                 continue
             list_of_measure.append(getattr(measurement, measure_type))
-            list_of_age.append(measurement.age_in_month)
+            list_of_age.append(getattr(measurement, "age_in_month"))
         # menambah titik kordinat pertumbuhan ketika data belum disimpan di database
         if not self.id:
-            list_of_measure.append(self.height)
-            list_of_age.append(self.age_in_month)
+            list_of_measure.append(getattr(self, measure_type))
+            list_of_age.append(getattr(self, "age_in_month"))
 
         # Tambahkan titik koordinat pertumbuhan anak
         plt.scatter(
@@ -262,13 +266,14 @@ class ChildMeasurement(models.Model):
         plt.savefig(figure, format="png", bbox_inches="tight")
         content_file = ImageFile(figure)
 
+        growthchart, created = GrowthChart.objects.get_or_create(child=self.child)
         # Hapus gambar lama
-        old_chart = getattr(self.child.growthchart, chart_attr)
+        old_chart = getattr(growthchart, chart_attr)
         if old_chart:
             old_chart.delete()
 
         # Simpan gambar baru
-        getattr(self.child.growthchart, chart_attr).save(
+        getattr(growthchart, chart_attr).save(
             f"{self.child.id}_{chart_attr}.png", content_file
         )
 
@@ -280,8 +285,13 @@ class ChildMeasurement(models.Model):
         gender = self.child.gender
 
         # get anthopometric_standards
-        measurement_type = "length_for_age" if child_age <= 24 else "height_for_age"
-        index_filter = {"index__lte": 24} if child_age <= 24 else {"index__gte": 25}
+        if child_age <= 24:
+            measurement_type = "length_for_age"
+            index_filter = {"index__lte": 24}
+        else:
+            measurement_type = "height_for_age"
+            index_filter = {"index__gte": 25}
+
         anthopometric_standards = AnthropometricStandard.objects.filter(
             measurement_type=measurement_type, gender=gender, **index_filter
         )
@@ -290,7 +300,7 @@ class ChildMeasurement(models.Model):
             raise ValueError("Length or height for age standards not found")
 
         # get standard data
-        standard = anthopometric_standards.filter(index=child_age).first()
+        standard = anthopometric_standards.get(index=child_age)
 
         # calculate z score
         z_score = self._calculate_zscore(standard=standard, measurement=self.height)
@@ -309,24 +319,18 @@ class ChildMeasurement(models.Model):
             self.height_for_age = "Tinggi"
 
         # generate growth chart
-        chart_attr = (
-            "length_for_age_chart_0_24"
-            if self.age_in_month <= 24
-            else "height_for_age_chart_24_60"
-        )
-        title = (
-            "Tinggi Badan Menurut Umur (0-24 Bulan)"
-            if self.age_in_month <= 24
-            else "Tinggi Badan Menurut Umur (24-60 Bulan)"
-        )
+        if child_age <= 24:
+            chart_attr = "length_for_age_chart_0_24"
+            title = "Tinggi Badan Menurut Umur (0-24 Bulan)"
+            age_in_month_filter = {"age_in_month__lte": 24}
+        else:
+            chart_attr = "height_for_age_chart_24_60"
+            title = "Tinggi Badan Menurut Umur (24-60 Bulan)"
+            age_in_month_filter = {"age_in_month__gte": 25}
+
         ylabel = "Tinggi Badan (cm)"
         xlabel = "Umur (bulan)"
 
-        age_in_month_filter = (
-            {"age_in_month__lte": 24}
-            if self.age_in_month <= 24
-            else {"age_in_month__gte": 25}
-        )
         child_measurements = ChildMeasurement.objects.filter(
             child=self.child, **age_in_month_filter
         ).order_by("created_at")
@@ -346,8 +350,13 @@ class ChildMeasurement(models.Model):
         gender = self.child.gender
 
         # get anthopometric_standards
-        measurement_type = "weight_for_age"
-        index_filter = {"index__lte": 24} if child_age <= 24 else {"index__gte": 25}
+        if child_age <= 24:
+            measurement_type = "weight_for_age"
+            index_filter = {"index__lte": 24}
+        else:
+            measurement_type = "weight_for_age"
+            index_filter = {"index__gte": 25}
+
         anthopometric_standards = AnthropometricStandard.objects.filter(
             measurement_type=measurement_type, gender=gender, **index_filter
         )
@@ -375,24 +384,18 @@ class ChildMeasurement(models.Model):
             self.weight_for_age = "Resiko berat badan lebih"
 
         # generate growth chart
-        chart_attr = (
-            "weight_for_age_chart_0_24"
-            if self.age_in_month <= 24
-            else "weight_for_age_chart_24_60"
-        )
-        title = (
-            "Berat Badan Menurut Umur (0-24 Bulan)"
-            if self.age_in_month <= 24
-            else "Berat Badan Menurut Umur (24-60 Bulan)"
-        )
+        if child_age <= 24:
+            chart_attr = "weight_for_age_chart_0_24"
+            title = "Berat Badan Menurut Umur (0-24 Bulan)"
+            age_in_month_filter = {"age_in_month__lte": 24}
+        else:
+            chart_attr = "weight_for_age_chart_24_60"
+            title = "Berat Badan Menurut Umur (24-60 Bulan)"
+            age_in_month_filter = {"age_in_month__gte": 25}
+
         ylabel = "Berat Badan (kg)"
         xlabel = "Umur (bulan)"
 
-        age_in_month_filter = (
-            {"age_in_month__lte": 24}
-            if self.age_in_month <= 24
-            else {"age_in_month__gte": 25}
-        )
         child_measurements = ChildMeasurement.objects.filter(
             child=self.child, **age_in_month_filter
         ).order_by("created_at")
