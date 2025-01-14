@@ -22,10 +22,7 @@
 </div>
 {% endblock %} {% block content %}
 <div class="card card-custom gutter-b">
-    <div class="card-header border-0 py-5">
-        <div class="card-toolbar"></div>
-    </div>
-    <div class="card-body pt-0 pb-3">
+    <div class="card-body">
         <div class="table-responsive">
             <table
                 id="childTable"
@@ -72,8 +69,9 @@
                         const detailUrl =
                             "{% url 'child_detail' 'pk' %}".replace("pk", data);
 
-                        return `<a href="${detailUrl}" class="btn btn-primary btn-sm" title="Lihat Detail">
-                                    <i class="fas fa-info-circle"></i> Lihat Detail
+                        return `<a href="${detailUrl}" class="btn btn-outline-primary btn-sm" title="Lihat Detail">
+                                    <i class="fas fa-info-circle"></i> 
+                                    Lihat Detail
                                 </a>`;
                     },
                 },

@@ -3,19 +3,25 @@
     <div
         class="container-fluid d-flex align-items-center justify-content-between flex-wrap flex-sm-nowrap"
     >
-        <!--begin::Info-->
-        <div class="d-flex align-items-center flex-wrap mr-2">
-            <!--begin::Page Title-->
-            <h5 class="text-dark font-weight-bold mt-2 mb-2 mr-5">
+        <div class="d-flex align-items-center flex-wrap">
+            <a
+                href="{% url 'child_list' %}"
+                class="text-dark font-weight-bold mr-3 d-flex align-items-center"
+            >
+                <i class="la la-arrow-left mr-1"></i>
+            </a>
+
+            <h5 class="text-dark font-weight-bold mt-2 mb-2">
                 Detail Data Anak
             </h5>
-            <!--end::Page Title-->
         </div>
-        <!--end::Info-->
     </div>
 </div>
 {% endblock %} {% block content %}
 <div class="card card-custom gutter-b">
+    <div class="card-header">
+        <h5 class="card-title mb-0">Informasi Anak</h5>
+    </div>
     <div class="card-body">
         <table class="table table-bordered">
             <tr>
@@ -67,8 +73,89 @@
             </tr>
         </table>
     </div>
-    <div class="card-footer">
-        <a href="{% url 'child_list' %}" class="btn btn-primary">Kembali</a>
+</div>
+
+{% if child.growthchart %}
+<div class="card card-custom gutter-b">
+    <div class="card-header">
+        <h5 class="card-title mb-0">Grafik Pertumbuhan</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            {% if child.growthchart.weight_for_age_chart_0_24 %}
+            <div class="col-md-6 mb-4">
+                <h6>Berat untuk Usia (0-24 Bulan)</h6>
+                <img
+                    src="{{ child.growthchart.weight_for_age_chart_0_24.url }}"
+                    class="img-fluid img-thumbnail"
+                    alt="Grafik Berat untuk Usia (0-24 Bulan)"
+                />
+            </div>
+            {% endif %} {% if child.growthchart.weight_for_age_chart_24_60 %}
+            <div class="col-md-6 mb-4">
+                <h6>Berat untuk Usia (24-60 Bulan)</h6>
+                <img
+                    src="{{ child.growthchart.weight_for_age_chart_24_60.url }}"
+                    class="img-fluid img-thumbnail"
+                    alt="Grafik Berat untuk Usia (24-60 Bulan)"
+                />
+            </div>
+            {% endif %} {% if child.growthchart.length_for_age_chart_0_24 %}
+            <div class="col-md-6 mb-4">
+                <h6>Panjang untuk Usia (0-24 Bulan)</h6>
+                <img
+                    src="{{ child.growthchart.length_for_age_chart_0_24.url }}"
+                    class="img-fluid img-thumbnail"
+                    alt="Grafik Panjang untuk Usia (0-24 Bulan)"
+                />
+            </div>
+            {% endif %} {% if child.growthchart.height_for_age_chart_24_60 %}
+            <div class="col-md-6 mb-4">
+                <h6>Tinggi untuk Usia (24-60 Bulan)</h6>
+                <img
+                    src="{{ child.growthchart.height_for_age_chart_24_60.url }}"
+                    class="img-fluid img-thumbnail"
+                    alt="Grafik Tinggi untuk Usia (24-60 Bulan)"
+                />
+            </div>
+            {% endif %} {% if child.growthchart.weight_for_length_chart_0_24 %}
+            <div class="col-md-6 mb-4">
+                <h6>Berat untuk Panjang (0-24 Bulan)</h6>
+                <img
+                    src="{{ child.growthchart.weight_for_length_chart_0_24.url }}"
+                    class="img-fluid img-thumbnail"
+                    alt="Grafik Berat untuk Panjang (0-24 Bulan)"
+                />
+            </div>
+            {% endif %} {% if child.growthchart.weight_for_height_chart_24_60 %}
+            <div class="col-md-6 mb-4">
+                <h6>Berat untuk Tinggi (24-60 Bulan)</h6>
+                <img
+                    src="{{ child.growthchart.weight_for_height_chart_24_60.url }}"
+                    class="img-fluid img-thumbnail"
+                    alt="Grafik Berat untuk Tinggi (24-60 Bulan)"
+                />
+            </div>
+            {% endif %} {% if child.growthchart.bmi_for_age_chart_0_24 %}
+            <div class="col-md-6 mb-4">
+                <h6>Indeks Massa Tubuh untuk Usia (0-24 Bulan)</h6>
+                <img
+                    src="{{ child.growthchart.bmi_for_age_chart_0_24.url }}"
+                    class="img-fluid img-thumbnail"
+                    alt="Grafik IMT untuk Usia (0-24 Bulan)"
+                />
+            </div>
+            {% endif %} {% if child.growthchart.bmi_for_age_chart_24_60 %}
+            <div class="col-md-6 mb-4">
+                <h6>Indeks Massa Tubuh untuk Usia (24-60 Bulan)</h6>
+                <img
+                    src="{{ child.growthchart.bmi_for_age_chart_24_60.url }}"
+                    class="img-fluid img-thumbnail"
+                    alt="Grafik IMT untuk Usia (24-60 Bulan)"
+                />
+            </div>
+            {% endif %}
+        </div>
     </div>
 </div>
-{% endblock %}
+{% endif %} {% endblock %}

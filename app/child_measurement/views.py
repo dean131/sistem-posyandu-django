@@ -67,7 +67,7 @@ class AnthropometricStandardView(View):
             return redirect("anthropometric_standard")
 
         workbook = load_workbook(excel_file)
-        for row in workbook.worksheets[0].iter_rows(values_only=True, min_row=2):
+        for row in workbook.worksheets[0].iter_rows(values_only=True, min_row=1):
             obj, created = AnthropometricStandard.objects.update_or_create(
                 index=row[0],
                 sd_minus_3=row[1],
@@ -80,5 +80,9 @@ class AnthropometricStandardView(View):
                 measurement_type=measurement_type,
                 gender=gender,
             )
+            if created:
+                print("DATA BARU")
+            else:
+                print("DATA SUDAH ADA")
         messages.success(request, "Data berhasil diupload")
         return redirect("anthropometric_standard")

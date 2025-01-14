@@ -7,10 +7,14 @@
         {% csrf_token %}
         <div class="card-body">{{ form.as_p }}</div>
         <div class="card-footer">
-            <button type="submit" class="btn btn-success">Simpan</button>
-            <a href="{% url 'village_list' %}" class="btn btn-secondary"
-                >Batal</a
-            >
+            <a href="{% url 'village_list' %}" class="btn btn-secondary mr-2">
+                <i class="fas fa-times-circle"></i>
+                Batal
+            </a>
+            <button type="submit" class="btn btn-success">
+                <i class="fas fa-save"></i>
+                Simpan
+            </button>
         </div>
     </form>
 </div>
